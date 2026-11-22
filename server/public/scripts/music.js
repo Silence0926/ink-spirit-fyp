@@ -16,6 +16,18 @@ async function initializeMusicPlayer() {
     document.body.appendChild(panel);
   }
 
+  const play = async nextIndex => {
+    if (!playlist.length) return;
+    index = nextIndex;
+    audio.src = playlist[index];
+    try {
+      await audio.play();
+      button.classList.add('playing');
+    } catch (error) {
+      console.warn('Browser blocked audio playback until user interaction.', error);
+    }
+  };
+
   const render = () => {
     panel.replaceChildren();
     if (!playlist.length) {
@@ -33,26 +45,8 @@ async function initializeMusicPlayer() {
       track.addEventListener('click', () => play(itemIndex));
       li.appendChild(track);
       list.appendChild(li);
-    }
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeMusicPlayer, { once: true });
-} else {
-  initializeMusicPlayer();
-}
+    });
     panel.appendChild(list);
-  };
-
-  const play = async nextIndex => {
-    if (!playlist.length) return;
-    index = nextIndex;
-    audio.src = playlist[index];
-    try {
-      await audio.play();
-      button.classList.add('playing');
-    } catch (error) {
-      console.warn('Browser blocked audio playback until user interaction.', error);
-    }
   };
 
   try {
@@ -81,4 +75,10 @@ if (document.readyState === 'loading') {
   });
   button.addEventListener('dblclick', () => panel.classList.toggle('hidden'));
   audio.addEventListener('ended', () => play((index + 1) % playlist.length));
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeMusicPlayer, { once: true });
+} else {
+  initializeMusicPlayer();
+}
