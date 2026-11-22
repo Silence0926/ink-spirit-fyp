@@ -19,10 +19,11 @@ async function freePort() {
   });
 }
 
-async function startServer(t, seedUsers = []) {
+async function startServer(t, seedUsers = [], seedProducts = null) {
   const port = await freePort();
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ink-spirit-test-'));
   if (seedUsers.length) fs.writeFileSync(path.join(dataDir, 'users.json'), JSON.stringify(seedUsers));
+  if (seedProducts) fs.writeFileSync(path.join(dataDir, 'products.json'), JSON.stringify(seedProducts));
   const child = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
     env: { ...process.env, PORT: String(port), DATA_DIR: dataDir },
     stdio: 'ignore'
