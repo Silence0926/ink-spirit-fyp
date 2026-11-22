@@ -1,11 +1,2 @@
 'use strict';
-
-document.addEventListener('DOMContentLoaded', () => {
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem('loggedInUser') || 'null'); } catch {}
-  if (!user) { location.replace('login.html'); return; }
-  document.getElementById('profile-username').textContent = user.username || '—';
-  document.getElementById('profile-email').textContent = user.email || '—';
-  document.getElementById('profile-role').textContent = user.role || 'user';
-  document.getElementById('profile-logout')?.addEventListener('click', logoutUser);
-});
+document.addEventListener('DOMContentLoaded',async()=>{try{const response=await fetch('/api/me',{credentials:'same-origin'});const data=await response.json();if(!response.ok)throw new Error();document.getElementById('profile-username').textContent=data.user.username;document.getElementById('profile-email').textContent=data.user.email||'—';document.getElementById('profile-role').textContent=data.user.role;}catch{location.replace('login.html');return;}document.getElementById('profile-logout')?.addEventListener('click',logoutUser);});
