@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadComponent('navbar', 'components/navbar.html'),
     loadComponent('footer', 'components/footer.html')
   ]);
+  if (!document.querySelector('link[data-music-styles]')) {
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = 'styles/music.css';
+    style.dataset.musicStyles = 'true';
+    document.head.appendChild(style);
+  }
   if (!document.getElementById('music-btn')) {
     const musicButton = document.createElement('button');
     musicButton.id = 'music-btn';
