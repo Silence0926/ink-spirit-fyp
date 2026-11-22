@@ -61,7 +61,7 @@ app.post('/api/register', (req, res, next) => {
     const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
     const password = typeof req.body.password === 'string' ? req.body.password : '';
     const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
-    if (email.length > 254 || (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))) {
+    if (email.length > 254 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       return res.status(400).json({ error: 'Please provide a valid email address.' });
     }
     if (username.length < 3 || username.length > 40 || password.length < 8 || password.length > 200) {
