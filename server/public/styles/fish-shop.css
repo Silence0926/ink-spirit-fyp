@@ -1,1 +1,2 @@
 .product-card{transition:transform .2s,box-shadow .2s}.product-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px #174c6818}.product-card button:hover{background:#105f82}.product-card a{color:#167ba4}
+\n.product-image{display:block;width:100%;height:175px;object-fit:cover;border-radius:12px;background:#e9e5d9;margin-bottom:14px}.product-card small{display:block;color:#758477;margin:10px 0}.product-card button:disabled{opacity:.45;cursor:not-allowed}\n
