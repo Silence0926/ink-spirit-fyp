@@ -1,62 +1,49 @@
 'use strict';
 
+async function apiRequest(url, options = {}) {
+  const response = await fetch(url, { credentials:'same-origin', ...options, headers:{ ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.headers || {}) } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Request failed.');
+  return data;
+}
 async function registerUser(username, email, password) {
   try {
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Registration failed.');
-    alert('Registration successful. You can now log in.');
-    window.location.href = 'login.html';
-  } catch (error) {
-    alert(error.message || 'Unable to register. Please try again.');
-  }
+    const result = await apiRequest('/api/register',{method:'POST',body:JSON.stringify({username,email,password})});
+    localStorage.setItem('loggedInUser',JSON.stringify(result.user));
+    localStorage.setItem('isLoggedIn','true');
+    localStorage.setItem('role',result.user.role);
+    location.href='user.html';
+  } catch(error) { alert(error.message); }
 }
-
-async function loginUser(username, password) {
+async function loginUser(username,password) {
   try {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || 'Invalid username or password.');
-    localStorage.setItem('loggedInUser', JSON.stringify(result.user));
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('role', result.user.role);
-    alert('Welcome back, ' + result.user.username + '!');
-    window.location.href = result.user.role === 'admin' ? 'admin.html'
-      : result.user.role === 'manager' ? 'manager.html' : 'user.html';
-  } catch (error) {
-    alert(error.message || 'Unable to log in. Please try again.');
-  }
+    const result = await apiRequest('/api/login',{method:'POST',body:JSON.stringify({username,password})});
+    localStorage.setItem('loggedInUser',JSON.stringify(result.user));
+    localStorage.setItem('isLoggedIn','true');
+    localStorage.setItem('role',result.user.role);
+    location.href=result.user.role==='admin'?'admin.html':result.user.role==='manager'?'manager.html':'user.html';
+  } catch(error) { alert(error.message); }
 }
-
-function logoutUser() {
+async function logoutUser() {
+  try { await apiRequest('/api/logout',{method:'POST'}); } catch {}
   localStorage.removeItem('loggedInUser');
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('role');
-  window.location.href = 'login.html';
+  location.href='login.html';
 }
-
-function checkLoginStatus() {
-  const loginLink = document.getElementById('login-link');
-  const userDisplay = document.getElementById('user-display');
-  const logoutBtn = document.getElementById('logout-btn');
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem('loggedInUser') || 'null'); } catch {}
-  if (!loginLink || !userDisplay || !logoutBtn) return;
-  if (user && user.username) {
-    loginLink.style.display = 'none';
-    logoutBtn.style.display = 'inline-block';
-    userDisplay.textContent = user.username;
-  } else {
-    loginLink.style.display = 'inline-block';
-    logoutBtn.style.display = 'none';
-    userDisplay.textContent = '';
+async function checkLoginStatus() {
+  const loginLink=document.getElementById('login-link');
+  const userDisplay=document.getElementById('user-display');
+  const logoutBtn=document.getElementById('logout-btn');
+  if(!loginLink||!userDisplay||!logoutBtn)return;
+  try {
+    const result=await apiRequest('/api/me');
+    localStorage.setItem('loggedInUser',JSON.stringify(result.user));
+    loginLink.hidden=true; logoutBtn.hidden=false; userDisplay.textContent=result.user.username;
+    const profileLink=document.getElementById('profile-link');
+    if(profileLink)profileLink.hidden=false;
+  } catch {
+    localStorage.removeItem('loggedInUser');localStorage.removeItem('isLoggedIn');localStorage.removeItem('role');
+    loginLink.hidden=false;logoutBtn.hidden=true;userDisplay.textContent='';
   }
 }
