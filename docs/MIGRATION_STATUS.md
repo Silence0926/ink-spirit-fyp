@@ -2,20 +2,21 @@
 
 | Area | Status | Notes |
 |---|---|---|
-| Ink Spirit homepage | Implemented prototype | Four creature selector and progression. |
-| Original product visual assets | First set implemented | Six original SVG illustrations. More species/product imagery planned. |
-| Original soundtrack | Implemented as procedural Web Audio | No MP3 asset is bundled; user starts playback. |
-| Snake | Rebuilt | Keyboard, WASD, touch, pause/restart, best score. |
-| 2048 | Pending restoration/validation | Original source exists in uploaded archive. |
-| Sudoku | Pending restoration/validation | Original source exists in uploaded archive. |
-| Tetris | Pending restoration/validation | Original source exists in uploaded archive. |
-| Game hub | Pending restoration | Original source contains links to mini-games. |
-| Ecological Atlas | First version implemented | Betta, clownfish, goldfish, koi regional summaries. |
-| Server sessions | Implemented prototype | HttpOnly cookie, hashed token store, scrypt password hashes. |
-| Admin/manager permissions | Implemented prototype | Server-side role checks; admin bootstrap via env. |
-| Product CRUD | Implemented prototype | Admin/manager create and update; admin archive. |
-| Server cart/orders | Implemented prototype | JSON files, persistent filesystem required. |
-| Billplz checkout | Integration code implemented | Sandbox credentials and public callback URL still required. |
-| Real payment collection | Not activated | Merchant account and end-to-end tests required. |
-| Video/animated habitat scenes | Pending | Current world has CSS/SVG motion, not a rendered video. |
+| Ink Spirit homepage | Implemented prototype | Four creature selector and local progression. |
+| Product visual assets | First set implemented | Original SVG artwork for six product categories; additional species and aquarium scenes remain planned. |
+| Original soundtrack | Procedural soundtrack implemented | Web Audio composition with plucked-string, flute-like tones and filtered water ambience. Generated in-browser; no standalone MP3 is bundled. |
+| Snake | Rebuilt | Keyboard, WASD, touch controls, pause/restart, speed progression and local best score. |
+| Mini-game hub | Added | Snake is playable; 2048, Sudoku and Tetris are explicitly marked pending migration/testing. |
+| 2048 | Pending | Original game source must be migrated and validated. |
+| Sudoku | Pending | Original game source must be migrated and validated. |
+| Tetris | Pending | Original game source must be migrated and validated. |
+| Ecological Atlas | First version implemented | Educational regional summaries; markers represent broad ranges, not exact collection sites. |
+| Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |
+| Admin/manager permissions | Implemented prototype | Server-side role checks; administrator bootstrap via environment variables. |
+| Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. |
+| Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
+| Billplz checkout | Integration code implemented | Sandbox/live mode switch; merchant credentials and public HTTPS callback still required. |
+| Real payment collection | Not activated | Requires merchant credentials, public deployment URL and successful sandbox verification. |
+| Original video assets | Pending | New art direction uses original ink-wash SVG/CSS artwork; video production is separate. |
 
+See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring administrator access or payment credentials.
