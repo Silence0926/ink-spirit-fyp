@@ -1,35 +1,25 @@
 # 墨灵 · Ink Spirit / Sea Garden FYP
 
-**Ink Spirit** is the new main experience: an interactive Chinese ink-wash ecosystem built around companion creatures, habitat exploration, and creature development. **Sea Garden** remains a connected aquarium catalogue and shopping area.
+Ink Spirit is an interactive Chinese ink-wash ecosystem with companion creatures, ecological exploration, creature growth, original procedural music and a connected Sea Garden aquarium storefront.
 
-## Product pillars
+## Current features
 
-1. **Companion creatures** — select and interact with koi, dragon, snake, and turtle.
-2. **Ecological exploration** — initial lotus pond, cloud mountain, bamboo grove, and quiet marsh identities; the full explorable habitat system is still in development.
-3. **Collection and growth** — experience, levels, and browser-local progression form the first prototype.
-4. **Sea Garden commerce** — aquarium pages remain a separate area and are being migrated incrementally.
-
-## Current implementation
-
-- Ink Spirit homepage at `server/public/index.html`.
-- Creature selection, habitat labels, interaction feedback, and browser-local progression.
-- Sea Garden pages currently present: legacy homepage, fish shop, fish list, map, search, cart, checkout demonstration, payment demonstration, order history, login, registration, profile, and role dashboards.
-- Shared navigation/footer components and a generated music control.
-- Express API routes:
-  - `GET /api/health`
-  - `POST /api/register`
-  - `POST /api/login`
-  - `GET /api/products`
-  - `GET /api/music`
-- JSON-file persistence for API accounts and product data under `server/data/` (created at runtime and excluded from Git).
-- API-created passwords use Node.js scrypt hashes. Legacy plaintext account records are upgraded after a successful API login.
-- Public API registration always creates the `user` role. Admin and manager accounts are not created through public registration.
-- The browser stores the signed-in user summary, cart, demo orders, and Ink Spirit progression in localStorage. The current login flow is a prototype: it does not yet issue a server session/token or protect privileged server-side operations.
-- GitHub Actions validates frontend JavaScript syntax and runs Node.js API tests.
+- Ink Spirit creature selection: koi, dragon, snake and turtle.
+- Browser-local prototype creature progression.
+- Original procedural soundtrack generated with Web Audio: plucked-string motifs, bamboo-flute-like tones and soft water/ocean ambience. Start it with the floating music control.
+- Original SVG product illustrations for koi, betta, aquarium, filter, fish food and aquatic plants.
+- Sea Garden storefront reads products from the server API.
+- New Snake game: keyboard, WASD, touch controls, pause/restart and local best score.
+- Ecological Atlas with regional distribution summaries for Betta splendens, Amphiprion ocellaris, Carassius auratus and ornamental koi history.
+- Server-side account sessions using HttpOnly cookies; password hashes use scrypt.
+- Admin/manager product catalogue endpoints, admin-only role management, and stock fields.
+- Server-persisted carts and order records using atomic JSON file writes.
+- Billplz checkout integration code with server-side bill verification. Payment remains disabled until merchant credentials and a public HTTPS callback URL are configured.
+- GitHub Actions frontend syntax and API tests.
 
 ## Run locally
 
-Requires Node.js 18 or newer.
+Requires Node.js 18+.
 
 ```bash
 cd server
@@ -39,26 +29,52 @@ npm start
 
 Open `http://localhost:3000`.
 
-Run validation with:
+Run checks:
 
 ```bash
 npm run check:frontend
 npm test
 ```
 
-## Migration limitations
+## Administrator setup
 
-- The original FYP archive did not contain MP3 tracks in `server/public/music/`; add licensed MP3 files there to populate the playlist.
-- Original image/video assets and the remaining mini-game pages have not yet been migrated into this repository. Some restored catalogue cards currently use text/graphic placeholders.
-- Product data can be read from `server/data/products.json`, but a product-management API and admin authorization flow are not implemented.
-- Cart, checkout, payment simulation, and order history are browser-local demonstrations. No real payment is processed, and no server-side order is created.
-- The original Google Maps embed is retained as a location reference. Fish birthplace/habitat mapping is not implemented yet.
-- Runtime JSON data is not committed. Back up `server/data/` separately if you use the local API.
+Set these environment variables before starting the server:
 
-Do not use this prototype for real customer accounts, privileged administration, or payments until server-side sessions, role-based authorization, order persistence, validation, CSRF protection, and payment-provider integration have been implemented and reviewed.
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD` (use a long unique password)
+- Optional: `ADMIN_EMAIL`
+
+On startup, the server creates the bootstrap administrator if it does not already exist. Public registration always creates a normal `user` account. Administrators can promote accounts to `manager` or `admin` through the Admin Studio. Managers can manage products and view orders; only admins can change roles and archive products.
+
+See `server/.env.example` for the environment template. Never commit real credentials.
+
+## Billplz payment setup
+
+The integration targets Billplz because it supports Malaysian FPX and offers additional card/e-wallet methods subject to account activation. FPX is enabled by default for eligible Collection accounts; cards and e-wallets require separate activation. See the official [Billplz overview](https://support.billplz.com/guide/overview) and [API documentation](https://support.billplz.com/api).
+
+Configure:
+
+- `BILLPLZ_MODE=sandbox` for initial testing.
+- `BILLPLZ_API_KEY`
+- `BILLPLZ_COLLECTION_ID`
+- `PUBLIC_BASE_URL` as a publicly reachable HTTPS origin.
+
+Create a Billplz Sandbox account and collection first. The application creates bills server-side, redirects the customer to Billplz, receives the callback, and verifies the bill by retrieving it from Billplz before marking an order paid. Do not switch to live mode until merchant verification, payment-method activation, webhook reachability, and end-to-end sandbox tests are complete.
+
+The current deployment is not yet configured with merchant credentials, so real checkout cannot be activated from the repository alone.
+
+## Data and deployment notes
+
+- Accounts, sessions, products, carts and orders are stored in `server/data/` at runtime.
+- JSON writes are atomic for a single Node process, but this file-based store is a prototype. For concurrent production traffic, migrate to PostgreSQL/MySQL with transactions, database backups and migrations.
+- Set a persistent `DATA_DIR` on the deployment platform. Ephemeral hosting filesystems will lose JSON data after redeploy/restart.
+- Use HTTPS in production. The session cookie is marked Secure when `NODE_ENV=production`.
+- Set `PUBLIC_BASE_URL` to the exact HTTPS deployment origin so Billplz can reach the callback.
+- The payment integration has not been activated against a merchant account and is not a claim of live payment acceptance.
 
 ## Project documentation
 
 - [Product roadmap](docs/ROADMAP.md)
 - [System architecture](docs/ARCHITECTURE.md)
 - [Migration status](docs/MIGRATION_STATUS.md)
+- [Payment integration guide](docs/PAYMENTS.md)
