@@ -49,7 +49,7 @@ async function initializeMusicPlayer(){
   if(!context){const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext){alert('Web Audio is not supported in this browser.');return;}context=new AudioContext();master=context.createGain();master.gain.value=.7;master.connect(context.destination);makeNoise();}
   if(context.state==='suspended')await context.resume();
   if(playing){playing=false;clearInterval(clock);button.classList.remove('playing');button.textContent='♫';master.gain.setTargetAtTime(.0001,context.currentTime,.18);return;}
-  master.gain.setTargetAtTime(.7,context.currentTime,.4);playing=true;button.classList.add('playing');button.textContent='❚❚';schedule();clock=setInterval(schedule,beat*2000);
+  master.gain.setTargetAtTime(.7,context.currentTime,.4);playing=true;button.classList.add('playing');button.textContent='❚❚';schedule();clock=setInterval(schedule,beat*1000);
  }
  button.addEventListener('click',()=>toggle().catch(console.error));
  button.title='Original Ink Spirit soundtrack · plucked strings, bamboo flute and sea ambience';
