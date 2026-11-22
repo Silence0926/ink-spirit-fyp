@@ -1,72 +1,57 @@
 # Architecture / 系统架构
 
-## Current architecture
+## Runtime
 
-```text
-Browser
-  ├── Ink Spirit world
-  │     ├── Creature selector and SVG artwork
-  │     ├── Habitat scene presentation
-  │     └── Local prototype progression (localStorage)
-  └── Sea Garden pages
-        ├── Fish catalogue and shop
-        ├── Cart and demo checkout
-        ├── Demo order history
-        └── Login / registration / profile UI
+- Browser frontend: Ink Spirit world and Sea Garden storefront.
+- Node.js 18+ / Express backend.
+- Runtime JSON files under `server/data/`.
+- Billplz API for hosted checkout (sandbox-first; merchant credentials required).
 
-Node.js 18+ + Express
-  ├── Static frontend hosting
-  ├── GET  /api/health
-  ├── POST /api/register
-  ├── POST /api/login
-  ├── GET  /api/products
-  └── GET  /api/music
+## Authentication and authorization
 
-Runtime storage
-  ├── server/data/users.json
-  ├── server/data/products.json
-  └── server/public/music/*.mp3
-```
+- Passwords use Node.js scrypt with a random per-password salt.
+- Sessions use random 256-bit opaque tokens; only SHA-256 token digests are stored server-side.
+- Session token is issued in an HttpOnly, SameSite=Lax cookie; Secure is enabled in production.
+- Public registration always creates role `user`.
+- Bootstrap admin is created from `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables.
+- Product management is available to admin/manager roles. User role changes and product archiving require admin.
+- APIs enforce roles on the server; localStorage is no longer an authorization source.
 
-## API account storage
+## Commerce data
 
-The API stores account records in `server/data/users.json`. New passwords are hashed with Node.js `crypto.scryptSync` and a per-password random salt. For compatibility with an older JSON format, a successful login against a legacy plaintext password upgrades that record to a scrypt hash.
+Runtime files:
+- `users.json`
+- `sessions.json`
+- `products.json`
+- `carts.json`
+- `orders.json`
 
-Public registration accepts a username, optional email, and password. It always assigns the `user` role; a role supplied by the client is ignored. Admin/manager provisioning is intentionally not exposed as a public endpoint.
+Carts are stored per authenticated user. Checkout snapshots product names, unit prices and quantities into an order. The order starts as `pending_payment`. The server creates a Billplz bill in the configured environment and redirects the customer to the provider-hosted payment page.
 
-The current login endpoint returns a user summary for the browser prototype. It does **not** establish a server-side session or issue a signed access token. The browser's localStorage values are not proof of identity. Any privileged API or dashboard must be protected server-side before production use.
+The Billplz callback is not trusted by itself. The server retrieves the Bill from Billplz using the server-side API key, checks the paid state and exact amount, and only then marks the order `paid`, decrements stock and clears the user's cart. Duplicate callbacks are idempotent at the order-status level.
 
-## Product storage
+## Payment boundary
 
-`GET /api/products` reads an array from `server/data/products.json`. If no file exists, it returns an empty array. Product mutation endpoints are not implemented yet.
+- Billplz API key is server-side only.
+- Use the sandbox endpoint unless `BILLPLZ_MODE=live` is explicitly configured.
+- A public HTTPS `PUBLIC_BASE_URL` is required for provider callbacks.
+- FPX is enabled by default on eligible Billplz Collection accounts; cards and e-wallets need separate activation.
+- Never mark an order paid from browser redirect parameters.
+- Production launch still requires merchant approval, callback tests, refunds/cancellation handling, reconciliation, database transactions and operational monitoring.
 
-## Music storage
+## Storage limitation
 
-`GET /api/music` scans `server/public/music/` and returns relative URLs for MP3 files. The static Express middleware serves the actual files. The supplied FYP archive contained no MP3 tracks, so the directory starts empty.
+The current JSON persistence is durable on a persistent filesystem and uses atomic file replacement, but it is not a transactional multi-process database. It is suitable for the current single-instance prototype, not a high-concurrency production shop. A PostgreSQL/MySQL migration is the next infrastructure hardening milestone.
 
-## Ink Spirit browser data
+## Music and games
 
-Current local prototype keys:
-- `inkSpirit.progress.v1` — per-creature experience, level, and visit count.
-- `inkSpirit.selected` — selected creature id.
+The original soundtrack is synthesized in the browser using Web Audio. It does not download or redistribute third-party music. The Snake game stores its best score locally. Other legacy mini-games are tracked separately in the migration checklist.
 
-These values are browser-local and can be edited by the user. Server-authoritative progression is a later milestone.
+## Ecological Atlas
 
-## Sea Garden demo data
+Species data distinguishes:
+- wild/native range,
+- habitat ecology,
+- ornamental domestication or selective-breeding history.
 
-- `cart` — browser-local shopping cart.
-- `orders` — browser-local demonstration order history.
-- `loggedInUser`, `isLoggedIn`, `role` — browser display state only.
-
-No real payment provider is connected. A demo order is not a paid or fulfilled order.
-
-## Security boundaries
-
-- Never trust a role or identity value supplied by localStorage.
-- Never accept a client-supplied role as proof of authorization.
-- Use server-side sessions or signed tokens before protecting real user data.
-- Keep password hashes and runtime JSON data out of the public repository.
-- Validate request bodies and enforce size limits.
-- Add rate limiting to registration/login before public deployment.
-- Do not expose filesystem paths or allow user-controlled file paths.
-- Use HTTPS and deployment secrets for production hosting.
+Map markers represent broad regional reference points, not precise collection locations or surveyed range polygons.
