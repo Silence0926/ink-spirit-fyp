@@ -7,14 +7,14 @@ Ink Spirit is a browser-based interactive ecosystem, not a combat game. It combi
 ## Milestone status
 
 ### M1 — Ink Spirit visual foundation
-<badge>Implemented prototype</badge>
+**Status: Implemented prototype**
 - Rice-paper, ink, mist, mountain, water and vermilion-seal design language.
 - Responsive landing page and accessible creature selector.
 - Four initial creature choices: koi, dragon, snake, and turtle.
 - Browser-local selection and experience/level prototype.
 
 ### M2 — Sea Garden restoration and API foundation
-<badge>In progress</badge>
+**Status: In progress**
 - Restored the legacy homepage, shop, fish list, map, search, cart, checkout/payment demonstration, order history, login, registration, profile, and role pages.
 - Reconnected registration/login pages to Express APIs.
 - Added JSON-file account/product storage and music playlist discovery.
