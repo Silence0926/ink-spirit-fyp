@@ -88,9 +88,12 @@ test('legacy plaintext password is upgraded after successful login', async t => 
   assert.equal(users[0].password.algorithm, 'scrypt');
 });
 
-test('products endpoint returns an empty list when no catalogue file exists', async t => {
+test('products endpoint seeds the starter catalogue when no catalogue file exists', async t => {
   const { base } = await startServer(t);
   const response = await fetch(base + '/api/products');
   assert.equal(response.status, 200);
-  assert.deepEqual(await response.json(), []);
+  const products = await response.json();
+  assert.ok(products.length >= 6);
+  assert.ok(products.some(product => product.id === 'koi-001'));
+  assert.ok(products.some(product => product.id === 'tank-001'));
 });
