@@ -35,6 +35,7 @@ async function checkLoginStatus() {
   const loginLink=document.getElementById('login-link');
   const userDisplay=document.getElementById('user-display');
   const logoutBtn=document.getElementById('logout-btn');
+  const adminNav=document.getElementById('admin-nav-link');
   if(!loginLink||!userDisplay||!logoutBtn)return;
   try {
     const result=await apiRequest('/api/me');
@@ -42,8 +43,10 @@ async function checkLoginStatus() {
     loginLink.hidden=true; logoutBtn.hidden=false; userDisplay.textContent=result.user.username;
     const profileLink=document.getElementById('profile-link');
     if(profileLink)profileLink.hidden=false;
+    if(adminNav)adminNav.hidden=!['admin','manager'].includes(result.user.role);
   } catch {
     localStorage.removeItem('loggedInUser');localStorage.removeItem('isLoggedIn');localStorage.removeItem('role');
     loginLink.hidden=false;logoutBtn.hidden=true;userDisplay.textContent='';
+    if(adminNav)adminNav.hidden=true;
   }
 }
