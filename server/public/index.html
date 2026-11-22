@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eee9dc">
+  <meta name="description" content="墨灵 Ink Spirit — 在会呼吸的水墨画卷中，与生灵相伴，探索栖息之境，见证成长。">
+  <title>墨灵 · Ink Spirit — A Living Ink World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/ink-world.css">
+  <script defer src="scripts/ink-world.js"></script>
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="墨灵首页">
+      <span class="seal">墨</span><span><b>墨灵</b><small>INK SPIRIT · THE LIVING WORLD</small></span>
+    </a>
+    <nav aria-label="主导航">
+      <a href="#world" class="active">灵境</a><a href="#creatures">生灵图鉴</a><a href="#journey">探索与养成</a>
+      <a href="fish-shop.html">水族商店</a>
+    </nav>
+    <a class="enter-link" href="#creatures">入画 <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="world">
+      <div class="hero-copy">
+        <p class="eyebrow"><i></i> A LIVING WORLD OF CHINESE INK</p>
+        <h1>一念入画，<br><em>万物生灵。</em></h1>
+        <p class="intro">这里不是一幅静止的画。山有呼吸，水有回响，生灵在墨色之间自在游弋。选择你的伙伴，走进它的栖息之境。</p>
+        <div class="actions"><a class="button" href="#creatures">选择我的生灵 <span>→</span></a><a class="quiet-link" href="#journey">探索墨灵世界 ↘</a></div>
+        <div class="motto"><span></span> 山有灵 · 水有意 · 万物皆有形</div>
+      </div>
+
+      <div class="painting-frame">
+        <div class="painting-meta"><span>卷一 · 初见</span><span id="scene-label">烟雨荷塘 / LOTUS POND</span></div>
+        <div class="painting" id="painting">
+          <svg class="landscape" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="haze" x2="0" y2="1"><stop stop-color="#f5f1e7" stop-opacity=".1"/><stop offset="1" stop-color="#aaa99f" stop-opacity=".62"/></linearGradient>
+              <filter id="blur"><feGaussianBlur stdDeviation="8"/></filter>
+            </defs>
+            <path d="M0 310Q110 180 220 250T440 225T680 210T900 240V560H0Z" fill="#555b53" opacity=".19" filter="url(#blur)"/>
+            <path d="M0 330Q140 190 250 270Q360 115 470 250Q600 125 730 260Q830 180 900 245V560H0Z" fill="#4c514a" opacity=".2"/>
+            <path d="M0 365Q150 300 300 360T600 350T900 355M0 420Q170 370 340 420T680 405T900 420" fill="none" stroke="#3e443e" stroke-width="3" opacity=".22"/>
+            <g fill="none" stroke="#343b34" stroke-linecap="round" opacity=".38"><path d="M70 460Q95 340 72 210M72 310Q25 270 20 230M75 345Q125 300 145 255M820 450Q790 320 825 210M820 320Q760 280 745 240M820 355Q870 310 890 260" stroke-width="8"/></g>
+            <g fill="#42483f" opacity=".22"><ellipse cx="190" cy="470" rx="75" ry="14"/><ellipse cx="710" cy="485" rx="110" ry="16"/><ellipse cx="450" cy="520" rx="170" ry="18"/></g>
+            <g class="mountain-scene" fill="none" stroke="#343b34" stroke-width="4" opacity="0"><path d="M60 370L240 145L400 370M330 370L560 110L760 370M620 370L790 190L900 360"/></g>
+            <g class="bamboo-scene" fill="none" stroke="#303a31" stroke-width="8" opacity="0"><path d="M110 560Q150 300 120 30M250 560Q220 320 280 60M760 560Q710 330 790 30M860 560Q820 350 880 100"/><path d="M125 180l-85 -55m140 150l80 -80m-10 -110l95 -50m375 180l-90 -70m130 160l85 -80" stroke-width="4"/></g>
+            <rect width="900" height="560" fill="url(#haze)"/>
+          </svg>
+          <div class="waterline"></div><div class="mist mist-a"></div><div class="mist mist-b"></div>
+          <div class="creature" id="creature-art" role="img" aria-label="锦鲤水墨灵"></div>
+          <div class="stamp">灵</div>
+          <div class="painting-caption"><span id="creature-title">锦鲤 · 鲤鱼灵</span><span id="creature-habitat">栖于烟雨荷塘</span></div>
+        </div>
+        <div class="frame-footer"><span>水墨有形 · 生灵有性</span><span>NO. <b id="folio">001</b></span></div>
+      </div>
+    </section>
+
+    <section class="creature-section" id="creatures">
+      <div class="section-heading"><div><p class="eyebrow">THE CREATURE INDEX · 生灵图鉴</p><h2>与你结缘的灵</h2></div><p>每一种生灵，都有自己的性情与栖息之境。</p></div>
+      <div class="creature-grid" role="group" aria-label="选择生灵">
+        <button class="creature-card selected" data-creature="koi" aria-pressed="true"><span class="number">壹 · 001</span><span class="glyph koi-glyph">鲤</span><b>锦鲤</b><small>灵动 · 烟雨荷塘</small></button>
+        <button class="creature-card" data-creature="dragon" aria-pressed="false"><span class="number">贰 · 002</span><span class="glyph dragon-glyph">龍</span><b>青龙</b><small>威仪 · 云海山巅</small></button>
+        <button class="creature-card" data-creature="snake" aria-pressed="false"><span class="number">叁 · 003</span><span class="glyph snake-glyph">蛇</span><b>灵蛇</b><small>静谧 · 幽篁竹林</small></button>
+        <button class="creature-card" data-creature="turtle" aria-pressed="false"><span class="number">肆 · 004</span><span class="glyph turtle-glyph">龟</span><b>玄龟</b><small>沉稳 · 静水泽地</small></button>
+      </div>
+    </section>
+
+    <section class="journey" id="journey">
+      <div class="journey-copy"><p class="eyebrow">A JOURNEY THROUGH INK</p><h2>相伴、探索，<br><em>然后成长。</em></h2><p>从一次相遇开始。与你的生灵互动，走访不同的生态画境，在日常陪伴中积累经验，逐步解锁更丰富的灵境与图鉴。</p></div>
+      <div class="progress-panel">
+        <div class="progress-top"><span>我的灵契 · YOUR BOND</span><span class="level" id="level">LV. 1</span></div>
+        <div class="bond-creature" id="bond-name">锦鲤 · 初见</div>
+        <div class="progress-track"><span id="xp-bar"></span></div>
+        <div class="progress-bottom"><span id="xp-text">0 / 100 灵息</span><button id="interact-button" class="small-button" type="button">与它互动 +10</button></div>
+        <p class="progress-note" id="progress-note" aria-live="polite">每次互动都会积累灵息。成长数据目前保存在此浏览器。</p>
+      </div>
+    </section>
+  </main>
+  <footer><span class="footer-seal">墨</span><span>墨灵 · INK SPIRIT</span><span>一卷山水，万物有灵。</span></footer>
+</body>
+</html>
