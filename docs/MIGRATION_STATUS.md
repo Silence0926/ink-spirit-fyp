@@ -2,21 +2,24 @@
 
 | Area | Status | Notes |
 |---|---|---|
-| Ink Spirit homepage | Implemented prototype | Four creature selector and local progression. |
-| Product visual assets | First set implemented | Original SVG artwork for six product categories; additional species and aquarium scenes remain planned. |
-| Original soundtrack | Procedural soundtrack implemented | Web Audio composition with plucked-string, flute-like tones and filtered water ambience. Generated in-browser; no standalone MP3 is bundled. |
+| Ink Spirit homepage | Implemented prototype | Ink-wash scene, four creature selector and local progression. |
+| Aquatic visual assets | Expanded | Original SVG artwork for koi, betta, goldfish, guppy, clownfish, Asian arowana reference, freshwater and reef habitat scenes, plus aquarium equipment. |
+| Product catalogue seed | Improved | New starter products are appended by ID without overwriting existing product records. |
+| Original soundtrack | Procedural soundtrack implemented | Web Audio composition: plucked-string, flute-like tones and filtered water ambience. It is generated in-browser; no standalone MP3 is bundled yet. |
 | Snake | Rebuilt | Keyboard, WASD, touch controls, pause/restart, speed progression and local best score. |
-| Mini-game hub | Added | Snake is playable; 2048, Sudoku and Tetris are explicitly marked pending migration/testing. |
-| 2048 | Pending | Original game source must be migrated and validated. |
-| Sudoku | Pending | Original game source must be migrated and validated. |
-| Tetris | Pending | Original game source must be migrated and validated. |
-| Ecological Atlas | First version implemented | Educational regional summaries; markers represent broad ranges, not exact collection sites. |
+| Mini-game hub | Added | Snake is playable; 2048, Sudoku and Tetris remain pending migration/testing. |
+| Ecological Atlas | Expanded | Bilingual Leaflet atlas with eight species, freshwater/marine filters, native-range notes, habitat descriptions and responsible-release guidance. Regional markers are illustrative, not exact occurrence records. |
 | Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |
-| Admin/manager permissions | Implemented prototype | Server-side role checks; administrator bootstrap via environment variables. |
+| Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
 | Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. |
 | Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
-| Billplz checkout | Integration code implemented | Sandbox/live mode switch; merchant credentials and public HTTPS callback still required. |
-| Real payment collection | Not activated | Requires merchant credentials, public deployment URL and successful sandbox verification. |
-| Original video assets | Pending | New art direction uses original ink-wash SVG/CSS artwork; video production is separate. |
+| Payment gateway | Deferred | No live payment provider enabled. If required for Malaysia, evaluate TNG eWallet merchant integration first, subject to eligibility and official integration access. |
+| Original video assets | Pending | Visual direction uses original ink-wash SVG/CSS artwork; animation/video production remains a separate task. |
 
-See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring administrator access or payment credentials.
+## Important limitations
+- Species locations are broad educational reference points, not field-verified boundaries or collection coordinates.
+- Live-animal availability, local regulations, health certificates and shipping requirements must be verified before listing animals for sale.
+- JSON persistence is not a substitute for transactional SQL storage in a production multi-instance shop.
+- No payment should be represented as successful until a trusted provider callback or server-side verification confirms it.
+
+See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring production services.
