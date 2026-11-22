@@ -1,6 +1,6 @@
 'use strict';
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initializeMusicPlayer() {
   const button = document.getElementById('music-btn');
   if (!button) return;
 
@@ -33,7 +33,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       track.addEventListener('click', () => play(itemIndex));
       li.appendChild(track);
       list.appendChild(li);
-    });
+    }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeMusicPlayer, { once: true });
+} else {
+  initializeMusicPlayer();
+}
     panel.appendChild(list);
   };
 
