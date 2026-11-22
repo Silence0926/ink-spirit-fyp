@@ -1,8 +1,8 @@
 {
   "name": "ink-spirit-fyp",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "墨灵 Ink Spirit — an interactive Chinese ink-wash ecosystem integrated with Sea Garden",
+  "description": "墨灵 Ink Spirit — Chinese ink-wash ecosystem and Sea Garden commerce",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
