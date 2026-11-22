@@ -1,33 +1,34 @@
-# 墨灵 · Ink Spirit
+# 墨灵 · Ink Spirit / Sea Garden FYP
 
-**An Interactive Chinese Ink-Wash Ecosystem Combining Living Creatures, Exploration and Creature Development.**
+**Ink Spirit** is the new experience and visual identity for this project: an interactive Chinese ink-wash ecosystem built around companion creatures, habitat exploration, and creature development. The existing **Sea Garden** aquarium catalogue and shopping pages remain part of the same application.
 
-墨灵 is an interactive digital world inspired by traditional Chinese ink-wash painting. The experience is built around three connected pillars:
+## Product pillars
 
-- **Companions** — choose and interact with koi, dragon, snake, and turtle spirits.
-- **Exploration** — visit distinct habitats rendered as living ink paintings.
-- **Growth** — develop a persistent creature collection through experience and progression.
+1. **Companion creatures** — select and interact with koi, dragon, snake, and turtle.
+2. **Ecological exploration** — distinct ink-wash habitats, with the habitat system being expanded.
+3. **Collection and growth** — experience, levels, and persistent local progress are the first prototype of the creature-development system.
+4. **Sea Garden commerce** — legacy aquarium pages are retained as a separate shopping area.
 
-The project evolves from the original Sea Garden FYP. Existing aquarium commerce pages and assets are retained as a separate integration area.
+## Current implementation
 
-## Repository structure
-
-```text
-server/
-  public/
-    index.html
-    styles/
-    scripts/
-  server.js
-  package.json
-docs/
-  ROADMAP.md
-  ARCHITECTURE.md
-```
+- Ink Spirit homepage at `server/public/index.html`.
+- Creature selection, scene labels, interaction feedback, and browser-local progression.
+- Sea Garden legacy homepage at `server/public/index-seagarden-legacy.html`.
+- Express API routes:
+  - `GET /api/health`
+  - `POST /api/register`
+  - `POST /api/login`
+  - `GET /api/products`
+  - `GET /api/music`
+- JSON-file persistence for accounts and products under `server/data/` (created at runtime and excluded from Git).
+- Passwords created through the API are stored using Node.js scrypt hashes. Legacy plaintext accounts are upgraded after a successful login.
+- Public API registration always creates the `user` role; privileged roles must be provisioned through a trusted administrative process.
+- Existing Sea Garden frontend pages still use their original browser-localStorage demonstration account/cart flow. This is not yet a production authentication or order system.
+- Node.js automated tests and GitHub Actions CI.
 
 ## Run locally
 
-Requirements: Node.js 18 or later.
+Requires Node.js 18 or newer.
 
 ```bash
 cd server
@@ -35,23 +36,21 @@ npm install
 npm start
 ```
 
-Open http://localhost:3000.
+Open `http://localhost:3000`.
 
-## Development status
+Run tests with:
 
-| Milestone | Scope | Status |
-|---|---|---|
-| M1 | Ink-wash landing world and creature selection | In progress |
-| M2 | Creature registry, animation states and habitat scenes | Planned |
-| M3 | Account-linked collection and secure persistence | Planned |
-| M4 | Experience, levels, growth and unlocks | Planned |
-| M5 | Sea Garden catalogue, cart and order integration | Planned |
-| M6 | Accessibility, automated tests and deployment | Planned |
+```bash
+npm test
+```
 
-## Security notice
+## Important integration notes
 
-Do not use real credentials or payment data until authentication, authorization, input validation, password hashing, session handling, and persistence have been reviewed and tested. Never commit secrets, API keys, or production user data.
+- The original archive did not contain music tracks in `server/public/music/`; add licensed MP3 files there to populate the music playlist.
+- Runtime JSON data is not committed. Back up `server/data/` separately if you use the local API.
+- Checkout/payment pages are legacy demonstration pages. No live payment gateway or verified order-processing backend is configured.
+- Do not deploy real customer accounts, privileged roles, or payment workflows until authentication/session management, authorization, CSRF protection, input validation, order persistence, and payment-provider integration have been completed and reviewed.
 
-## Language
+## Roadmap
 
-The interface and project documentation may use both Simplified Chinese and English.
+See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
