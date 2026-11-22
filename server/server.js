@@ -144,16 +144,23 @@ function ensureAdminBootstrap() {
   writeJson(FILES.users, users);
 }
 function seedProducts() {
-  const current = readJson(FILES.products, null);
-  if (Array.isArray(current) && current.length) return;
-  writeJson(FILES.products, [
+  const current = readJson(FILES.products, []);
+  if (!Array.isArray(current)) throw new Error('Product data must be an array.');
+  const starter = [
     { id:'koi-001', name:'Japanese Koi', category:'Ornamental Fish', description:'A graceful ornamental carp for a properly designed pond.', price:180, currency:'MYR', stock:12, image:'/images/products/koi-card.svg', active:true },
     { id:'betta-001', name:'Siamese Fighting Fish', category:'Ornamental Fish', description:'A freshwater betta. Keep individually or with carefully selected compatible tank mates.', price:35, currency:'MYR', stock:18, image:'/images/products/betta-card.svg', active:true },
     { id:'tank-001', name:'Glass Aquarium 60L', category:'Aquarium', description:'A 60-litre glass aquarium for a suitable freshwater setup.', price:229, currency:'MYR', stock:8, image:'/images/products/aquarium-card.svg', active:true },
     { id:'filter-001', name:'QuietFlow Filter', category:'Equipment', description:'A compact filtration unit for a correctly sized aquarium.', price:89, currency:'MYR', stock:20, image:'/images/products/filter-card.svg', active:true },
     { id:'food-001', name:'Premium Fish Food', category:'Food', description:'Daily fish food. Select a feed suitable for the species kept.', price:25, currency:'MYR', stock:40, image:'/images/products/food-card.svg', active:true },
-    { id:'plant-001', name:'Aquatic Plant Bundle', category:'Aquatic Plants', description:'A starter bundle of aquatic plants for planted aquariums.', price:42, currency:'MYR', stock:25, image:'/images/products/plants-card.svg', active:true }
-  ]);
+    { id:'plant-001', name:'Aquatic Plant Bundle', category:'Aquatic Plants', description:'A starter bundle of aquatic plants for planted aquariums.', price:42, currency:'MYR', stock:25, image:'/images/products/plants-card.svg', active:true },
+    { id:'goldfish-001', name:'Goldfish Pair', category:'Ornamental Fish', description:'Captive-bred goldfish. Provide adequate tank volume, strong filtration and compatible tank mates.', price:48, currency:'MYR', stock:10, image:'/images/products/goldfish-card.svg', active:true },
+    { id:'guppy-001', name:'Guppy Trio', category:'Ornamental Fish', description:'Captive-bred guppies for a cycled freshwater aquarium. Plan for livebearer reproduction.', price:28, currency:'MYR', stock:16, image:'/images/products/guppy-card.svg', active:true },
+    { id:'clownfish-001', name:'Ocellaris Clownfish', category:'Marine Fish', description:'Captive-bred marine fish. Requires a mature saltwater aquarium and stable salinity.', price:95, currency:'MYR', stock:6, image:'/images/products/clownfish-card.svg', active:true },
+    { id:'testkit-001', name:'Water Test Kit', category:'Equipment', description:'Test aquarium water parameters regularly; follow the kit instructions for each test.', price:55, currency:'MYR', stock:14, image:'/images/products/filter-card.svg', active:true }
+  ];
+  const existingIds = new Set(current.map(product => product.id));
+  const missing = starter.filter(product => !existingIds.has(product.id));
+  if (missing.length) writeJson(FILES.products, [...current, ...missing]);
 }
 function validateProduct(input, partial = false) {
   const result = {};
