@@ -100,7 +100,7 @@ app.post('/api/login', (req, res, next) => {
       user.password = hashPassword(password);
       writeJson(USERS_FILE, users);
     }
-    return res.json({ message: 'Login successful.', user: { username: user.username, role: user.role || 'user' } });
+    return res.json({ message: 'Login successful.', user: { username: user.username, email: user.email || '', role: user.role || 'user' } });
   } catch (error) {
     next(error);
   }
