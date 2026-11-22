@@ -7,13 +7,14 @@
 | Product catalogue seed | Improved | New starter products are appended by ID without overwriting existing product records. |
 | Original soundtrack | Procedural soundtrack implemented | Web Audio composition: plucked-string, flute-like tones and filtered water ambience. It is generated in-browser; no standalone MP3 is bundled yet. |
 | Snake | Rebuilt | Keyboard, WASD, touch controls, pause/restart, speed progression and local best score. |
-| Mini-game hub | Added | Snake is playable; 2048, Sudoku and Tetris remain pending migration/testing. |
+| 2048 | Rebuilt | Keyboard, WASD, swipe and touch direction controls, score, best score and win/continue state. |
+| Mini-game hub | Expanded | Snake and 2048 are playable; Sudoku and Tetris remain pending migration/testing. |
 | Ecological Atlas | Expanded | Bilingual Leaflet atlas with eight species, freshwater/marine filters, native-range notes, habitat descriptions and responsible-release guidance. Regional markers are illustrative, not exact occurrence records. |
 | Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |
 | Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
 | Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. |
 | Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
-| Payment gateway | Deferred | No live payment provider enabled. If required for Malaysia, evaluate TNG eWallet merchant integration first, subject to eligibility and official integration access. |
+| Payment gateway | Deferred | No live provider enabled. TNG eWallet is the first Malaysia provider to evaluate if payment becomes necessary. Billplz remains legacy prototype code only. |
 | Original video assets | Pending | Visual direction uses original ink-wash SVG/CSS artwork; animation/video production remains a separate task. |
 
 ## Important limitations
