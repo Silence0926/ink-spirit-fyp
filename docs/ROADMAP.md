@@ -1,58 +1,47 @@
 # Product Roadmap / 产品路线图
 
-## Product definition
+## M1 — Ink Spirit visual foundation
+**Prototype implemented**
+- Rice-paper, ink, mist, mountain and vermilion seal visual language.
+- Four selectable companion creatures and browser-local progression.
+- Procedural original soundtrack.
 
-Ink Spirit is a browser-based interactive ecosystem, not a combat game. It combines a living Chinese ink-wash world with companion creatures, habitat exploration, collection, and growth. Sea Garden aquarium browsing and commerce remain a connected but separate area.
+## M2 — Sea Garden visual and game restoration
+**In progress**
+- New SVG illustrations for fish and aquarium products.
+- Rebuilt Snake game with keyboard and mobile controls.
+- 2048, Sudoku and Tetris still need restoration and validation from the original FYP source.
+- Full-resolution animated ecosystem scenes and video-style environmental motion remain in design.
 
-## Milestone status
+## M3 — Ecology Atlas
+**First version implemented**
+- Regional habitat map for betta, clownfish, goldfish and koi history.
+- Source-linked species summaries and distinction between native range and ornamental breeding history.
+- Next: more species, range polygons, habitat layers and conservation status.
 
-### M1 — Ink Spirit visual foundation
-**Status: Implemented prototype**
-- Rice-paper, ink, mist, mountain, water and vermilion-seal design language.
-- Responsive landing page and accessible creature selector.
-- Four initial creature choices: koi, dragon, snake, and turtle.
-- Browser-local selection and experience/level prototype.
+## M4 — Commerce and account system
+**Backend prototype implemented**
+- HttpOnly server sessions and scrypt password hashes.
+- Admin bootstrap from environment variables.
+- Product create/update/archive APIs and admin UI.
+- Manager access for product and order management.
+- Server-persisted carts and orders.
+- Billplz hosted-checkout integration code with authoritative server-side bill lookup.
+- Next: migrate JSON storage to relational database, add transaction-safe stock reservation, refund/cancellation, audit log, CSRF defence-in-depth and stronger rate limiting.
 
-### M2 — Sea Garden restoration and API foundation
-**Status: In progress**
-- Restored the legacy homepage, shop, fish list, map, search, cart, checkout/payment demonstration, order history, login, registration, profile, and role pages.
-- Reconnected registration/login pages to Express APIs.
-- Added JSON-file account/product storage and music playlist discovery.
-- Added scrypt password hashing and legacy plaintext password upgrade.
-- Remaining: original image/video assets, MP3 tracks, mini-game pages, complete original page styling, product CRUD, and persistent orders.
-
-### M3 — Living companions and habitat engine
-- Standardize creature metadata: id, display name, species, habitat, motion profile and unlock state.
-- Add idle, hover, selected, interaction, and growth states.
-- Build a reusable scene registry with scene-specific palette, environmental layers and ambient motion.
-- Implement scene transitions for lotus pond, cloud mountain, bamboo grove and quiet marsh.
-
-### M4 — Creature collection and development
-- Define persistent creature identity, level, experience, growth stage and attributes.
-- Move progression from localStorage to authenticated server-side storage.
-- Add collection, creature detail, feeding/interaction, and unlock interfaces.
-- Add deterministic progression tests and anti-tampering validation.
-
-### M5 — Sea Garden commerce completion
-- Audit original catalogue and product data.
-- Implement product create/update/delete with server-side role checks.
-- Move cart, checkout and order history to server-side persistence.
-- Integrate a payment provider only after business and security requirements are confirmed.
-
-### M6 — Security and release
-- Implement server-side sessions or signed tokens, logout/revocation, and role-based authorization.
-- Validate all request bodies and rate-limit authentication endpoints.
-- Add CSRF protections where cookie-based sessions are used.
-- Add accessibility, responsive, browser, and end-to-end tests.
-- Deploy only after secrets, persistence, backups, and payment boundaries are reviewed.
+## M5 — Production payments and release
+**Not activated**
+- Create and verify a Billplz merchant account and sandbox collection.
+- Complete sandbox payment, callback, duplicate callback, failure and reconciliation tests.
+- Activate FPX/card/e-wallet methods on the merchant account as required.
+- Add public HTTPS deployment, persistent database, backups, monitoring and refund workflows.
+- Switch to production credentials only after merchant approval and end-to-end acceptance.
 
 ## Acceptance criteria
-
-- A visitor can select each available creature without a page reload.
-- Scene, creature description and accessible labels update together.
-- Selection persists after refresh on the same browser.
-- Experience cannot become negative; level progression is deterministic.
-- Account passwords are never stored in plaintext by the API.
-- Public registration cannot self-assign admin or manager roles.
-- The checkout clearly states that no real payment is processed.
-- The interface remains usable on mobile and with reduced-motion preferences.
+- No public registration can grant privileged roles.
+- Admin APIs reject unauthenticated and unauthorized requests.
+- A user's cart and orders remain available across browser sessions.
+- Orders are marked paid only after provider-side verification.
+- Stock is not reduced by an unverified browser redirect.
+- Ecological map distinguishes native distribution from ornamental breeding history.
+- Music is original and user-initiated.
