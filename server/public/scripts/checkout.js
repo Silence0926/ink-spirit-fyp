@@ -1,27 +1,2 @@
 'use strict';
-
-document.addEventListener('DOMContentLoaded', () => {
-  const list = document.getElementById('checkout-items');
-  const total = document.getElementById('checkout-total');
-  const notice = document.getElementById('checkout-notice');
-  let cart = [];
-  try { cart = JSON.parse(localStorage.getItem('cart') || '[]'); } catch {}
-  let sum = 0;
-  cart.forEach(item => {
-    const quantity = Math.max(1, Number(item.quantity) || 1);
-    const price = Math.max(0, Number(item.price) || 0);
-    sum += quantity * price;
-    const line = document.createElement('p');
-    line.textContent = (item.name || 'Product') + ' × ' + quantity + ' — RM ' + (quantity * price).toFixed(2);
-    list?.appendChild(line);
-  });
-  if (!cart.length && list) list.textContent = 'Your cart is empty.';
-  if (total) total.textContent = 'RM ' + sum.toFixed(2);
-  document.getElementById('checkout-btn')?.addEventListener('click', () => {
-    if (!cart.length) {
-      if (notice) notice.textContent = 'Add products to your cart before checkout.';
-      return;
-    }
-    if (notice) notice.textContent = 'Demo only: no payment has been collected and no order has been placed.';
-  });
-});
+document.addEventListener('DOMContentLoaded',async()=>{const list=document.getElementById('checkout-items'),total=document.getElementById('checkout-total'),notice=document.getElementById('checkout-notice');let summary;try{const r=await fetch('/api/cart',{credentials:'same-origin'});summary=await r.json();if(r.status===401){location.href='login.html';return;}if(!r.ok)throw new Error(summary.error);summary.lines.forEach(item=>{const p=document.createElement('p');p.textContent=item.name+' × '+item.quantity+' — RM '+item.lineTotal.toFixed(2);list.append(p);});if(!summary.lines.length)list.textContent='Your cart is empty.';total.textContent='RM '+summary.total.toFixed(2);}catch(e){notice.textContent=e.message;return;}document.getElementById('checkout-btn')?.addEventListener('click',async()=>{if(!summary.lines.length){notice.textContent='Your cart is empty.';return;}const button=document.getElementById('checkout-btn');button.disabled=true;button.textContent='Creating secure payment…';try{const r=await fetch('/api/checkout',{method:'POST',credentials:'same-origin'}),d=await r.json();if(!r.ok)throw new Error(d.error);location.href=d.paymentUrl;}catch(e){notice.textContent=e.message;button.disabled=false;button.textContent='Continue to Payment';}});});
