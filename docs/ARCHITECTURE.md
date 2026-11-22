@@ -1,53 +1,72 @@
 # Architecture / 系统架构
 
-## Current target architecture
+## Current architecture
 
 ```text
 Browser
-  ├── Ink Spirit world (HTML / CSS / vanilla JavaScript)
-  │     ├── Creature registry
-  │     ├── Habitat scene registry
-  │     └── Local progression prototype (localStorage)
-  └── Existing Sea Garden commerce pages (separate integration boundary)
+  ├── Ink Spirit world
+  │     ├── Creature selector and SVG artwork
+  │     ├── Habitat scene presentation
+  │     └── Local prototype progression (localStorage)
+  └── Sea Garden pages
+        ├── Fish catalogue and shop
+        ├── Cart and demo checkout
+        ├── Demo order history
+        └── Login / registration / profile UI
 
-Node.js + Express
+Node.js 18+ + Express
   ├── Static frontend hosting
-  ├── Health endpoint
-  └── Future API boundary
+  ├── GET  /api/health
+  ├── POST /api/register
+  ├── POST /api/login
+  ├── GET  /api/products
+  └── GET  /api/music
+
+Runtime storage
+  ├── server/data/users.json
+  ├── server/data/products.json
+  └── server/public/music/*.mp3
 ```
 
-## Current persistence boundary
+## API account storage
 
-The first interactive milestone uses browser localStorage for a single-device prototype. This is not account synchronization, secure cloud persistence, or a multi-user database. A future server-backed collection must be introduced only after authentication and authorization are implemented.
+The API stores account records in `server/data/users.json`. New passwords are hashed with Node.js `crypto.scryptSync` and a per-password random salt. For compatibility with an older JSON format, a successful login against a legacy plaintext password upgrades that record to a scrypt hash.
 
-## Data contracts
+Public registration accepts a username, optional email, and password. It always assigns the `user` role; a role supplied by the client is ignored. Admin/manager provisioning is intentionally not exposed as a public endpoint.
 
-Creature:
-- id: stable lowercase identifier
-- name: display name
-- species: fish | dragon | snake | turtle
-- habitatId: stable habitat identifier
-- description: short user-facing description
-- xpPerVisit: integer progression reward
+The current login endpoint returns a user summary for the browser prototype. It does **not** establish a server-side session or issue a signed access token. The browser's localStorage values are not proof of identity. Any privileged API or dashboard must be protected server-side before production use.
 
-Habitat:
-- id: stable lowercase identifier
-- title: localized scene name
-- subtitle: English scene label
-- atmosphere: short descriptive text
-- accent: visual accent token
+## Product storage
 
-Progress:
-- creatureId
-- experience: non-negative integer
-- level: positive integer
-- visits: non-negative integer
+`GET /api/products` reads an array from `server/data/products.json`. If no file exists, it returns an empty array. Product mutation endpoints are not implemented yet.
+
+## Music storage
+
+`GET /api/music` scans `server/public/music/` and returns relative URLs for MP3 files. The static Express middleware serves the actual files. The supplied FYP archive contained no MP3 tracks, so the directory starts empty.
+
+## Ink Spirit browser data
+
+Current local prototype keys:
+- `inkSpirit.progress.v1` — per-creature experience, level, and visit count.
+- `inkSpirit.selected` — selected creature id.
+
+These values are browser-local and can be edited by the user. Server-authoritative progression is a later milestone.
+
+## Sea Garden demo data
+
+- `cart` — browser-local shopping cart.
+- `orders` — browser-local demonstration order history.
+- `loggedInUser`, `isLoggedIn`, `role` — browser display state only.
+
+No real payment provider is connected. A demo order is not a paid or fulfilled order.
 
 ## Security boundaries
 
-- Never accept a role from an unauthenticated client as proof of authorization.
-- Passwords must be hashed using a modern password-hashing algorithm.
+- Never trust a role or identity value supplied by localStorage.
+- Never accept a client-supplied role as proof of authorization.
+- Use server-side sessions or signed tokens before protecting real user data.
+- Keep password hashes and runtime JSON data out of the public repository.
 - Validate request bodies and enforce size limits.
-- Use environment variables for secrets and deployment configuration.
-- Restrict CORS to known origins when cross-origin access is required.
+- Add rate limiting to registration/login before public deployment.
 - Do not expose filesystem paths or allow user-controlled file paths.
+- Use HTTPS and deployment secrets for production hosting.
