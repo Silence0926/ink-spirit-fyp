@@ -103,13 +103,8 @@ function createSession(user, res) {
     expiresAt: Date.now() + SESSION_TTL
   });
   writeJson(FILES.sessions, sessions);
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: SESSION_TTL
-  });
+  const cookie = COOKIE_NAME + '=' + token + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + Math.floor(SESSION_TTL / 1000) + (isProduction ? '; Secure' : '');
+  res.setHeader('Set-Cookie', cookie);
 }
 function clearSession(req, res) {
   const token = sessionToken(req);
@@ -117,7 +112,16 @@ function clearSession(req, res) {
     const digest = crypto.createHash('sha256').update(token).digest('hex');
     writeJson(FILES.sessions, readJson(FILES.sessions, []).filter(item => item.tokenHash !== digest));
   }
-  res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: isProduction, sameSite: 'lax', path: '/' });
+  res.setHeader('Set-Cookie', COOKIE_NAME + '=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0' + (isProduction ? '; Secure' : ''));
+}
+function ensureUserIds() {
+  const users = readJson(FILES.users, []);
+  let changed = false;
+  for (const user of users) {
+    if (!user.id) { user.id = id('usr_'); changed = true; }
+    if (!user.role) { user.role = 'user'; changed = true; }
+  }
+  if (changed) writeJson(FILES.users, users);
 }
 function ensureAdminBootstrap() {
   const username = process.env.ADMIN_USERNAME;
@@ -216,6 +220,7 @@ async function billplzRequest(url, options = {}) {
   return data;
 }
 
+ensureUserIds();
 ensureAdminBootstrap();
 seedProducts();
 
