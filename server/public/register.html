@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Register | Sea Garden</title>
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="styles/register.css">
+</head>
+<body>
+  <div id="navbar"></div>
+  <main>
+    <section class="register-box">
+      <h1>Create Account</h1>
+      <label for="username">Username</label>
+      <input id="username" name="username" minlength="3" maxlength="40" autocomplete="username" required>
+      <label for="email">Email (optional)</label>
+      <input id="email" type="email" name="email" autocomplete="email">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" minlength="8" autocomplete="new-password" required>
+      <p class="form-note">New registrations are created with the standard User role.</p>
+      <button id="register-btn" type="button">Register</button>
+      <p>Already registered? <a href="login.html">Login</a></p>
+    </section>
+  </main>
+  <div id="footer"></div>
+  <script src="scripts/include.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/register.js"></script>
+</body>
+</html>
