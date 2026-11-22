@@ -1,0 +1,17 @@
+{
+  "name": "ink-spirit-fyp",
+  "version": "1.1.0",
+  "private": true,
+  "description": "墨灵 Ink Spirit — an interactive Chinese ink-wash ecosystem",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
