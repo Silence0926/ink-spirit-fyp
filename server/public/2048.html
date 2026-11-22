@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eee9dc">
+  <title>数字合璧 · 2048 | Ink Spirit</title>
+  <link rel="stylesheet" href="styles/ink-world.css">
+  <link rel="stylesheet" href="styles/games.css">
+  <script defer src="scripts/2048.js"></script>
+</head>
+<body class="puzzle-page">
+  <header class="games-header"><a href="index.html">墨灵 · INK SPIRIT</a><a href="games.html">返回小游园</a></header>
+  <main class="puzzle-shell">
+    <p class="eyebrow">THE QUIET NUMBER GARDEN · 数字清心</p>
+    <h1>数字合璧 <em>· 2048</em></h1>
+    <p class="games-lead">滑动方块，让相同的数字相遇。合成 2048，或继续挑战更高的数字。</p>
+    <section class="puzzle-scoreboard" aria-label="游戏分数">
+      <div><small>当前分数</small><strong id="score">0</strong></div>
+      <div><small>最高纪录</small><strong id="best">0</strong></div>
+      <button id="new-game" type="button">重新开始</button>
+    </section>
+    <div class="puzzle-status" id="status" aria-live="polite">方向键 / WASD 或在棋盘上滑动</div>
+    <div class="puzzle-board" id="board" role="grid" aria-label="2048 游戏棋盘"></div>
+    <div class="puzzle-controls" aria-label="触屏方向控制">
+      <button type="button" data-move="up" aria-label="向上">↑</button>
+      <div><button type="button" data-move="left" aria-label="向左">←</button><button type="button" data-move="down" aria-label="向下">↓</button><button type="button" data-move="right" aria-label="向右">→</button></div>
+    </div>
+    <p class="snake-tip">电脑：方向键 / WASD · 手机：滑动棋盘或使用方向按钮。相同数字合并时会累积分数。</p>
+    <p class="puzzle-back"><a href="games.html">← 返回灵境小游园</a></p>
+  </main>
+  <footer><span class="footer-seal">墨</span><span>墨灵 · INK SPIRIT</span><span>静观其变 · 合而为一</span></footer>
+</body>
+</html>
