@@ -630,6 +630,10 @@ app.patch('/api/admin/orders/:id/status', requireRole('admin', 'manager'), (req,
   }
   order.status = nextStatus;
   order.statusUpdatedAt = new Date().toISOString();
+  order.statusHistory = [...(Array.isArray(order.statusHistory) ? order.statusHistory : []), {
+    status:nextStatus, at:order.statusUpdatedAt,
+    note:nextStatus === 'cancelled' ? 'Order cancelled; allocated stock restored when applicable.' : 'Order status updated by staff.'
+  }];
   order.statusUpdatedBy = req.user.id;
   order.updatedAt = order.statusUpdatedAt;
   writeJson(FILES.orders, orders);
@@ -684,6 +688,24 @@ app.delete('/api/cart', requireAuth, (req, res) => { saveCart(req.user.id, []); 
 app.get('/api/orders', requireAuth, (req, res) => {
   res.json(readJson(FILES.orders, []).filter(order => order.userId === req.user.id).sort((a,b) => b.createdAt.localeCompare(a.createdAt)));
 });
+app.get('/api/orders/:id', requireAuth, (req, res) => {
+  const order = readJson(FILES.orders, []).find(item => item.id === req.params.id && item.userId === req.user.id);
+  if (!order) return res.status(404).json({ error:'Order not found.' });
+  const history = Array.isArray(order.statusHistory) ? order.statusHistory : [{
+    status:order.status,
+    at:order.updatedAt || order.createdAt,
+    note:order.status === 'paid' ? 'Payment verified by provider.' : 'Order created.'
+  }];
+  res.json({
+    order:{
+      id:order.id, items:order.items || [], total:order.total, currency:order.currency || 'MYR',
+      status:order.status, createdAt:order.createdAt, updatedAt:order.updatedAt,
+      paidAt:order.paidAt || null, paymentVerified:order.paymentVerified === true,
+      paymentUrl:order.status === 'pending_payment' ? order.paymentUrl || null : null,
+      statusHistory:history
+    }
+  });
+});
 app.post('/api/checkout', requireAuth, async (req, res) => {
   if (!billplzConfigured()) return res.status(503).json({ error:'Online payment is not configured. Add Billplz sandbox credentials and PUBLIC_BASE_URL.' });
   try {
@@ -696,7 +718,8 @@ app.post('/api/checkout', requireAuth, async (req, res) => {
     const order = {
       id:id('ord_'), userId:req.user.id, items:summary.lines, total:summary.total,
       currency:'MYR', status:'pending_payment', paymentProvider:'billplz',
-      createdAt:new Date().toISOString(), updatedAt:new Date().toISOString()
+      createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+      statusHistory:[{ status:'pending_payment', at:new Date().toISOString(), note:'Order created; awaiting payment.' }]
     };
     const orders = readJson(FILES.orders, []);
     orders.push(order); writeJson(FILES.orders, orders);
@@ -752,6 +775,7 @@ app.post('/api/payments/billplz/callback', async (req, res) => {
           }
           order.inventoryDeducted = true;
           order.status = 'paid';
+          order.statusHistory = [...(order.statusHistory || []), { status:'paid', at:order.paidAt, note:'Payment verified by payment provider; inventory allocated.' }];
           writeJson(FILES.products, products);
           const carts = readJson(FILES.carts, {});
           carts[order.userId] = [];
@@ -759,6 +783,7 @@ app.post('/api/payments/billplz/callback', async (req, res) => {
         } else {
           order.inventoryDeducted = false;
           order.status = 'paid_inventory_review';
+          order.statusHistory = [...(order.statusHistory || []), { status:'paid_inventory_review', at:order.paidAt, note:'Payment verified; inventory requires staff review.' }];
         }
         writeJson(FILES.orders, orders);
       }
