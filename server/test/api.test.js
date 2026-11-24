@@ -916,6 +916,18 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   });
   assert.equal(feed.status,200);
   assert.equal((await feed.json()).aquarium.fish[0].satiety,90);
+  const aquariumFile=path.join(dataDir,'aquariums.json');
+  const aquariumData=JSON.parse(fs.readFileSync(aquariumFile,'utf8'));
+  const owner=JSON.parse(fs.readFileSync(path.join(dataDir,'users.json'),'utf8')).find(user=>user.username==='tank-owner');
+  aquariumData[owner.id][0].fish[0].growthPoints=20;
+  fs.writeFileSync(aquariumFile,JSON.stringify(aquariumData,null,2));
+  const breed=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'breed'})});
+  assert.equal(breed.status,200);
+  const bredAquarium=(await breed.json()).aquarium;
+  assert.equal(bredAquarium.fishCount,6);
+  assert.equal(bredAquarium.fish.filter(item=>item.cohort==='fry').length,1);
+  const cooldown=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'breed'})});
+  assert.equal(cooldown.status,429);
   const water = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
     method:'POST',headers,body:JSON.stringify({action:'water_change'})
   });
