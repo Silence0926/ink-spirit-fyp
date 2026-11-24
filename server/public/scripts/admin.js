@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       field.value = value;
     });
     document.getElementById('product-image-file').value = '';
+    document.getElementById('product-gallery').value = Array.isArray(product?.images) ? product.images.join('\n') : '';
     const preset = document.getElementById('product-image-preset');
     preset.value = [...preset.options].some(option => option.value === values['product-image']) ? values['product-image'] : 'custom';
     document.getElementById('product-image-preview').src = values['product-image'];
@@ -226,32 +227,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   const imageFile = document.getElementById('product-image-file');
   const uploadImageButton = document.getElementById('upload-product-image');
   uploadImageButton.addEventListener('click', async () => {
-    const file = imageFile.files?.[0];
-    if (!file) { showMessage('Choose an image file first.', true); return; }
-    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      showMessage('Choose a JPEG, PNG or WebP image no larger than 5 MB.', true);
-      return;
+    const files = [...(imageFile.files || [])];
+    if (!files.length) { showMessage('Choose one or more image files first.', true); return; }
+    if (files.some(file => !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)) {
+      showMessage('Every file must be JPEG, PNG or WebP and no larger than 5 MB.', true); return;
     }
     uploadImageButton.disabled = true;
     uploadImageButton.textContent = 'Uploading…';
     try {
-      const response = await fetch('/api/admin/media/products', {
-        method:'POST', credentials:'same-origin',
-        headers:{ 'Content-Type':file.type },
-        body:file
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || 'Image upload failed.');
-      imagePath.value = result.image;
-      imagePreset.value = 'custom';
-      imagePreview.src = result.image;
-      showMessage('Image uploaded. Save the product to apply this image.');
-    } catch (error) {
-      showMessage(error.message, true);
-    } finally {
-      uploadImageButton.disabled = false;
-      uploadImageButton.textContent = 'Upload image';
-    }
+      const paths = [];
+      for (const file of files) {
+        const response = await fetch('/api/admin/media/products', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.type }, body:file });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Image upload failed.');
+        paths.push(result.image);
+      }
+      const gallery = document.getElementById('product-gallery');
+      const existing = gallery.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
+      gallery.value = [...new Set([...existing,...paths])].slice(0,8).join('\n');
+      if (!imagePath.value.trim()) { imagePath.value=paths[0]; imagePreset.value='custom'; imagePreview.src=paths[0]; }
+      showMessage(paths.length+' image(s) uploaded. Save the product to apply the gallery.');
+      imageFile.value='';
+    } catch (error) { showMessage(error.message, true); }
+    finally { uploadImageButton.disabled=false; uploadImageButton.textContent='Upload selected images'; }
   });
 
   document.getElementById('new-product').addEventListener('click', () => editProduct(null));
@@ -267,6 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       stock: Number(document.getElementById('product-stock').value),
       stockThreshold: Number(document.getElementById('product-stock-threshold').value),
       image: document.getElementById('product-image').value.trim(),
+      images: document.getElementById('product-gallery').value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean),
       active: document.getElementById('product-active').checked
     };
     try {
