@@ -29,7 +29,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     breadcrumb.textContent=product.name;
     root.className='detail-layout';root.replaceChildren();root.setAttribute('aria-busy','false');
     const visual=document.createElement('div');visual.className='detail-visual';
-    const image=document.createElement('img');image.src=product.image||'images/products/aquarium-card.svg';image.alt=product.name+' 商品图';image.loading='eager';image.addEventListener('error',()=>{image.src='images/products/aquarium-card.svg';},{once:true});visual.append(image);
+    const gallery=[...new Set([product.image,...(Array.isArray(product.images)?product.images:[])].filter(Boolean))].slice(0,9);
+    const image=document.createElement('img');image.src=gallery[0]||'images/products/aquarium-card.svg';image.alt=product.name+' 商品图';image.loading='eager';image.addEventListener('error',()=>{image.src='images/products/aquarium-card.svg';},{once:true});visual.append(image);
+    if(gallery.length>1){
+      const thumbs=document.createElement('div');thumbs.className='detail-thumbnails';thumbs.setAttribute('aria-label','商品图片选择');
+      gallery.forEach((src,index)=>{const thumb=document.createElement('button');thumb.type='button';thumb.className='detail-thumbnail'+(index===0?' active':'');thumb.setAttribute('aria-label','查看商品图片 '+(index+1));const preview=document.createElement('img');preview.src=src;preview.alt='';preview.loading='lazy';thumb.append(preview);thumb.addEventListener('click',()=>{image.src=src;thumbs.querySelectorAll('button').forEach(node=>node.classList.remove('active'));thumb.classList.add('active');});thumbs.append(thumb);});
+      visual.append(thumbs);
+    }
     const copy=document.createElement('section');copy.className='detail-copy';
     const kicker=document.createElement('p');kicker.className='detail-kicker';kicker.textContent='INK SPIRIT · COLLECTION DETAIL';
     const title=document.createElement('h1');title.textContent=product.name;
@@ -58,5 +64,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     care.append(careTitle,careText);
     if(matched){const links=document.createElement('div');links.className='detail-links';const atlas=document.createElement('a');atlas.href='map.html?species='+encodeURIComponent(matched.map);atlas.textContent='在生态地图查看 '+matched.name+' ↗';const guide=document.createElement('a');guide.href='fish-list.html';guide.textContent='阅读生灵图谱 ↗';links.append(atlas,guide);care.append(links);}
     root.append(visual,copy,care);
+    const relatedProducts=products.filter(item=>item.id!==product.id&&item.active!==false&&item.category===product.category).slice(0,4);
+    if(relatedProducts.length){
+      const section=document.createElement('section');section.className='detail-related';
+      const heading=document.createElement('h2');heading.textContent='同卷藏品 · RELATED COLLECTION';section.append(heading);
+      const grid=document.createElement('div');grid.className='detail-related-grid';
+      relatedProducts.forEach(item=>{const card=document.createElement('a');card.className='detail-related-card';card.href='product.html?id='+encodeURIComponent(item.id);const thumb=document.createElement('img');thumb.src=item.image||'images/products/aquarium-card.svg';thumb.alt=item.name;thumb.loading='lazy';const name=document.createElement('strong');name.textContent=item.name;const amount=document.createElement('span');amount.textContent='RM '+Number(item.price).toFixed(2);card.append(thumb,name,amount);grid.append(card);});
+      section.append(grid);root.append(section);
+    }
+
   } catch(error){showError(error.message||'读取商品详情失败。');}
 });
