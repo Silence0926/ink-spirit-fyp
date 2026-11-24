@@ -1,0 +1,199 @@
+[
+  {
+    "id": "koi",
+    "commonName": "锦鲤",
+    "scientificName": "Cyprinus carpio",
+    "waterType": "freshwater",
+    "range": "鲤鱼具有广泛的欧亚自然分布；锦鲤观赏品系主要在日本发展。",
+    "habitat": "淡水池塘、湖泊、河流回水区与植被丰富的水域。",
+    "origin": "日本人工选育历史；观赏品系不等同于野生鲤鱼种群。",
+    "care": "适合池塘或大型水体；需要强过滤、充足溶氧和季节性管理。",
+    "conservation": "鲤鱼物种层级的保育状态不能直接代表所有观赏品系或地方种群。",
+    "nativeRegions": [
+      "欧亚大陆（鲤鱼物种范围概览）"
+    ],
+    "image": "/images/products/koi-card.svg",
+    "coordinates": [
+      37.1,
+      138.9
+    ],
+    "distributionNote": "地图标记为日本锦鲤选育文化的区域参考位置，并非鲤鱼完整原生分布。",
+    "sources": [
+      "https://www.fishbase.se/summary/Cyprinus-carpio.html"
+    ]
+  },
+  {
+    "id": "betta",
+    "commonName": "暹罗斗鱼",
+    "scientificName": "Betta splendens",
+    "waterType": "freshwater",
+    "range": "原生于泰国及湄公河流域周边部分地区。",
+    "habitat": "浅水、缓流或静水环境，例如洪泛平原、沼泽、运河与稻田。",
+    "origin": "原生淡水鱼；现代观赏品系经过长期人工选育。",
+    "care": "偏好温暖、低流速且有遮蔽物的淡水环境；迷宫器官不能替代清洁水质。",
+    "conservation": "观赏贸易个体与野生种群的来源及保育情况应分别核验。",
+    "nativeRegions": [
+      "泰国",
+      "柬埔寨",
+      "老挝",
+      "越南部分地区"
+    ],
+    "image": "/images/products/betta-card.svg",
+    "coordinates": [
+      15.2,
+      102.3
+    ],
+    "distributionNote": "地图标记为湄公河流域的区域参考位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Betta-splendens.html"
+    ]
+  },
+  {
+    "id": "guppy",
+    "commonName": "孔雀鱼",
+    "scientificName": "Poecilia reticulata",
+    "waterType": "freshwater",
+    "range": "原生于委内瑞拉、圭亚那、特立尼达及加勒比海邻近地区。",
+    "habitat": "溪流、池塘、沟渠与植被丰富的浅水环境。",
+    "origin": "原生分布在热带南美洲及邻近岛屿；已被人为引入许多地区。",
+    "care": "繁殖速度较快；应规划性别比例、幼鱼安置和种群数量，维持稳定水质。",
+    "conservation": "不同地区的引入种群可能产生生态影响，不应放生。",
+    "nativeRegions": [
+      "委内瑞拉",
+      "圭亚那",
+      "特立尼达及邻近地区"
+    ],
+    "image": "/images/products/guppy-card.svg",
+    "coordinates": [
+      9.8,
+      -61.2
+    ],
+    "distributionNote": "地图标记为原生分布区域的概览位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Poecilia-reticulata.html"
+    ]
+  },
+  {
+    "id": "goldfish",
+    "commonName": "金鱼",
+    "scientificName": "Carassius auratus",
+    "waterType": "freshwater",
+    "range": "鲫属鱼类祖先分布于东亚；金鱼在中国长期人工驯化。",
+    "habitat": "淡水池塘、湖泊与缓流水域；观赏品系属于人工选育类型。",
+    "origin": "中国驯化历史；人工品系不等同于野生形态。",
+    "care": "排泄负荷较高，需要充足水量、成熟过滤与规律水质检测。",
+    "conservation": "人工观赏品系与野生近缘种群应区分管理。",
+    "nativeRegions": [
+      "东亚（近缘野生祖先范围概览）"
+    ],
+    "image": "/images/products/goldfish-card.svg",
+    "coordinates": [
+      31.2,
+      112.5
+    ],
+    "distributionNote": "地图标记为金鱼驯化历史的文化地理参考位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Carassius-auratus.html"
+    ]
+  },
+  {
+    "id": "arowana",
+    "commonName": "亚洲龙鱼",
+    "scientificName": "Scleropages formosus",
+    "waterType": "freshwater",
+    "range": "东南亚部分流域，包括马来半岛、苏门答腊与婆罗洲等地。",
+    "habitat": "森林溪流、黑水河与植被覆盖的低地水域。",
+    "origin": "原生区域性分布；国际贸易受到严格管制，购买前须核验合法来源与文件。",
+    "care": "大型鱼类，需要大型成熟水体、强过滤与专业饲养条件。",
+    "conservation": "涉及 CITES 国际贸易管制；具体许可、来源与当地法规须在交易前核实。",
+    "nativeRegions": [
+      "马来半岛",
+      "苏门答腊",
+      "婆罗洲部分流域"
+    ],
+    "image": "/images/products/arowana-card.svg",
+    "coordinates": [
+      2.4,
+      112.8
+    ],
+    "distributionNote": "地图标记为婆罗洲区域参考位置，不代表完整分布边界。",
+    "sources": [
+      "https://www.fishbase.se/summary/Scleropages-formosus.html",
+      "https://cites.org/eng"
+    ]
+  },
+  {
+    "id": "clown",
+    "commonName": "公子小丑鱼",
+    "scientificName": "Amphiprion ocellaris",
+    "waterType": "marine",
+    "range": "印度洋—西太平洋热带海域，包括东南亚与马来群岛周边。",
+    "habitat": "热带珊瑚礁，与特定海葵形成共生关系。",
+    "origin": "海水鱼；自然分布与人工繁殖贸易来源需区分。",
+    "care": "需要成熟海水系统、稳定盐度和完善过滤；采购时应核验人工繁殖声明。",
+    "conservation": "贸易来源与野外采集压力应分别评估；不可据此页面推断个体来源。",
+    "nativeRegions": [
+      "东南亚海域",
+      "马来群岛",
+      "印度洋—西太平洋部分珊瑚礁"
+    ],
+    "image": "/images/products/clownfish-card.svg",
+    "coordinates": [
+      5.5,
+      119.5
+    ],
+    "distributionNote": "地图标记为印度洋—西太平洋区域参考位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Amphiprion-ocellaris.html"
+    ]
+  },
+  {
+    "id": "blue-tang",
+    "commonName": "蓝吊",
+    "scientificName": "Paracanthurus hepatus",
+    "waterType": "marine",
+    "range": "印度洋与太平洋热带珊瑚礁海域。",
+    "habitat": "外礁坡、珊瑚礁与清澈热带海域。",
+    "origin": "海水礁区鱼类；成鱼活动空间需求较大。",
+    "care": "需要大型成熟海水缸与稳定水质，不适合小型新手鱼缸。",
+    "conservation": "应核验来源与贸易链信息，避免来源不明的野采个体。",
+    "nativeRegions": [
+      "印度洋热带海域",
+      "西太平洋热带海域"
+    ],
+    "image": "/images/products/blue-tang-card.svg",
+    "coordinates": [
+      -3.5,
+      130.5
+    ],
+    "distributionNote": "地图标记为印度尼西亚附近的区域参考位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Paracanthurus-hepatus.html"
+    ]
+  },
+  {
+    "id": "seahorse",
+    "commonName": "膨腹海马",
+    "scientificName": "Hippocampus abdominalis",
+    "waterType": "marine",
+    "range": "澳大利亚南部与新西兰周边温带海域。",
+    "habitat": "海草床、海藻区、岩礁与近岸海域。",
+    "origin": "温带海马；地图标记为区域参考，不代表完整分布边界。",
+    "care": "对水流、食物与同缸竞争敏感，需要专业饲养知识。",
+    "conservation": "海马贸易受国际法规关注；购买前应核验来源与当地法规。",
+    "nativeRegions": [
+      "澳大利亚南部",
+      "新西兰周边"
+    ],
+    "image": "/images/products/seahorse-card.svg",
+    "coordinates": [
+      -38.5,
+      146.5
+    ],
+    "distributionNote": "地图标记为澳大利亚南部区域参考位置。",
+    "sources": [
+      "https://www.fishbase.se/summary/Hippocampus-abdominalis.html",
+      "https://cites.org/eng"
+    ]
+  }
+]
