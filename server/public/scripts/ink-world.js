@@ -61,6 +61,32 @@
     if (creatures[data.selectedCreature]) selected = data.selectedCreature;
     if (data.dailyInteractions) dailyInteractions = data.dailyInteractions;
   }
+  const codexLore = {
+    koi:'水纹映月，循流而行。锦鲤象征灵动与机缘，初入墨灵世界时便与你结缘。',
+    dragon:'行云布雨，镇守山川。青龙象征威仪与守护，在云海之间聆听天地气息。',
+    snake:'潜行竹影，静观万象。灵蛇象征敏锐与沉静，于幽篁深处感知细微变化。',
+    turtle:'负甲守泽，静候四时。玄龟象征坚韧与长久，在静水边守望生灵往来。'
+  };
+  const realmNames = {
+    'lotus-pond':'烟雨荷塘',
+    'cloud-mountain':'云海山巅',
+    'bamboo-forest':'幽篁竹林',
+    'quiet-marsh':'静水泽地'
+  };
+  function renderCodex(discovered = []) {
+    document.querySelectorAll('[data-codex]').forEach(entry => {
+      const id = entry.dataset.codex;
+      const unlocked = id === 'koi' || discovered.includes(entry.dataset.realm);
+      entry.classList.toggle('unlocked', unlocked);
+      entry.classList.toggle('locked', !unlocked);
+      const status = entry.querySelector('.codex-status');
+      const lore = entry.querySelector('.codex-lore');
+      if (status) status.textContent = unlocked
+        ? (id === 'koi' ? '已收录 · 初见之灵' : '已收录 · ' + realmNames[entry.dataset.realm])
+        : '尚未发现 · 前往' + realmNames[entry.dataset.realm];
+      if (lore) lore.textContent = unlocked ? codexLore[id] : '灵境尚未探索，图鉴记载暂未显现。';
+    });
+  }
   function renderProgress() {
     const p = progress[selected];
     const needed = threshold(p.level);
@@ -149,6 +175,10 @@
       authenticated = true;
       applyServerProgress(data);
       $('progress-note').textContent = '已登录：成长记录保存在服务器，可跨设备继续。每日最多获得 50 次互动奖励。';
+      try {
+        const exploration = await api('/api/exploration/progress');
+        renderCodex(exploration.discovered || []);
+      } catch { renderCodex([]); }
     } catch {
       authenticated = false;
       try {
@@ -156,6 +186,10 @@
         if (creatures[saved]) selected = saved;
       } catch {}
       $('progress-note').textContent = '访客模式：成长进度保存在此浏览器。登录后可启用跨设备同步。';
+      try {
+        const savedRealms = JSON.parse(localStorage.getItem('inkSpiritExplorationV1') || '[]');
+        renderCodex(Array.isArray(savedRealms) ? savedRealms : []);
+      } catch { renderCodex([]); }
     }
     selectCreature(selected, false);
   }
