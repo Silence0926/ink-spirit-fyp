@@ -404,3 +404,60 @@ test('creature journal records interactions, feeding and first-time habitat disc
   const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-journal.json'), 'utf8'));
   assert.equal(stored[user.id].length, 3);
 });
+
+
+test('companion signature abilities are unique, bond-gated, rate-limited and server-validated', async t => {
+  const { base, dataDir } = await startServer(t);
+  const anonymous = await fetch(base + '/api/creatures/ability', {
+    method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({creatureId:'koi',abilityId:'ripple-leap'})
+  });
+  assert.equal(anonymous.status, 401);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST', headers:{'content-type':'application/json'},
+    body:JSON.stringify({username:'ability-user',password:'ability-pass-123'})
+  });
+  assert.equal(registration.status, 201);
+  const user = (await registration.json()).user;
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = {cookie,'content-type':'application/json'};
+  const initial = await fetch(base + '/api/creatures/care', {headers});
+  const initialCare = (await initial.json()).creatures.koi;
+  assert.equal(initialCare.ability.id, 'ripple-leap');
+  assert.equal(initialCare.ability.unlocked, false);
+  const locked = await fetch(base + '/api/creatures/ability', {
+    method:'POST', headers, body:JSON.stringify({creatureId:'koi',abilityId:'ripple-leap'})
+  });
+  assert.equal(locked.status, 403);
+  const wrongAbility = await fetch(base + '/api/creatures/ability', {
+    method:'POST', headers, body:JSON.stringify({creatureId:'koi',abilityId:'cloudborne-presence'})
+  });
+  assert.equal(wrongAbility.status, 400);
+  const progressPath = path.join(dataDir,'creature-progress.json');
+  const carePath = path.join(dataDir,'creature-care.json');
+  const progress = JSON.parse(fs.readFileSync(progressPath,'utf8'));
+  const care = JSON.parse(fs.readFileSync(carePath,'utf8'));
+  progress[user.id].creatures.koi.level = 5;
+  care[user.id].creatures.koi.bond = 50;
+  fs.writeFileSync(progressPath,JSON.stringify(progress));
+  fs.writeFileSync(carePath,JSON.stringify(care));
+  const unlocked = await fetch(base + '/api/creatures/care',{headers});
+  const ability = (await unlocked.json()).creatures.koi.ability;
+  assert.equal(ability.unlocked,true);
+  assert.equal(ability.name,'锦鲤跃波');
+  for(let index=0;index<5;index+=1){
+    const activated = await fetch(base + '/api/creatures/ability',{
+      method:'POST',headers,body:JSON.stringify({creatureId:'koi',abilityId:'ripple-leap'})
+    });
+    assert.equal(activated.status,200);
+    assert.equal((await activated.json()).activated,true);
+  }
+  const exhausted = await fetch(base + '/api/creatures/ability',{
+    method:'POST',headers,body:JSON.stringify({creatureId:'koi',abilityId:'ripple-leap'})
+  });
+  assert.equal(exhausted.status,429);
+  const journal = await fetch(base + '/api/creatures/journal',{headers});
+  const events = (await journal.json()).events;
+  assert.equal(events.filter(event=>event.type==='ability').length,5);
+  const stored = JSON.parse(fs.readFileSync(carePath,'utf8'));
+  assert.equal(stored[user.id].creatures.koi.abilityDaily.count,5);
+});
