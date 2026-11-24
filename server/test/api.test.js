@@ -203,8 +203,8 @@ test('authenticated creature progression persists server-side and validates rewa
   });
   assert.equal(capped.status, 429, 'daily interaction rewards must be capped server-side');
 
-  const invalid = await fetch(base + '/api/creatures/interact', {
+  const invalidAfterLimit = await fetch(base + '/api/creatures/interact', {
     method:'POST', headers, body:JSON.stringify({ creatureId:'unknown' })
   });
-  assert.equal(invalid.status, 400);
+  assert.equal(invalidAfterLimit.status, 400);
 });
