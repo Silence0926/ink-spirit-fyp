@@ -16,6 +16,7 @@ const FILES = {
   products: path.join(DATA_DIR, 'products.json'),
   carts: path.join(DATA_DIR, 'carts.json'),
   orders: path.join(DATA_DIR, 'orders.json'),
+  inventoryMovements: path.join(DATA_DIR, 'inventory-movements.json'),
   creatureProgress: path.join(DATA_DIR, 'creature-progress.json'),
   explorationProgress: path.join(DATA_DIR, 'exploration-progress.json'),
   creatureCare: path.join(DATA_DIR, 'creature-care.json'),
@@ -571,10 +572,10 @@ app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
   res.json(products.filter(product => product.active !== false));
 });
-app.get('/api/admin/products', requireRole('admin', 'manager'), (_req, res) => res.json(readJson(FILES.products, [])));
+app.get('/api/admin/products', requireRole('admin', 'manager'), (_req, res) => res.json(readJson(FILES.products, []).map(product => ({ ...product, stockThreshold:Number.isInteger(product.stockThreshold) ? product.stockThreshold : 5 }))));
 app.post('/api/admin/products', requireRole('admin', 'manager'), (req, res) => {
   try {
-    const product = { id:id('prd_'), ...validateProduct(req.body), createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+    const product = { id:id('prd_'), ...validateProduct(req.body), stockThreshold:Number.isInteger(req.body.stockThreshold) && req.body.stockThreshold >= 0 ? req.body.stockThreshold : 5, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
     const products = readJson(FILES.products, []);
     products.push(product); writeJson(FILES.products, products);
     res.status(201).json({ product });
@@ -588,6 +589,57 @@ app.patch('/api/admin/products/:id', requireRole('admin', 'manager'), (req, res)
     products[index] = { ...products[index], ...validateProduct(req.body, true), updatedAt:new Date().toISOString() };
     writeJson(FILES.products, products); res.json({ product:products[index] });
   } catch (error) { res.status(400).json({ error:error.message }); }
+});
+app.post('/api/admin/products/:id/stock', requireRole('admin', 'manager'), (req, res) => {
+  const products = readJson(FILES.products, []);
+  const product = products.find(item => item.id === req.params.id);
+  if (!product) return res.status(404).json({ error:'Product not found.' });
+  const mode = req.body.mode;
+  const quantity = req.body.quantity;
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
+  if (!['adjust', 'set'].includes(mode) || !Number.isInteger(quantity) || quantity < 0 || quantity > 1000000) {
+    return res.status(400).json({ error:'Choose adjust or set and provide a valid non-negative integer quantity.' });
+  }
+  if (!reason || reason.length > 240) return res.status(400).json({ error:'A stock movement reason (1–240 characters) is required.' });
+  const previousStock = Number.isInteger(product.stock) ? product.stock : 0;
+  const nextStock = mode === 'adjust' ? previousStock + quantity : quantity;
+  if (nextStock < 0) return res.status(409).json({ error:'Stock cannot become negative.' });
+  if (nextStock > 1000000) return res.status(400).json({ error:'Stock cannot exceed 1,000,000 units.' });
+  const movement = {
+    id:id('mov_'), productId:product.id, productName:product.name,
+    mode, quantity:mode === 'adjust' ? Math.abs(quantity) : nextStock - previousStock,
+    delta:nextStock - previousStock, previousStock, newStock:nextStock,
+    reason, actorId:req.user.id, actorRole:req.user.role, createdAt:new Date().toISOString()
+  };
+  product.stock = nextStock;
+  product.updatedAt = movement.createdAt;
+  writeJson(FILES.products, products);
+  const movements = readJson(FILES.inventoryMovements, []);
+  movements.push(movement);
+  writeJson(FILES.inventoryMovements, movements.slice(-10000));
+  res.json({ product, movement });
+});
+app.patch('/api/admin/products/:id/stock-threshold', requireRole('admin', 'manager'), (req, res) => {
+  const threshold = req.body.threshold;
+  if (!Number.isInteger(threshold) || threshold < 0 || threshold > 1000000) {
+    return res.status(400).json({ error:'Low-stock threshold must be an integer from 0 to 1,000,000.' });
+  }
+  const products = readJson(FILES.products, []);
+  const product = products.find(item => item.id === req.params.id);
+  if (!product) return res.status(404).json({ error:'Product not found.' });
+  product.stockThreshold = threshold;
+  product.updatedAt = new Date().toISOString();
+  writeJson(FILES.products, products);
+  res.json({ product });
+});
+app.get('/api/admin/products/:id/stock-movements', requireRole('admin', 'manager'), (req, res) => {
+  const product = readJson(FILES.products, []).find(item => item.id === req.params.id);
+  if (!product) return res.status(404).json({ error:'Product not found.' });
+  const movements = readJson(FILES.inventoryMovements, [])
+    .filter(item => item.productId === req.params.id)
+    .sort((a,b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 50);
+  res.json({ movements });
 });
 app.delete('/api/admin/products/:id', requireRole('admin'), (req, res) => {
   const products = readJson(FILES.products, []);
