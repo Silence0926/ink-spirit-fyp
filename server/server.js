@@ -700,7 +700,7 @@ function aquariumSnapshot(aquarium) {
     cleanliness,
     fish,
     fishCount:fish.reduce((sum,item)=>sum+item.quantity,0),
-    speciesCount:fish.length,
+    speciesCount:new Set(fish.map(item=>item.speciesId)).size,
     simulationNotice:'虚拟数值仅用于游戏体验，不代表真实水质检测或实际物种生长参数。'
   };
 }
@@ -769,6 +769,21 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
     aquarium.fish.forEach(item=>{item.satiety=Math.min(100,item.satiety+20);item.growthPoints=Math.min(30,item.growthPoints+1);});
     aquarium.daily.feeds+=1;
     addEvent('投喂了鱼群，饱食度与成长进度有所提升。');
+  } else if (action==='breed') {
+    const parents=aquarium.fish.find(item=>item.speciesId==='guppy' && item.growthPoints>=20 && item.quantity>=2);
+    if (!parents) return res.status(409).json({error:'当前鱼缸需要至少 2 条已达到成体阶段的孔雀鱼，才能进行第一版繁殖模拟。'});
+    if (parents.satiety<50 || aquarium.waterQuality<60 || aquarium.cleanliness<60) return res.status(409).json({error:'繁殖模拟条件不足：请先将鱼群饱食度、水质与清洁度维持在合适的游戏数值。'});
+    const lastBreed=Date.parse(aquarium.lastBreedAt||'');
+    if (Number.isFinite(lastBreed) && Date.now()-lastBreed<24*60*60*1000) return res.status(429).json({error:'这座鱼缸的孔雀鱼繁殖模拟有 24 小时冷却时间。'});
+    const currentCount=aquarium.fish.reduce((sum,item)=>sum+item.quantity,0);
+    const fryCount=Math.min(3,30-currentCount);
+    if (fryCount<1) return res.status(409).json({error:'鱼缸已达到 30 条模拟个体的游戏容量上限，暂时无法加入幼鱼。'});
+    aquarium.fish.push({speciesId:'guppy',commonName:parents.commonName,scientificName:parents.scientificName,quantity:fryCount,satiety:70,growthPoints:0,addedAt:now.toISOString(),cohort:'fry'});
+    parents.satiety=Math.max(0,parents.satiety-15);
+    aquarium.waterQuality=Math.max(0,aquarium.waterQuality-5);
+    aquarium.cleanliness=Math.max(0,aquarium.cleanliness-3);
+    aquarium.lastBreedAt=now.toISOString();
+    addEvent('孔雀鱼繁殖模拟完成，新增幼鱼 × '+fryCount+'。幼鱼作为独立成长批次记录。');
   } else if (action==='water_change') {
     aquarium.waterQuality=Math.min(100,aquarium.waterQuality+20);
     aquarium.cleanliness=Math.min(100,aquarium.cleanliness+10);
