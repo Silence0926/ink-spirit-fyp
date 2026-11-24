@@ -79,10 +79,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       meta.append(category, stock);
 
       const title = document.createElement('h3');
-      title.textContent = product.name;
+      const titleLink = document.createElement('a');
+      titleLink.href = 'product.html?id=' + encodeURIComponent(product.id);
+      titleLink.textContent = product.name;
+      titleLink.className = 'product-detail-link';
+      title.appendChild(titleLink);
       const description = document.createElement('p');
       description.className = 'product-description';
       description.textContent = product.description;
+      const detailLink = document.createElement('a');
+      detailLink.href = 'product.html?id=' + encodeURIComponent(product.id);
+      detailLink.className = 'product-more-link';
+      detailLink.textContent = '阅览藏品详情 ↗';
       const footer = document.createElement('div');
       footer.className = 'product-card-footer';
       const price = document.createElement('strong');
@@ -123,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           footer.appendChild(notice);
         }
       });
-      footer.append(price, button);
+      footer.append(price, button, detailLink);
       card.append(imageWrap, meta, title, description, footer);
       grid.appendChild(card);
     });
