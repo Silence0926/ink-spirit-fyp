@@ -187,6 +187,8 @@ test('authenticated creature progression persists server-side and validates rewa
   assert.equal(latest.progress.creatures.dragon.experience, 0);
   assert.equal(latest.progress.creatures.dragon.visits, 10);
   assert.equal(latest.progress.dailyInteractions.count, 10);
+  assert.equal(latest.care.creatures.dragon.bond, 10, 'each companionship interaction adds one bond point');
+  assert.equal(latest.care.creatures.dragon.bondStage, '初识');
 
   const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-progress.json'), 'utf8'));
   const user = (await registration.json()).user;
