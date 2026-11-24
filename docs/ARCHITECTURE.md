@@ -146,3 +146,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - Product records may carry an optional `speciesId`; the server validates it against the canonical catalogue. Generic aquarium equipment, food, and plants may leave the field empty.
 - Species records distinguish native-range summaries, habitat descriptions, domestication/origin notes, care notes, conservation/legal cautions, broad map reference coordinates, and further-reading source URLs. Map coordinates are regional educational markers, not precise occurrence or collection records. The dataset is introductory and should be reviewed against current taxonomic, conservation, and local regulatory references before operational use.
 - Existing legacy product IDs retain a temporary front-end association fallback. New and edited products should use the explicit species reference.
+
+
+## Aquarium encyclopedia
+
+- `server/aquarium-encyclopedia.json` stores reviewed educational articles, categories, warnings, structured sections, tags, and external references. Public APIs: `GET /api/encyclopedia` (optional `category` and `q` filters) and `GET /api/encyclopedia/:slug`.
+- The public `encyclopedia.html` page renders article content using text nodes, supports category filtering, search, and expandable reading. It is an educational reference, not a veterinary diagnostic or treatment system.
+- Articles distinguish general principles from species/system-specific requirements. Water targets and maintenance schedules must not be universalized; users should validate against the actual species, system, test method, and local professional guidance.
+- Current content covers nitrogen cycling, testing, water changes, filtration, temperature, lighting, stocking, quarantine, feeding, warning signs, freshwater/marine differences, and emergencies. It links to UF/IFAS, RSPCA Australia, and Merck Veterinary Manual references. Content should be reviewed periodically as references and regulations change.
