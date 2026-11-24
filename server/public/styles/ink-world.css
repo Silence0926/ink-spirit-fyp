@@ -18,3 +18,17 @@
 .care-actions button:disabled{opacity:.55;cursor:not-allowed}
 .care-note{font-size:11px;color:var(--muted);min-height:1.5em;margin:13px 0 0}
 @media(max-width:620px){.care-panel{padding:17px}.care-heading{align-items:flex-start}.care-heading h3{font-size:19px}.care-actions{display:grid;grid-template-columns:1fr 1fr}.care-actions label{grid-column:1/-1}.care-actions select,.care-actions button{width:100%;min-width:0}}
+
+
+.journal-panel{max-width:1100px;margin:22px auto 0;padding:22px 24px;border-top:1px solid var(--line);background:rgba(246,243,234,.24)}
+.journal-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px}
+.journal-heading h3{font-family:var(--calligraphy);font-size:22px;font-weight:500;margin:4px 0}
+.journal-heading>span{font-size:10px;color:var(--muted)}
+.journal-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.journal-entry{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid var(--line);background:rgba(255,255,255,.22)}
+.journal-marker{flex:none;width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--red);color:var(--red);font-family:var(--calligraphy);font-size:17px}
+.journal-entry strong{font-size:12px;font-weight:500}
+.journal-entry p{font-size:11px;line-height:1.7;color:var(--muted);margin:4px 0}
+.journal-entry time{font-size:9px;color:#99958a}
+.journal-empty{grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);font-size:11px;border:1px dashed var(--line)}
+@media(max-width:620px){.journal-panel{padding:17px 0}.journal-list{grid-template-columns:1fr}.journal-heading h3{font-size:19px}}
