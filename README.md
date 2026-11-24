@@ -62,6 +62,9 @@ On startup, the server creates the bootstrap administrator if it does not alread
 
 See `server/.env.example` for the environment template. Never commit real credentials.
 
+For an auxiliary organism to appear as a purchasable item, an administrator should create a product in Admin Studio, select its matching linked species (for example, Cherry Shrimp), choose the `Aquatic Invertebrates` category, and enter the actual selling price and available stock. The encyclopedia's **查看相关藏品** link then filters the storefront to that organism. No stock or price is fabricated by the species catalogue.
+
+
 ## Billplz payment setup
 
 The integration targets Billplz because it supports Malaysian FPX and offers additional card/e-wallet methods subject to account activation. FPX is enabled by default for eligible Collection accounts; cards and e-wallets require separate activation. See the official [Billplz overview](https://support.billplz.com/guide/overview) and [API documentation](https://support.billplz.com/api).
