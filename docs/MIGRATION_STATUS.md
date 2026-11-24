@@ -40,3 +40,5 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 | Shared species catalogue and product linkage | Implemented prototype | Eight species served by `GET /api/species`; species guide and Leaflet atlas consume the same dataset; products support validated optional `speciesId`; Admin editor can assign the link. Legacy product-ID fallback remains for older catalogue records. |
 
 | Aquarium encyclopedia | Implemented prototype | 12 structured knowledge articles across five categories; searchable/category-filterable API and reader page; external references and veterinary-safety caveats included. |
+
+| Aquarium planner and compatibility assessment | Implemented prototype | Geometric gross-volume estimator, catalogue-driven species selection, explicit mixed-water warnings, conservative unknown pair status, and specification-based equipment filtering. Does not claim stocking capacity or unverified pair compatibility. |
