@@ -7,8 +7,8 @@
 | Product catalogue seed | Improved | New starter products are appended by ID without overwriting existing product records. |
 | Original soundtrack | Procedural soundtrack implemented | Web Audio composition: plucked-string, flute-like tones and filtered water ambience. It is generated in-browser; no standalone MP3 is bundled yet. |
 | Snake | Rebuilt | Keyboard, WASD, touch controls, pause/restart, speed progression and local best score. |
-| 2048 | Rebuilt | Keyboard, WASD, swipe and touch direction controls, score, best score and win/continue state. |
-| Mini-game hub | Expanded | Snake and 2048 are playable; Sudoku and Tetris remain pending migration/testing. |
+| 2048 | Rebuilt | Keyboard, WASD, swipe and touch direction controls, score, best score and win/continue state. |\n| Sudoku | Rebuilt prototype | Generated unique-solution puzzles, three difficulty settings, notes mode, keyboard/numpad input, mistake feedback, timer and completion detection. |
+| Mini-game hub | Expanded | Snake, 2048 and Sudoku are playable; Tetris remains pending migration/testing. |
 | Ecological Atlas | Expanded | Bilingual Leaflet atlas with eight species, freshwater/marine filters, native-range notes, habitat descriptions and responsible-release guidance. Regional markers are illustrative, not exact occurrence records. |
 | Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |
 | Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
