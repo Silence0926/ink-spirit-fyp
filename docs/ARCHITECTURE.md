@@ -184,3 +184,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - Each virtual aquarium stores up to eight selected decorative elements. The server validates item IDs, add/remove operations and freshwater/marine compatibility.
 - The initial catalogue contains freshwater plant/hardscape themes and marine seagrass/reef-themed decorative elements. Coral arch is explicitly a decorative object, not a live coral organism.
 - An aquascape score is derived from the number of placed elements for collection presentation only. It does not represent water quality, ecological balance, animal welfare or real aquarium suitability.
+
+
+## Virtual aquarium living ecosystem V4.0
+
+- Each user-owned aquarium can store simulated plant cohorts and auxiliary-organism cohorts independently.
+- Plant growth is a deterministic game progression: care adds one growth point (maximum 12) and five health points (maximum 100). Stages are seedling (0–4), growing (5–11) and mature (12).
+- The auxiliary catalogue currently includes cherry shrimp and nerite snails for freshwater tanks, and cleaner shrimp and hermit crabs for marine tanks. The server validates catalogue membership and water-type category only; it does not claim species-level compatibility.
+- Per tank limits: 20 simulated plant units and 10 auxiliary-organism units. An ecology collection score is cosmetic and is not a biological or water-quality metric.
