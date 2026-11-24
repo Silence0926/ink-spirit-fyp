@@ -26,10 +26,41 @@
   }
 
   let progress = loadProgress();
-  let selected = creatures[localStorage.getItem('inkSpirit.selected') ] ? localStorage.getItem('inkSpirit.selected') : 'koi';
+  let selected = 'koi';
+  let authenticated = false;
+  let dailyInteractions = { count:0, limit:50 };
   const $ = id => document.getElementById(id);
   const threshold = level => level * 100;
-
+  const api = async (url, options = {}) => {
+    const response = await fetch(url, {
+      credentials:'same-origin',
+      ...options,
+      headers:{ ...(options.body ? {'Content-Type':'application/json'} : {}), ...(options.headers || {}) }
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Request failed.');
+    return data;
+  };
+  function safeLocalWrite(key, value) {
+    try { localStorage.setItem(key, value); } catch {}
+  }
+  function applyServerProgress(data) {
+    if (!data || !data.creatures) return;
+    for (const id of Object.keys(creatures)) {
+      const p = data.creatures[id];
+      if (p && Number.isInteger(p.experience) && p.experience >= 0 &&
+          Number.isInteger(p.level) && p.level >= 1) {
+        progress[id] = {
+          experience:p.experience,
+          level:p.level,
+          visits:Number.isInteger(p.visits) ? p.visits : 0,
+          totalExperience:Number.isInteger(p.totalExperience) ? p.totalExperience : 0
+        };
+      }
+    }
+    if (creatures[data.selectedCreature]) selected = data.selectedCreature;
+    if (data.dailyInteractions) dailyInteractions = data.dailyInteractions;
+  }
   function renderProgress() {
     const p = progress[selected];
     const needed = threshold(p.level);
@@ -37,12 +68,20 @@
     $('xp-text').textContent = p.experience + ' / ' + needed + ' 灵息';
     $('xp-bar').style.width = Math.min(100, p.experience / needed * 100) + '%';
     $('bond-name').textContent = creatures[selected].bond;
+    const visits = $('creature-visits');
+    if (visits) visits.textContent = '相伴次数 · ' + (p.visits || 0);
+    const daily = $('daily-interactions');
+    if (daily) daily.textContent = authenticated
+      ? '今日互动 · ' + dailyInteractions.count + ' / ' + dailyInteractions.limit
+      : '访客模式 · 进度保存在本浏览器';
+    const button = $('interact-button');
+    button.disabled = authenticated && dailyInteractions.count >= dailyInteractions.limit;
+    button.textContent = button.disabled ? '今日互动已达上限' : '与它互动 +10';
   }
-
-  function selectCreature(id) {
+  function selectCreature(id, sync = true) {
     if (!creatures[id]) return;
     selected = id;
-    localStorage.setItem('inkSpirit.selected', id);
+    safeLocalWrite('inkSpirit.selected', id);
     const c = creatures[id];
     $('creature-art').innerHTML = c.art;
     $('creature-art').setAttribute('aria-label', c.title);
@@ -59,25 +98,66 @@
     document.querySelector('.bamboo-scene').style.opacity = id === 'snake' ? '.34' : '0';
     $('painting').dataset.scene = id;
     renderProgress();
+    if (sync && authenticated) {
+      api('/api/creatures/selected', {
+        method:'PATCH', body:JSON.stringify({ creatureId:id })
+      }).then(data => applyServerProgress(data)).catch(error => {
+        $('progress-note').textContent = '保存伙伴选择失败：' + error.message;
+      });
+    }
   }
-
   document.querySelectorAll('.creature-card').forEach(card => {
     card.addEventListener('click', () => selectCreature(card.dataset.creature));
   });
-
-  $('interact-button').addEventListener('click', () => {
-    const p = progress[selected];
-    p.experience += creatures[selected].reward;
-    p.visits += 1;
-    while (p.experience >= threshold(p.level)) {
-      p.experience -= threshold(p.level);
-      p.level += 1;
+  $('interact-button').addEventListener('click', async () => {
+    const button = $('interact-button');
+    button.disabled = true;
+    try {
+      if (authenticated) {
+        const result = await api('/api/creatures/interact', {
+          method:'POST', body:JSON.stringify({ creatureId:selected })
+        });
+        applyServerProgress(result.progress);
+        $('progress-note').textContent = '灵息增加了 ' + result.reward + ' 点。成长记录已保存至服务器。';
+      } else {
+        const p = progress[selected];
+        p.experience += creatures[selected].reward;
+        p.visits += 1;
+        p.totalExperience = (p.totalExperience || 0) + creatures[selected].reward;
+        while (p.experience >= threshold(p.level)) {
+          p.experience -= threshold(p.level);
+          p.level += 1;
+        }
+        safeLocalWrite(STORAGE_KEY, JSON.stringify(progress));
+        $('progress-note').textContent = '灵息增加了 ' + creatures[selected].reward + ' 点。访客进度保存在此浏览器；登录后可使用跨设备同步。';
+      }
+      renderProgress();
+      const art = $('creature-art');
+      if (typeof art.animate === 'function') {
+        art.animate([{transform:'translateY(0) scale(1)'},{transform:'translateY(-18px) scale(1.04)'},{transform:'translateY(0) scale(1)'}], {duration:650,easing:'ease-out'});
+      }
+    } catch (error) {
+      $('progress-note').textContent = error.message;
+      renderProgress();
+    } finally {
+      if (!(authenticated && dailyInteractions.count >= dailyInteractions.limit)) button.disabled = false;
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    renderProgress();
-    $('progress-note').textContent = '灵息增加了 ' + creatures[selected].reward + ' 点。你与' + creatures[selected].name + '的羁绊更深了。';
-    $('creature-art').animate([{transform:'translateY(0) scale(1)'},{transform:'translateY(-18px) scale(1.04)'},{transform:'translateY(0) scale(1)'}], {duration:650,easing:'ease-out'});
   });
-
-  selectCreature(selected);
+  async function init() {
+    try {
+      const data = await api('/api/creatures/progress');
+      authenticated = true;
+      applyServerProgress(data);
+      $('progress-note').textContent = '已登录：成长记录保存在服务器，可跨设备继续。每日最多获得 50 次互动奖励。';
+    } catch {
+      authenticated = false;
+      try {
+        const saved = localStorage.getItem('inkSpirit.selected');
+        if (creatures[saved]) selected = saved;
+      } catch {}
+      $('progress-note').textContent = '访客模式：成长进度保存在此浏览器。登录后可启用跨设备同步。';
+    }
+    selectCreature(selected, false);
+  }
+  init();
 })();
