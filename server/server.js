@@ -366,8 +366,12 @@ app.post('/api/creatures/interact', requireAuth, (req, res) => {
   progress.daily.count += 1;
   progress.selectedCreature = creatureId;
   saveCreatureProgress(req.user.id, progress);
-  recordCreatureEvent(req.user.id, { type:'interaction', creatureId, title:'相伴互动', detail:'与伙伴相伴片刻，获得 ' + reward + ' 点灵息。' });
-  res.json({ reward, progress:publicCreatureProgress(progress) });
+
+  const care = getCreatureCare(req.user.id);
+  care.creatures[creatureId].bond += 1;
+  saveCreatureCare(req.user.id, care);
+  recordCreatureEvent(req.user.id, { type:'interaction', creatureId, title:'相伴互动', detail:'与伙伴相伴片刻，获得 ' + reward + ' 点灵息，亲密度增加 1。' });
+  res.json({ reward, progress:publicCreatureProgress(progress), care:publicCreatureCare(care) });
 });
 
 
@@ -412,6 +416,7 @@ function publicCreatureCare(care) {
         satiety:item.satiety,
         bond:item.bond,
         mood:item.satiety >= 70 ? '安然' : item.satiety >= 35 ? '平静' : '需要照料',
+        bondStage:item.bond >= 100 ? '心契' : item.bond >= 50 ? '亲近' : item.bond >= 20 ? '熟悉' : '初识',
         dailyFeeds:{ count:item.daily.count, limit:DAILY_FEED_LIMIT, date:item.daily.date },
         lastFedAt:item.lastFedAt
       }];
