@@ -20,7 +20,8 @@
     "distributionNote": "地图标记为日本锦鲤选育文化的区域参考位置，并非鲤鱼完整原生分布。",
     "sources": [
       "https://www.fishbase.se/summary/Cyprinus-carpio.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "betta",
@@ -46,7 +47,8 @@
     "distributionNote": "地图标记为湄公河流域的区域参考位置。",
     "sources": [
       "https://www.fishbase.se/summary/Betta-splendens.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "guppy",
@@ -71,7 +73,8 @@
     "distributionNote": "地图标记为原生分布区域的概览位置。",
     "sources": [
       "https://www.fishbase.se/summary/Poecilia-reticulata.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "goldfish",
@@ -94,7 +97,8 @@
     "distributionNote": "地图标记为金鱼驯化历史的文化地理参考位置。",
     "sources": [
       "https://www.fishbase.se/summary/Carassius-auratus.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "arowana",
@@ -120,7 +124,8 @@
     "sources": [
       "https://www.fishbase.se/summary/Scleropages-formosus.html",
       "https://cites.org/eng"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "clown",
@@ -145,7 +150,8 @@
     "distributionNote": "地图标记为印度洋—西太平洋区域参考位置。",
     "sources": [
       "https://www.fishbase.se/summary/Amphiprion-ocellaris.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "blue-tang",
@@ -169,7 +175,8 @@
     "distributionNote": "地图标记为印度尼西亚附近的区域参考位置。",
     "sources": [
       "https://www.fishbase.se/summary/Paracanthurus-hepatus.html"
-    ]
+    ],
+    "organismType": "fish"
   },
   {
     "id": "seahorse",
@@ -194,6 +201,118 @@
     "sources": [
       "https://www.fishbase.se/summary/Hippocampus-abdominalis.html",
       "https://cites.org/eng"
+    ],
+    "organismType": "fish"
+  },
+  {
+    "id": "cherry-shrimp",
+    "commonName": "樱花虾",
+    "scientificName": "Neocaridina davidi",
+    "organismType": "auxiliary",
+    "waterType": "freshwater",
+    "range": "原生于东亚淡水区域，资料记录包括中国、台湾、韩国与越南；不同地区的引入种群应与原生分布区分。",
+    "habitat": "淡水溪流及有水草、石块与附着生物膜的水域。",
+    "origin": "台湾及东亚淡水原生种群；红、蓝、黄等颜色多为人工选育表现型。",
+    "care": "需要成熟稳定的淡水系统、无铜污染环境与可供觅食的生物膜；换水应避免剧烈参数变化。",
+    "conservation": "不可随意放生或弃置；水族贸易个体可能在非原生地区建立入侵种群。",
+    "nativeRegions": [
+      "中国部分地区",
+      "台湾",
+      "韩国",
+      "越南"
+    ],
+    "image": "/images/products/cherry-shrimp-card.svg",
+    "coordinates": [
+      24,
+      121
+    ],
+    "distributionNote": "区域标记为台湾及东亚原生分布概览，不代表精确采集点。",
+    "sources": [
+      "https://ask.ifas.ufl.edu/publication/in1301",
+      "https://nas.er.usgs.gov/queries/factsheet.aspx?SpeciesID=2257"
+    ]
+  },
+  {
+    "id": "nerite-snail",
+    "commonName": "斑马角螺",
+    "scientificName": "Vittina natalensis (syn. Neritina natalensis)",
+    "organismType": "auxiliary",
+    "waterType": "freshwater",
+    "range": "原生于东非沿岸区域，记录包括肯尼亚、莫桑比克、索马里、南非与坦桑尼亚。",
+    "habitat": "沿海河流、溪流、河口与潟湖；成体可见于淡水至微咸水环境。",
+    "origin": "东非沿岸原生螺类；水族贸易中常以 Neritina natalensis 名称销售。",
+    "care": "需要成熟鱼缸内的藻类与生物膜、足够矿物质维持螺壳，并使用防逃缸盖；不同角螺种类的盐度与繁殖需求并不相同。",
+    "conservation": "采购时确认具体物种名称与来源；不要将非本地个体释放到自然水域。",
+    "nativeRegions": [
+      "肯尼亚",
+      "莫桑比克",
+      "索马里",
+      "南非",
+      "坦桑尼亚"
+    ],
+    "image": "/images/products/nerite-snail-card.svg",
+    "coordinates": [
+      -3,
+      38
+    ],
+    "distributionNote": "区域标记为东非沿岸分布概览；市场俗名可能涵盖多个角螺物种。",
+    "sources": [
+      "https://doi.org/10.2305/IUCN.UK.2010-3.RLTS.T14628A4451314.en",
+      "https://fluvalaquatics.com/us/wp-content/uploads/2022/02/Species-Spotlight_Nerite-Snail_EN.pdf"
+    ]
+  },
+  {
+    "id": "cleaner-shrimp",
+    "commonName": "白袜清洁虾",
+    "scientificName": "Lysmata amboinensis",
+    "organismType": "auxiliary",
+    "waterType": "marine",
+    "range": "广泛分布于印度洋—西太平洋热带海域。",
+    "habitat": "珊瑚礁斜坡、岩礁洞穴与悬垂结构下方，常在清洁站为鱼类清除部分寄生物与脱落组织。",
+    "origin": "热带海水虾类；贸易个体来源可能包括野外采集与人工繁殖，应向供应商核实。",
+    "care": "需要成熟稳定的海水系统、合适藏身处与谨慎的同缸生物选择；不能假设它会清除所有鱼病或替代检疫。",
+    "conservation": "清洁行为不等于疾病治疗；采购时关注合法、可追溯来源。",
+    "nativeRegions": [
+      "印度洋",
+      "西太平洋",
+      "东南亚海域"
+    ],
+    "image": "/images/products/cleaner-shrimp-card.svg",
+    "coordinates": [
+      -15,
+      130
+    ],
+    "distributionNote": "区域标记为印度洋—西太平洋概览，并非个体采集位置。",
+    "sources": [
+      "https://www.surg.org.au/species/lysmata-amboinensis-de-man-1888/"
+    ]
+  },
+  {
+    "id": "blue-leg-hermit",
+    "commonName": "蓝脚寄居蟹",
+    "scientificName": "Clibanarius tricolor",
+    "organismType": "auxiliary",
+    "waterType": "marine",
+    "range": "原生分布于西大西洋与加勒比海区域。",
+    "habitat": "潮间带及浅海近岸，常见于岩石、碎石、沙底与海草床。",
+    "origin": "海水寄居蟹；会使用腹足类空壳作为保护，成长过程中需要更换合适贝壳。",
+    "care": "需要成熟海水系统、多个合适尺寸的备用空壳与躲藏空间；不同蟹类对鱼、珊瑚及其他无脊椎动物的影响不同，混养前须确认物种。",
+    "conservation": "避免购买来源不明或采集方式不透明的个体；不要把所有寄居蟹视为同一饲养类型。",
+    "nativeRegions": [
+      "加勒比海",
+      "佛罗里达",
+      "墨西哥湾",
+      "西大西洋"
+    ],
+    "image": "/images/products/blue-leg-hermit-card.svg",
+    "coordinates": [
+      18,
+      -75
+    ],
+    "distributionNote": "区域标记为加勒比海及西大西洋分布概览。",
+    "sources": [
+      "https://www.marinespecies.org/aphia.php?id=367527&p=taxdetails",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC5314957/"
     ]
   }
 ]
