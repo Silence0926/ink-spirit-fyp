@@ -879,3 +879,51 @@ test('aquarium compatibility assessment rejects mixed water types and avoids fal
   const invalid=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'not-real',quantity:1}]})});
   assert.equal(invalid.status,400);
 });
+
+
+test('virtual aquariums are private, persistent and support safe simulation actions', async t => {
+  const { base, dataDir } = await startServer(t);
+  assert.equal((await fetch(base + '/api/aquariums')).status, 401);
+  const register = async username => {
+    const response = await fetch(base + '/api/register', {
+      method:'POST', headers:{'content-type':'application/json'},
+      body:JSON.stringify({username,password:'virtual-aquarium-pass'})
+    });
+    assert.equal(response.status,201);
+    return response.headers.get('set-cookie').split(';')[0];
+  };
+  const ownerCookie = await register('tank-owner');
+  const otherCookie = await register('tank-visitor');
+  const headers = {cookie:ownerCookie,'content-type':'application/json'};
+  const created = await fetch(base + '/api/aquariums', {
+    method:'POST',headers,body:JSON.stringify({name:'Moonlit Pond',waterType:'freshwater',volumeLitres:60})
+  });
+  assert.equal(created.status,201);
+  const aquarium = (await created.json()).aquarium;
+  assert.equal(aquarium.fishCount,0);
+  assert.equal((await fetch(base + '/api/aquariums/'+aquarium.id,{headers:{cookie:otherCookie}})).status,404);
+  const invalidWater = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
+    method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'clown',quantity:1})
+  });
+  assert.equal(invalidWater.status,409);
+  const add = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
+    method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'guppy',quantity:3})
+  });
+  assert.equal(add.status,200);
+  assert.equal((await add.json()).aquarium.fishCount,3);
+  const feed = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
+    method:'POST',headers,body:JSON.stringify({action:'feed'})
+  });
+  assert.equal(feed.status,200);
+  assert.equal((await feed.json()).aquarium.fish[0].satiety,90);
+  const water = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
+    method:'POST',headers,body:JSON.stringify({action:'water_change'})
+  });
+  assert.equal(water.status,200);
+  const list = await fetch(base + '/api/aquariums',{headers});
+  assert.equal((await list.json()).aquariums.length,1);
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir,'aquariums.json'),'utf8'));
+  assert.equal(Object.values(stored)[0][0].fish[0].quantity,3);
+  assert.equal((await fetch(base + '/api/aquariums/'+aquarium.id,{method:'DELETE',headers})).status,200);
+  assert.equal((await fetch(base + '/api/aquariums',{headers})).json instanceof Function,true);
+});
