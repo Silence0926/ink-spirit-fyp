@@ -224,6 +224,30 @@ function validateProduct(input, partial = false) {
     }
     result.images = images;
   }
+  if (input.specifications !== undefined) {
+    const source = input.specifications;
+    if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('Product specifications must be an object.');
+    const allowedWater = ['', 'freshwater', 'marine', 'brackish', 'any'];
+    const allowedDifficulty = ['', 'beginner', 'intermediate', 'advanced'];
+    const waterType = source.waterType === undefined ? '' : source.waterType;
+    const difficulty = source.difficulty === undefined ? '' : source.difficulty;
+    if (!allowedWater.includes(waterType)) throw new Error('Invalid water type.');
+    if (!allowedDifficulty.includes(difficulty)) throw new Error('Invalid care difficulty.');
+    const numberField = (key, min, max) => {
+      const value = source[key];
+      if (value === undefined || value === null || value === '') return null;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error('Invalid product specification: ' + key);
+      return Math.round(value * 10) / 10;
+    };
+    const minTankLitres = numberField('minTankLitres', 1, 100000);
+    const temperatureMinC = numberField('temperatureMinC', 0, 45);
+    const temperatureMaxC = numberField('temperatureMaxC', 0, 45);
+    const adultSizeCm = numberField('adultSizeCm', 0.1, 500);
+    if (temperatureMinC !== null && temperatureMaxC !== null && temperatureMinC > temperatureMaxC) throw new Error('Minimum temperature cannot exceed maximum temperature.');
+    const careNotes = source.careNotes === undefined ? '' : source.careNotes;
+    if (typeof careNotes !== 'string' || careNotes.length > 500) throw new Error('Care notes must be 500 characters or fewer.');
+    result.specifications = { waterType, difficulty, minTankLitres, temperatureMinC, temperatureMaxC, adultSizeCm, careNotes:careNotes.trim() };
+  }
   if (input.stockThreshold !== undefined) {
     if (!Number.isInteger(input.stockThreshold) || input.stockThreshold < 0 || input.stockThreshold > 1000000) throw new Error('Stock threshold must be a non-negative integer.');
     result.stockThreshold = input.stockThreshold;
