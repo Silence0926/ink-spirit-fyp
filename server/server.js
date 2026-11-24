@@ -191,7 +191,16 @@ function validateProduct(input, partial = false) {
     if (typeof input[field] !== 'string' || !input[field].trim() || input[field].length > (field === 'description' ? 1200 : 160)) {
       throw new Error('Invalid product field: ' + field);
     }
-    result[field] = input[field].trim();
+    if (field === 'image') {
+      const image = input[field].trim();
+      const isLocalImage = /^\/(?:images|uploads)\/[a-zA-Z0-9_./-]+\.(?:svg|png|jpe?g|webp)$/i.test(image) && !image.includes('..');
+      let isHttpsImage = false;
+      try { const parsed = new URL(image); isHttpsImage = parsed.protocol === 'https:' && Boolean(parsed.hostname); } catch {}
+      if (!isLocalImage && !isHttpsImage) throw new Error('Image must be a site image path or HTTPS URL.');
+      result[field] = image;
+    } else {
+      result[field] = input[field].trim();
+    }
   }
   if (!partial || input.price !== undefined) {
     if (!Number.isFinite(input.price) || input.price < 0 || input.price > 1000000) throw new Error('Price must be a valid non-negative number.');
@@ -200,6 +209,10 @@ function validateProduct(input, partial = false) {
   if (!partial || input.stock !== undefined) {
     if (!Number.isInteger(input.stock) || input.stock < 0 || input.stock > 1000000) throw new Error('Stock must be a non-negative integer.');
     result.stock = input.stock;
+  }
+  if (input.stockThreshold !== undefined) {
+    if (!Number.isInteger(input.stockThreshold) || input.stockThreshold < 0 || input.stockThreshold > 1000000) throw new Error('Stock threshold must be a non-negative integer.');
+    result.stockThreshold = input.stockThreshold;
   }
   if (input.active !== undefined) {
     if (typeof input.active !== 'boolean') throw new Error('Active must be true or false.');
@@ -858,6 +871,21 @@ app.get('/api/music', (_req, res) => {
   if (!fs.existsSync(MUSIC_DIR)) return res.json([]);
   const files = fs.readdirSync(MUSIC_DIR, { withFileTypes:true }).filter(entry => entry.isFile() && entry.name.toLowerCase().endsWith('.mp3')).map(entry => '/music/' + encodeURIComponent(entry.name));
   res.json(files);
+});
+app.post('/api/admin/media/products', requireRole('admin', 'manager'), express.raw({ type:['image/jpeg','image/png','image/webp'], limit:'5mb' }), (req, res) => {
+  if (!Buffer.isBuffer(req.body) || req.body.length < 16) return res.status(400).json({ error:'Upload a JPEG, PNG or WebP image.' });
+  const type = req.headers['content-type'];
+  const bytes = req.body;
+  let extension = '';
+  if (type === 'image/jpeg' && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) extension = 'jpg';
+  if (type === 'image/png' && bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) extension = 'png';
+  if (type === 'image/webp' && bytes.toString('ascii',0,4) === 'RIFF' && bytes.toString('ascii',8,12) === 'WEBP') extension = 'webp';
+  if (!extension) return res.status(400).json({ error:'Image content does not match its declared JPEG, PNG or WebP type.' });
+  const directory = path.join(PUBLIC_DIR, 'uploads', 'products');
+  fs.mkdirSync(directory, { recursive:true });
+  const filename = crypto.randomUUID() + '.' + extension;
+  fs.writeFileSync(path.join(directory, filename), bytes, { flag:'wx', mode:0o644 });
+  res.status(201).json({ image:'/uploads/products/' + filename, contentType:type, size:bytes.length });
 });
 app.use(express.static(PUBLIC_DIR, { extensions:['html'], dotfiles:'deny', index:'index.html' }));
 app.use((req, res) => req.path.startsWith('/api/') ? res.status(404).json({ error:'API route not found.' }) : res.status(404).send('Not found.'));
