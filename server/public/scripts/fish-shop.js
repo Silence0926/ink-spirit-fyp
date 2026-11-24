@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const count = document.getElementById('catalog-count');
   let products = [];
   let activeCategory = 'all';
+  const activeSpecies = new URLSearchParams(location.search).get('species') || '';
+  const speciesProducts = { koi:['koi-001'], betta:['betta-001'], goldfish:['goldfish-001'], guppy:['guppy-001'], clown:['clownfish-001'], arowana:[], 'blue-tang':[], seahorse:[] };
 
   const categoryNames = {
     'Ornamental Fish':'淡水观赏鱼',
@@ -25,9 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sort = sortSelect?.value || 'featured';
     let visible = products.filter(product => {
       const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
+      const matchesSpecies = !activeSpecies || (speciesProducts[activeSpecies] || []).includes(product.id);
       const haystack = [product.name, product.category, product.description, categoryNames[product.category] || '']
         .join(' ').toLocaleLowerCase();
-      return matchesCategory && (!query || haystack.includes(query));
+      return matchesCategory && matchesSpecies && (!query || haystack.includes(query));
     });
 
     if (sort === 'price-asc') visible.sort((a,b) => Number(a.price)-Number(b.price));
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!visible.length) {
       const empty = document.createElement('div');
       empty.className = 'catalog-empty';
-      empty.innerHTML = '<span>空</span><h3>此卷暂未寻得藏品</h3><p>试试其他关键词，或切换商品类别。</p>';
+      empty.innerHTML = '<span>空</span><h3>此卷暂未寻得藏品</h3><p>' + (activeSpecies && Object.prototype.hasOwnProperty.call(speciesProducts, activeSpecies) ? '目前没有与此物种直接对应的在售商品。可浏览全部藏品，或先阅读生态照护资料。' : '试试其他关键词，或切换商品类别。') + '</p>';
       grid.appendChild(empty);
       return;
     }
