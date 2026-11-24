@@ -8,7 +8,7 @@ Ink Spirit is an interactive Chinese ink-wash ecosystem with companion creatures
 
 - Ink Spirit creature selection: koi, dragon, snake and turtle.
 - Browser-local prototype creature progression.
-- Original procedural soundtrack generated with Web Audio: plucked-string motifs, bamboo-flute-like tones and soft water/ocean ambience. Start it with the floating music control.
+- Provisional procedural soundtrack study generated with Web Audio. It is a technical playback prototype, not the approved final musical direction; the final soundtrack remains subject to composition and listening review.
 - Original SVG product illustrations for koi, betta, aquarium, filter, fish food and aquatic plants.
 - Sea Garden storefront reads products from the server API.
 - New Snake game: keyboard, WASD, touch controls, pause/restart and local best score.
