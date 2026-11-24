@@ -465,3 +465,94 @@ test('companion signature abilities are unique, bond-gated, rate-limited and ser
   const stored = JSON.parse(fs.readFileSync(carePath,'utf8'));
   assert.equal(stored[user.id].creatures.koi.abilityDaily.count,5);
 });
+
+
+test('order fulfilment transitions are role-protected and restore allocated stock once', async t => {
+  const order = {
+    id:'order-test-001', userId:'customer-id', total:20, currency:'MYR',
+    status:'paid', inventoryDeducted:true, inventoryRestored:false,
+    items:[{ productId:'order-product', name:'Koi', quantity:2, unitPrice:10 }],
+    createdAt:new Date().toISOString()
+  };
+  const { base, dataDir } = await startServer(t, [
+    { id:'manager-id', username:'manager-orders', password:'manager-pass-123', role:'manager' },
+    { id:'admin-id', username:'admin-orders', password:'admin-pass-123', role:'admin' },
+    { id:'customer-id', username:'customer-orders', password:'customer-pass-123', role:'user' }
+  ], [
+    { id:'order-product', name:'Koi', category:'Fish', description:'Test stock item.', price:10, currency:'MYR', stock:3, image:'/images/products/koi-card.svg', active:true }
+  ]);
+  fs.writeFileSync(path.join(dataDir, 'orders.json'), JSON.stringify([order]));
+  const signIn = async username => {
+    const response = await fetch(base + '/api/login', {
+      method:'POST', headers:{ 'content-type':'application/json' },
+      body:JSON.stringify({ username, password:username.startsWith('manager') ? 'manager-pass-123' : username.startsWith('admin') ? 'admin-pass-123' : 'customer-pass-123' })
+    });
+    assert.equal(response.status, 200);
+    return response.headers.get('set-cookie').split(';')[0];
+  };
+  const managerCookie = await signIn('manager-orders');
+  const managerHeaders = { cookie:managerCookie, 'content-type':'application/json' };
+  const userCookie = await signIn('customer-orders');
+  assert.equal((await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:{ cookie:userCookie, 'content-type':'application/json' },
+    body:JSON.stringify({ status:'processing' })
+  })).status, 403);
+
+  const processing = await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:managerHeaders, body:JSON.stringify({ status:'processing' })
+  });
+  assert.equal(processing.status, 200);
+  assert.equal((await processing.json()).order.status, 'processing');
+
+  const shipped = await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:managerHeaders, body:JSON.stringify({ status:'shipped' })
+  });
+  assert.equal(shipped.status, 200);
+
+  const invalid = await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:managerHeaders, body:JSON.stringify({ status:'paid' })
+  });
+  assert.equal(invalid.status, 409, 'staff cannot forge a provider-confirmed paid status');
+
+  const completed = await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:managerHeaders, body:JSON.stringify({ status:'completed' })
+  });
+  assert.equal(completed.status, 200);
+  const cancelCompleted = await fetch(base + '/api/admin/orders/order-test-001/status', {
+    method:'PATCH', headers:managerHeaders, body:JSON.stringify({ status:'cancelled' })
+  });
+  assert.equal(cancelCompleted.status, 409, 'completed orders are terminal');
+
+  const products = JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
+  assert.equal(products[0].stock, 3, 'completed orders retain their allocated inventory');
+});
+
+test('cancelled allocated orders restore stock exactly once', async t => {
+  const { base, dataDir } = await startServer(t, [
+    { id:'manager-id', username:'manager-cancel', password:'manager-pass-123', role:'manager' }
+  ], [
+    { id:'order-product', name:'Koi', category:'Fish', description:'Test stock item.', price:10, currency:'MYR', stock:3, image:'/images/products/koi-card.svg', active:true }
+  ]);
+  fs.writeFileSync(path.join(dataDir, 'orders.json'), JSON.stringify([{
+    id:'order-cancel-001', userId:'customer-id', total:20, status:'paid',
+    inventoryDeducted:true, inventoryRestored:false,
+    items:[{ productId:'order-product', quantity:2 }], createdAt:new Date().toISOString()
+  }]));
+  const login = await fetch(base + '/api/login', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'manager-cancel', password:'manager-pass-123' })
+  });
+  const headers = { cookie:login.headers.get('set-cookie').split(';')[0], 'content-type':'application/json' };
+  const cancelled = await fetch(base + '/api/admin/orders/order-cancel-001/status', {
+    method:'PATCH', headers, body:JSON.stringify({ status:'cancelled' })
+  });
+  assert.equal(cancelled.status, 200);
+  const products = JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
+  assert.equal(products[0].stock, 5);
+  const duplicate = await fetch(base + '/api/admin/orders/order-cancel-001/status', {
+    method:'PATCH', headers, body:JSON.stringify({ status:'cancelled' })
+  });
+  assert.equal(duplicate.status, 409);
+  const after = JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
+  assert.equal(after[0].stock, 5, 'stock must not be restored twice');
+});
