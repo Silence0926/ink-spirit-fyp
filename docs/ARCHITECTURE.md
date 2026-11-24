@@ -154,3 +154,10 @@ Map markers represent broad regional reference points, not precise collection lo
 - The public `encyclopedia.html` page renders article content using text nodes, supports category filtering, search, and expandable reading. It is an educational reference, not a veterinary diagnostic or treatment system.
 - Articles distinguish general principles from species/system-specific requirements. Water targets and maintenance schedules must not be universalized; users should validate against the actual species, system, test method, and local professional guidance.
 - Current content covers nitrogen cycling, testing, water changes, filtration, temperature, lighting, stocking, quarantine, feeding, warning signs, freshwater/marine differences, and emergencies. It links to UF/IFAS, RSPCA Australia, and Merck Veterinary Manual references. Content should be reviewed periodically as references and regulations change.
+
+
+## Aquarium planning and compatibility assessment
+
+- `POST /api/aquarium/compatibility` accepts 1–8 catalogue species and quantities (1–30), validates IDs against the canonical species catalogue, and flags mixed freshwater/marine system selections. It warns on multiple Betta splendens without claiming that all other pairs are safe.
+- Same water type is not treated as proof of compatibility. Pair-level behavior, adult-size, temperature, diet, and space rules remain unknown unless supported by reviewed structured data. Unknown assessment is explicitly returned as `insufficient_information`.
+- The browser aquarium planner calculates geometric gross volume from user-entered internal dimensions. It does not convert gross volume into a stocking recommendation. Product recommendations only use explicit structured product specifications; missing specifications are not inferred.
