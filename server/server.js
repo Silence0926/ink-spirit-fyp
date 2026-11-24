@@ -597,8 +597,8 @@ app.post('/api/admin/products/:id/stock', requireRole('admin', 'manager'), (req,
   const mode = req.body.mode;
   const quantity = req.body.quantity;
   const reason = typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
-  if (!['adjust', 'set'].includes(mode) || !Number.isInteger(quantity) || quantity < 0 || quantity > 1000000) {
-    return res.status(400).json({ error:'Choose adjust or set and provide a valid non-negative integer quantity.' });
+  if (!['adjust', 'set'].includes(mode) || !Number.isInteger(quantity) || (mode === 'set' && quantity < 0) || Math.abs(quantity) > 1000000) {
+    return res.status(400).json({ error:'Choose adjust or set and provide a valid integer quantity.' });
   }
   if (!reason || reason.length > 240) return res.status(400).json({ error:'A stock movement reason (1–240 characters) is required.' });
   const previousStock = Number.isInteger(product.stock) ? product.stock : 0;
