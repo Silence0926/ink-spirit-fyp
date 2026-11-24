@@ -55,3 +55,17 @@
 #painting[data-evolution="awakened"] .stamp{color:#9a7c4c;transform:scale(1.08)}
 #painting[data-evolution="transcendent"] .stamp{color:#a64b3e;transform:scale(1.18);text-shadow:0 0 12px rgba(166,75,62,.25)}
 @media(max-width:620px){.evolution-panel{padding:12px;gap:11px}.evolution-top{align-items:flex-start;flex-direction:column;gap:3px}.evolution-seal{width:36px;height:36px;font-size:20px}}
+
+
+.ability-panel{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:16px 17px;border:1px solid rgba(153,72,59,.34);background:linear-gradient(110deg,rgba(155,72,58,.055),rgba(255,255,255,.18))}
+.ability-copy{min-width:0;display:grid;gap:5px}
+.ability-copy>strong{font-family:var(--calligraphy);font-size:20px;font-weight:500;color:var(--ink)}
+.ability-copy p{margin:0;font-size:11px;line-height:1.7;color:var(--muted)}
+.ability-copy small{font-size:10px;color:var(--red)}
+#ability-button{flex:none;min-width:112px}
+#ability-button:disabled{opacity:.48;cursor:not-allowed}
+#creature-art[data-ability="koi"]{filter:drop-shadow(0 0 12px rgba(100,145,157,.55))}
+#creature-art[data-ability="dragon"]{filter:drop-shadow(0 0 13px rgba(150,150,145,.62))}
+#creature-art[data-ability="snake"]{filter:drop-shadow(0 0 12px rgba(91,112,85,.55))}
+#creature-art[data-ability="turtle"]{filter:drop-shadow(0 0 12px rgba(118,135,112,.58))}
+@media(max-width:620px){.ability-panel{align-items:stretch;flex-direction:column}.ability-panel button{width:100%}}
