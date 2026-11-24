@@ -17,7 +17,8 @@ const FILES = {
   carts: path.join(DATA_DIR, 'carts.json'),
   orders: path.join(DATA_DIR, 'orders.json'),
   creatureProgress: path.join(DATA_DIR, 'creature-progress.json'),
-  explorationProgress: path.join(DATA_DIR, 'exploration-progress.json')
+  explorationProgress: path.join(DATA_DIR, 'exploration-progress.json'),
+  creatureCare: path.join(DATA_DIR, 'creature-care.json')
 };
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 const COOKIE_NAME = 'inkspirit_session';
@@ -352,6 +353,73 @@ app.post('/api/creatures/interact', requireAuth, (req, res) => {
 });
 
 
+
+
+const CARE_FOODS = {
+  'moon-dew': { name:'月露', satiety:20 },
+  'lotus-seed': { name:'莲心', satiety:20 },
+  'cloud-fruit': { name:'云果', satiety:20 }
+};
+const DAILY_FEED_LIMIT = 3;
+function getCreatureCare(userId) {
+  const all = readJson(FILES.creatureCare, {});
+  const record = all[userId] || {};
+  const today = new Date().toISOString().slice(0, 10);
+  const creatures = {};
+  for (const creatureId of CREATURE_IDS) {
+    const saved = record.creatures?.[creatureId] || {};
+    const daily = saved.daily?.date === today && Number.isInteger(saved.daily.count)
+      ? { date:today, count:Math.max(0, saved.daily.count) }
+      : { date:today, count:0 };
+    const satiety = Number.isInteger(saved.satiety) ? Math.min(100, Math.max(0, saved.satiety)) : 60;
+    const bond = Number.isInteger(saved.bond) ? Math.max(0, saved.bond) : 0;
+    creatures[creatureId] = { satiety, bond, daily, lastFedAt:saved.lastFedAt || null };
+  }
+  return { creatures };
+}
+function saveCreatureCare(userId, care) {
+  const all = readJson(FILES.creatureCare, {});
+  all[userId] = care;
+  writeJson(FILES.creatureCare, all);
+}
+function publicCreatureCare(care) {
+  return {
+    creatures:Object.fromEntries(CREATURE_IDS.map(creatureId => {
+      const item = care.creatures[creatureId];
+      return [creatureId, {
+        satiety:item.satiety,
+        bond:item.bond,
+        mood:item.satiety >= 70 ? '安然' : item.satiety >= 35 ? '平静' : '需要照料',
+        dailyFeeds:{ count:item.daily.count, limit:DAILY_FEED_LIMIT, date:item.daily.date },
+        lastFedAt:item.lastFedAt
+      }];
+    }))
+  };
+}
+app.get('/api/creatures/care', requireAuth, (req, res) => {
+  res.json(publicCreatureCare(getCreatureCare(req.user.id)));
+});
+app.post('/api/creatures/care/feed', requireAuth, (req, res) => {
+  const creatureId = req.body.creatureId;
+  const foodId = req.body.foodId;
+  if (!CREATURE_IDS.includes(creatureId)) return res.status(400).json({ error:'Unknown creature.' });
+  if (!Object.hasOwn(CARE_FOODS, foodId)) return res.status(400).json({ error:'Unknown spirit food.' });
+  const care = getCreatureCare(req.user.id);
+  const creature = care.creatures[creatureId];
+  if (creature.daily.count >= DAILY_FEED_LIMIT) {
+    return res.status(429).json({ error:'今日的喂养次数已达上限，请明天再来。' });
+  }
+  if (creature.satiety >= 100) {
+    return res.status(409).json({ error:'伙伴现在已经吃饱了。' });
+  }
+  const food = CARE_FOODS[foodId];
+  creature.satiety = Math.min(100, creature.satiety + food.satiety);
+  creature.bond += 5;
+  creature.daily.count += 1;
+  creature.lastFedAt = new Date().toISOString();
+  saveCreatureCare(req.user.id, care);
+  res.json({ fed:true, food:food.name, satietyRestored:food.satiety, care:publicCreatureCare(care) });
+});
 
 const HABITAT_IDS = ['lotus-pond', 'cloud-mountain', 'bamboo-forest', 'quiet-marsh'];
 const HABITAT_REWARD_XP = 25;
