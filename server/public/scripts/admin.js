@@ -45,26 +45,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabs = [...document.querySelectorAll('[data-tab]')];
   const panels = [...document.querySelectorAll('.admin-panel')];
   const loaded = new Set();
+  let cachedProducts = [];
+  const productSearch = document.getElementById('admin-product-search');
+  const productFilter = document.getElementById('admin-product-filter');
 
   const loadProducts = async () => {
     const target = document.getElementById('admin-product-list');
     setLoading(target);
     try {
       const products = await request('/api/admin/products');
-      target.replaceChildren();
-      if (!products.length) {
+      cachedProducts = products;
+      renderProductRows();
+    } catch (error) {
+      setLoading(target, error.message);
+      showMessage(error.message, true);
+    }
+  };
+
+  const renderProductRows = () => {
+    const target = document.getElementById('admin-product-list');
+    target.replaceChildren();
+    const query = (productSearch?.value || '').trim().toLowerCase();
+    const filter = productFilter?.value || 'all';
+    const visible = cachedProducts.filter(product => {
+      const isActive = product.active !== false;
+      const statusMatch = filter === 'all' || (filter === 'active' && isActive) || (filter === 'archived' && !isActive);
+      const textMatch = [product.name, product.category, product.description].join(' ').toLowerCase().includes(query);
+      return statusMatch && textMatch;
+    });
+    if (!visible.length) {
         setLoading(target, 'No products in the catalogue yet.');
         return;
       }
-      products.forEach(product => {
+      visible.forEach(product => {
         const row = document.createElement('article');
         row.className = 'admin-row';
         const info = document.createElement('div');
         const title = document.createElement('strong');
         title.textContent = product.name + ' · RM ' + Number(product.price).toFixed(2);
+        const thumb = document.createElement('img');
+        thumb.className = 'admin-row-thumb';
+        thumb.src = product.image || '/images/products/aquarium-card.svg';
+        thumb.alt = '';
+        thumb.addEventListener('error', () => { thumb.src = '/images/products/aquarium-card.svg'; }, { once:true });
         const detail = document.createElement('p');
         detail.textContent = product.category + ' · Stock ' + product.stock + ' · ' + (product.active === false ? 'Archived' : 'Active');
-        info.append(title, detail);
+        info.append(thumb, title, detail);
         const actions = document.createElement('div');
         actions.className = 'admin-row-actions';
         const edit = document.createElement('button');
@@ -75,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isAdmin) {
           const archive = document.createElement('button');
           archive.type = 'button';
-          archive.textContent = 'Archive';
+          archive.textContent = product.active === false ? 'Archived' : 'Archive';
           archive.disabled = product.active === false;
           archive.addEventListener('click', async () => {
             if (!confirm('Archive ' + product.name + '?')) return;
@@ -90,11 +116,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.append(info, actions);
         target.append(row);
       });
-    } catch (error) {
-      setLoading(target, error.message);
-      showMessage(error.message, true);
     }
   };
+
+  productSearch?.addEventListener('input', renderProductRows);
+  productFilter?.addEventListener('change', renderProductRows);
 
   const form = document.getElementById('product-form');
   const editProduct = product => {
@@ -102,16 +128,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     const values = {
       'product-id': product?.id || '',
       'product-name': product?.name || '',
-      'product-category': product?.category || '',
+      'product-category': product?.category || 'Ornamental Fish',
       'product-description': product?.description || '',
       'product-price': product?.price ?? '',
       'product-stock': product?.stock ?? 0,
       'product-image': product?.image || '/images/products/koi-card.svg'
     };
-    Object.entries(values).forEach(([id, value]) => { document.getElementById(id).value = value; });
+    Object.entries(values).forEach(([id, value]) => {
+      const field = document.getElementById(id);
+      if (id === 'product-category' && ![...field.options].some(option => option.value === value)) {
+        const custom = document.createElement('option');
+        custom.value = value; custom.textContent = value; field.append(custom);
+      }
+      field.value = value;
+    });
+    const preset = document.getElementById('product-image-preset');
+    preset.value = [...preset.options].some(option => option.value === values['product-image']) ? values['product-image'] : 'custom';
+    document.getElementById('product-image-preview').src = values['product-image'];
     document.getElementById('product-active').checked = product?.active !== false;
     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const imagePath = document.getElementById('product-image');
+  const imagePreset = document.getElementById('product-image-preset');
+  const imagePreview = document.getElementById('product-image-preview');
+  imagePreset.addEventListener('change', () => {
+    if (imagePreset.value !== 'custom') imagePath.value = imagePreset.value;
+    imagePreview.src = imagePath.value;
+  });
+  imagePath.addEventListener('input', () => {
+    imagePreset.value = [...imagePreset.options].some(option => option.value === imagePath.value) ? imagePath.value : 'custom';
+    imagePreview.src = imagePath.value;
+  });
+  imagePreview.addEventListener('error', () => {
+    imagePreview.src = '/images/products/aquarium-card.svg';
+  });
 
   document.getElementById('new-product').addEventListener('click', () => editProduct(null));
   document.getElementById('cancel-product').addEventListener('click', () => { form.hidden = true; });
