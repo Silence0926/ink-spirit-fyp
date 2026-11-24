@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.append(info, actions);
         target.append(row);
       });
-    }
   };
 
   productSearch?.addEventListener('input', renderProductRows);
