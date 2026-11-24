@@ -925,5 +925,6 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   const stored = JSON.parse(fs.readFileSync(path.join(dataDir,'aquariums.json'),'utf8'));
   assert.equal(Object.values(stored)[0][0].fish[0].quantity,3);
   assert.equal((await fetch(base + '/api/aquariums/'+aquarium.id,{method:'DELETE',headers})).status,200);
-  assert.equal((await fetch(base + '/api/aquariums',{headers})).json instanceof Function,true);
+  const afterDelete = await fetch(base + '/api/aquariums',{headers});
+  assert.deepEqual((await afterDelete.json()).aquariums,[]);
 });
