@@ -556,3 +556,37 @@ test('cancelled allocated orders restore stock exactly once', async t => {
   const after = JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
   assert.equal(after[0].stock, 5, 'stock must not be restored twice');
 });
+
+
+test('customers can read their own order details and status history only', async t => {
+  const { base, dataDir } = await startServer(t, [
+    { id:'customer-one', username:'order-owner', password:'owner-pass-123', role:'user' },
+    { id:'customer-two', username:'order-other', password:'other-pass-123', role:'user' }
+  ]);
+  fs.writeFileSync(path.join(dataDir, 'orders.json'), JSON.stringify([{
+    id:'order-private-001', userId:'customer-one', total:75, currency:'MYR', status:'paid',
+    paymentVerified:true, paymentUrl:'https://private-payment.example/secret',
+    items:[{ productId:'fish-1', name:'Koi', quantity:1, unitPrice:75 }],
+    createdAt:'2026-11-24T08:00:00.000Z', updatedAt:'2026-11-24T08:05:00.000Z',
+    paidAt:'2026-11-24T08:05:00.000Z',
+    statusHistory:[{ status:'pending_payment', at:'2026-11-24T08:00:00.000Z' }, { status:'paid', at:'2026-11-24T08:05:00.000Z' }]
+  }]));
+  const signIn = async (username,password) => {
+    const response = await fetch(base + '/api/login', {
+      method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ username,password })
+    });
+    assert.equal(response.status,200);
+    return response.headers.get('set-cookie').split(';')[0];
+  };
+  const ownerCookie = await signIn('order-owner','owner-pass-123');
+  const detail = await fetch(base + '/api/orders/order-private-001',{ headers:{ cookie:ownerCookie } });
+  assert.equal(detail.status,200);
+  const data = await detail.json();
+  assert.equal(data.order.id,'order-private-001');
+  assert.equal(data.order.status,'paid');
+  assert.equal(data.order.statusHistory.length,2);
+  assert.equal(data.order.paymentUrl,null,'paid order must not expose a stale payment link');
+  const otherCookie = await signIn('order-other','other-pass-123');
+  assert.equal((await fetch(base + '/api/orders/order-private-001',{ headers:{ cookie:otherCookie } })).status,404);
+  assert.equal((await fetch(base + '/api/orders/order-private-001')).status,401);
+});
