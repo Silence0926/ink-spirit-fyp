@@ -18,7 +18,8 @@ const FILES = {
   orders: path.join(DATA_DIR, 'orders.json'),
   creatureProgress: path.join(DATA_DIR, 'creature-progress.json'),
   explorationProgress: path.join(DATA_DIR, 'exploration-progress.json'),
-  creatureCare: path.join(DATA_DIR, 'creature-care.json')
+  creatureCare: path.join(DATA_DIR, 'creature-care.json'),
+  creatureJournal: path.join(DATA_DIR, 'creature-journal.json')
 };
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 const COOKIE_NAME = 'inkspirit_session';
@@ -39,6 +40,22 @@ function writeJson(file, value) {
   fs.renameSync(temp, file);
 }
 function id(prefix = '') { return prefix + crypto.randomUUID(); }
+
+function recordCreatureEvent(userId, event) {
+  const all = readJson(FILES.creatureJournal, {});
+  const history = Array.isArray(all[userId]) ? all[userId] : [];
+  history.push({
+    id:id('evt_'),
+    type:event.type,
+    creatureId:event.creatureId,
+    title:event.title,
+    detail:event.detail,
+    createdAt:new Date().toISOString()
+  });
+  all[userId] = history.slice(-100);
+  writeJson(FILES.creatureJournal, all);
+}
+
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   return { algorithm: 'scrypt', salt, hash: crypto.scryptSync(password, salt, 64).toString('hex') };
 }
@@ -349,6 +366,7 @@ app.post('/api/creatures/interact', requireAuth, (req, res) => {
   progress.daily.count += 1;
   progress.selectedCreature = creatureId;
   saveCreatureProgress(req.user.id, progress);
+  recordCreatureEvent(req.user.id, { type:'interaction', creatureId, title:'相伴互动', detail:'与伙伴相伴片刻，获得 ' + reward + ' 点灵息。' });
   res.json({ reward, progress:publicCreatureProgress(progress) });
 });
 
@@ -400,6 +418,12 @@ function publicCreatureCare(care) {
     }))
   };
 }
+app.get('/api/creatures/journal', requireAuth, (req, res) => {
+  const all = readJson(FILES.creatureJournal, {});
+  const events = Array.isArray(all[req.user.id]) ? all[req.user.id] : [];
+  res.json({ events:events.slice(-30).reverse() });
+});
+
 app.get('/api/creatures/care', requireAuth, (req, res) => {
   res.json(publicCreatureCare(getCreatureCare(req.user.id)));
 });
@@ -422,6 +446,7 @@ app.post('/api/creatures/care/feed', requireAuth, (req, res) => {
   creature.daily.count += 1;
   creature.lastFedAt = new Date().toISOString();
   saveCreatureCare(req.user.id, care);
+  recordCreatureEvent(req.user.id, { type:'feeding', creatureId, title:'灵食照料', detail:'奉上' + food.name + '，饱足恢复 ' + food.satiety + ' 点，亲密度增加 5。' });
   res.json({ fed:true, food:food.name, satietyRestored:food.satiety, care:publicCreatureCare(care) });
 });
 
@@ -471,6 +496,8 @@ app.post('/api/exploration/discover', requireAuth, (req, res) => {
     companion.level += 1;
   }
   saveCreatureProgress(req.user.id, creatureProgress);
+  const realmTitle = { 'lotus-pond':'烟雨荷塘', 'cloud-mountain':'云海山巅', 'bamboo-forest':'幽篁竹林', 'quiet-marsh':'静水泽地' }[habitatId];
+  recordCreatureEvent(req.user.id, { type:'exploration', creatureId:creatureProgress.selectedCreature, title:'初访' + realmTitle, detail:'发现新的灵境，当前伙伴获得 ' + HABITAT_REWARD_XP + ' 点灵息。' });
   res.status(201).json({
     alreadyDiscovered:false,
     reward:HABITAT_REWARD_XP,
