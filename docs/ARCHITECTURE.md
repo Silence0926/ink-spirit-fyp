@@ -131,3 +131,10 @@ Map markers represent broad regional reference points, not precise collection lo
 - The API validates enumerations and numeric bounds and rejects inverted temperature ranges. Generic equipment, food and aquarium products can leave aquatic-life fields empty.
 - Admin/Manager edit forms expose the same fields. The public catalogue can filter by water type, care difficulty and stock availability; product detail pages display only supplied values.
 - Values are seller-entered catalogue metadata, not independently verified husbandry guarantees. Staff should use reliable species references and distinguish adult size, minimum tank volume and temperature ranges from universal standards.
+
+
+## Admin business analytics
+
+- `GET /api/admin/analytics?range=7d|30d` is restricted to Admin and Manager roles. It returns aggregate verified-payment totals, period gross, order status counts, active catalogue and low-stock counts, daily gross, category counts and best-selling lines. It does not expose customer identifiers or order-level PII.
+- Gross payment metrics include only orders with `paymentVerified === true`, set after provider verification. Pending and unverified orders are excluded. The project does not currently integrate refunds, so gross verified payments are not net revenue.
+- Dashboard data is calculated from JSON files at request time. This is suitable for the current single-instance prototype, not a high-volume analytics warehouse. The underlying JSON persistence is not transactional across multiple server processes.
