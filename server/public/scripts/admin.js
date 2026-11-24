@@ -67,9 +67,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     target.replaceChildren();
     const query = (productSearch?.value || '').trim().toLowerCase();
     const filter = productFilter?.value || 'all';
+    const lowStockCount = cachedProducts.filter(product => product.active !== false && Number(product.stock) <= (Number.isInteger(product.stockThreshold) ? product.stockThreshold : 5)).length;
+    const stockSummary = document.getElementById('low-stock-summary');
+    if (stockSummary) stockSummary.textContent = lowStockCount + ' low-stock item(s)';
     const visible = cachedProducts.filter(product => {
       const isActive = product.active !== false;
-      const statusMatch = filter === 'all' || (filter === 'active' && isActive) || (filter === 'archived' && !isActive);
+      const isLow = Number(product.stock) <= (Number.isInteger(product.stockThreshold) ? product.stockThreshold : 5);
+      const statusMatch = filter === 'all' || (filter === 'active' && isActive) || (filter === 'archived' && !isActive) || (filter === 'low' && isActive && isLow);
       const textMatch = [product.name, product.category, product.description].join(' ').toLowerCase().includes(query);
       return statusMatch && textMatch;
     });
@@ -89,7 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         thumb.alt = '';
         thumb.addEventListener('error', () => { thumb.src = '/images/products/aquarium-card.svg'; }, { once:true });
         const detail = document.createElement('p');
-        detail.textContent = product.category + ' · Stock ' + product.stock + ' · ' + (product.active === false ? 'Archived' : 'Active');
+        const threshold = Number.isInteger(product.stockThreshold) ? product.stockThreshold : 5;
+        detail.textContent = product.category + ' · Stock ' + product.stock + ' / Alert at ' + threshold + ' · ' + (product.active === false ? 'Archived' : (Number(product.stock) <= threshold ? 'LOW STOCK' : 'Active'));
         info.append(thumb, title, detail);
         const actions = document.createElement('div');
         actions.className = 'admin-row-actions';
@@ -98,6 +103,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         edit.textContent = 'Edit';
         edit.addEventListener('click', () => editProduct(product));
         actions.append(edit);
+        const adjustStock = document.createElement('button');
+        adjustStock.type = 'button';
+        adjustStock.textContent = 'Adjust stock';
+        adjustStock.addEventListener('click', async () => {
+          const rawDelta = prompt('Enter stock change (e.g. 12 or -3):', '1');
+          if (rawDelta === null) return;
+          const delta = Number(rawDelta);
+          if (!Number.isInteger(delta) || delta === 0) { showMessage('Enter a non-zero whole-number stock change.', true); return; }
+          const reason = prompt('Reason for this stock movement (required):');
+          if (reason === null) return;
+          try {
+            await send('/api/admin/products/' + encodeURIComponent(product.id) + '/stock', 'POST', { mode:'adjust', quantity:delta, reason });
+            showMessage('Stock updated and movement recorded.');
+            await loadProducts();
+          } catch (error) { showMessage(error.message, true); }
+        });
+        const setThreshold = document.createElement('button');
+        setThreshold.type = 'button';
+        setThreshold.textContent = 'Set alert';
+        setThreshold.addEventListener('click', async () => {
+          const raw = prompt('Alert when stock is at or below this quantity:', String(threshold));
+          if (raw === null) return;
+          const value = Number(raw);
+          if (!Number.isInteger(value) || value < 0) { showMessage('Enter a non-negative whole number.', true); return; }
+          try {
+            await send('/api/admin/products/' + encodeURIComponent(product.id) + '/stock-threshold', 'PATCH', { threshold:value });
+            showMessage('Low-stock threshold saved.');
+            await loadProducts();
+          } catch (error) { showMessage(error.message, true); }
+        });
+        const historyButton = document.createElement('button');
+        historyButton.type = 'button';
+        historyButton.textContent = 'Movement log';
+        historyButton.addEventListener('click', async () => {
+          try {
+            const result = await request('/api/admin/products/' + encodeURIComponent(product.id) + '/stock-movements');
+            const log = document.createElement('div');
+            log.className = 'admin-stock-history';
+            if (!result.movements.length) {
+              log.textContent = 'No manual stock movements recorded yet.';
+            } else {
+              result.movements.forEach(movement => {
+                const entry = document.createElement('p');
+                entry.textContent = new Date(movement.createdAt).toLocaleString() + ' · ' + (movement.delta > 0 ? '+' : '') + movement.delta + ' · ' + movement.previousStock + ' → ' + movement.newStock + ' · ' + movement.reason;
+                log.append(entry);
+              });
+            }
+            const oldLog = row.nextElementSibling;
+            if (oldLog?.classList.contains('admin-stock-history')) oldLog.remove();
+            row.after(log);
+          } catch (error) { showMessage(error.message, true); }
+        });
+        actions.append(adjustStock, setThreshold, historyButton);
         if (isAdmin) {
           const archive = document.createElement('button');
           archive.type = 'button';
@@ -131,6 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'product-description': product?.description || '',
       'product-price': product?.price ?? '',
       'product-stock': product?.stock ?? 0,
+      'product-stock-threshold': product?.stockThreshold ?? 5,
       'product-image': product?.image || '/images/products/koi-card.svg'
     };
     Object.entries(values).forEach(([id, value]) => {
@@ -174,6 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       description: document.getElementById('product-description').value.trim(),
       price: Number(document.getElementById('product-price').value),
       stock: Number(document.getElementById('product-stock').value),
+      stockThreshold: Number(document.getElementById('product-stock-threshold').value),
       image: document.getElementById('product-image').value.trim(),
       active: document.getElementById('product-active').checked
     };
