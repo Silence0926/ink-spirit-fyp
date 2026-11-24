@@ -412,7 +412,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  const loaders = { products: loadProducts, orders: loadOrders, users: loadUsers };
+
+  const money = value => 'RM ' + Number(value || 0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const safeCell = (container, text) => { const node=document.createElement('span');node.textContent=text;container.append(node); };
+  const renderAnalyticsTable = (target, rows, empty, columns) => {
+    target.replaceChildren();
+    if(!rows.length){const note=document.createElement('p');note.className='admin-empty';note.textContent=empty;target.append(note);return;}
+    const table=document.createElement('div');table.className='analytics-table-rows';
+    rows.forEach(row=>{const line=document.createElement('div');line.className='analytics-table-row';columns.forEach(column=>safeCell(line,column(row)));table.append(line);});
+    target.append(table);
+  };
+  const loadDashboard = async () => {
+    const metrics=document.getElementById('analytics-metrics');
+    setLoading(metrics);
+    try {
+      const range=document.getElementById('analytics-range')?.value||'7d';
+      const data=await request('/api/admin/analytics?range='+encodeURIComponent(range));
+      metrics.replaceChildren();
+      const cards=[
+        ['已验证付款总额',money(data.summary.grossVerifiedPayments),'累计总额 · Gross verified payments'],
+        ['本期付款',money(data.summary.periodGross),range==='30d'?'过去 30 天':'过去 7 天'],
+        ['已付款订单',String(data.summary.verifiedOrders),'所选统计期间'],
+        ['待付款订单',String(data.summary.pendingPayment),'尚未确认付款'],
+        ['上架商品',String(data.summary.activeProducts),'当前有效商品'],
+        ['库存预警',String(data.summary.lowStock),data.summary.outOfStock+' 件商品已缺货']
+      ];
+      cards.forEach(([label,value,note])=>{const card=document.createElement('article');card.className='analytics-metric';const heading=document.createElement('span');heading.textContent=label;const strong=document.createElement('strong');strong.textContent=value;const detail=document.createElement('small');detail.textContent=note;card.append(heading,strong,detail);metrics.append(card);});
+      document.getElementById('analytics-updated').textContent='Updated '+new Date(data.generatedAt).toLocaleString()+' · '+data.revenueDefinition;
+      const daily=document.getElementById('analytics-daily');daily.replaceChildren();
+      const max=Math.max(1,...data.daily.map(item=>item.gross));
+      data.daily.forEach(item=>{const bar=document.createElement('div');bar.className='analytics-bar';const value=document.createElement('span');value.textContent=money(item.gross);const fill=document.createElement('div');fill.className='analytics-bar-track';const inner=document.createElement('i');inner.style.height=Math.max(2,item.gross/max*100)+'%';fill.append(inner);const label=document.createElement('small');label.textContent=item.date.slice(5);bar.append(value,fill,label);daily.append(bar);});
+      const statusNames={pending_payment:'待付款',paid:'已付款',processing:'处理中',shipped:'已发货',completed:'已完成',cancelled:'已取消',paid_inventory_review:'库存待审核'};
+      renderAnalyticsTable(document.getElementById('analytics-status'),Object.entries(data.statusCounts).sort((a,b)=>b[1]-a[1]),'暂无订单',[[0,1]].map(()=>row=>{const name=statusNames[row[0]]||row[0];return name+' · '+row[1]+' 单';}));
+      renderAnalyticsTable(document.getElementById('analytics-bestsellers'),data.bestSellers,'所选期间暂无已付款商品', [row=>row.name,row=>row.units+' 件',row=>money(row.gross)]);
+      renderAnalyticsTable(document.getElementById('analytics-low-stock'),data.lowStockProducts,'没有库存预警商品',[row=>row.name,row=>row.stock+' / 阈值 '+row.threshold,row=>row.stock<=0?'缺货':'低库存']);
+      renderAnalyticsTable(document.getElementById('analytics-categories'),data.categories,'暂无上架商品',[row=>row.category,row=>row.products+' 个商品',row=>row.stockUnits+' 件库存']);
+    } catch(error) { setLoading(metrics,error.message);showMessage(error.message,true); }
+  };
+\n  const loaders = { dashboard: loadDashboard, products: loadProducts, orders: loadOrders, users: loadUsers };
   const activateTab = async name => {
     tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
     panels.forEach(panel => { panel.hidden = panel.id !== 'admin-' + name; });
