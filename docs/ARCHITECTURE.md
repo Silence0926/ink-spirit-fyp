@@ -169,3 +169,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - The simulation requires at least two guppies in an adult growth cohort, satiety of at least 50, water-quality and cleanliness scores of at least 60, and enforces a 24-hour per-tank cooldown.
 - Each successful cycle adds up to three fry as a separate cohort with its own growth progress. The existing 30-individual game capacity remains enforced.
 - This is deliberately an abstract game mechanic: it does not model sex, pairing, genetics, gestation, water chemistry or real breeding timelines. It must not be presented as husbandry advice.
+
+
+## Virtual aquarium growth and guppy line labels
+
+- Each newly added fish group is stored as a separate cohort with its own growth points, cohort ID and (for guppies) generation and selectable visual line label.
+- Growth stages are derived by server-side thresholds: fry below 7 points, juvenile from 7 to 19, and adult at 20 or more. Feeding advances each cohort's simulation growth by one point per feeding action.
+- Guppy simulation line labels currently include standard grey, mosaic, tuxedo and cobra. These are selectable game appearance labels, not validated genetic strains.
+- The breeding action creates a separate fry cohort, increments generation, and carries forward the parent cohort's line label. This is lineage bookkeeping for gameplay, not a genetic inheritance model.
