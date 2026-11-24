@@ -23,7 +23,8 @@ const FILES = {
   creatureProgress: path.join(DATA_DIR, 'creature-progress.json'),
   explorationProgress: path.join(DATA_DIR, 'exploration-progress.json'),
   creatureCare: path.join(DATA_DIR, 'creature-care.json'),
-  creatureJournal: path.join(DATA_DIR, 'creature-journal.json')
+  creatureJournal: path.join(DATA_DIR, 'creature-journal.json'),
+  aquariums: path.join(DATA_DIR, 'aquariums.json')
 };
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 const COOKIE_NAME = 'inkspirit_session';
@@ -671,6 +672,121 @@ app.post('/api/aquarium/compatibility', (req, res) => {
     pairAssessment:hasUnknownPairRules?'unknown':selected.length===1?'single_species':'not_applicable'
   });
 });
+
+const AQUARIUM_ACTION_LIMIT = 5;
+function getUserAquariums(userId) {
+  const all = readJson(FILES.aquariums, {});
+  return Array.isArray(all[userId]) ? all[userId] : [];
+}
+function saveUserAquariums(userId, aquariums) {
+  const all = readJson(FILES.aquariums, {});
+  all[userId] = aquariums;
+  writeJson(FILES.aquariums, all);
+}
+function aquariumSnapshot(aquarium) {
+  const now = Date.now();
+  const lastAction = Date.parse(aquarium.lastActionAt || aquarium.createdAt);
+  const elapsedHours = Number.isFinite(lastAction) ? Math.max(0, (now - lastAction) / 3600000) : 0;
+  const waterQuality = Math.max(0, Math.min(100, aquarium.waterQuality - Math.floor(elapsedHours / 24)));
+  const cleanliness = Math.max(0, Math.min(100, aquarium.cleanliness - Math.floor(elapsedHours / 36)));
+  const fish = aquarium.fish.map(item => ({
+    ...item,
+    ageDays:Math.max(0, Math.floor((now - Date.parse(item.addedAt)) / 86400000)),
+    growthStage:item.growthPoints >= 20 ? '成体' : item.growthPoints >= 7 ? '亚成体' : '幼鱼'
+  }));
+  return {
+    ...aquarium,
+    waterQuality,
+    cleanliness,
+    fish,
+    fishCount:fish.reduce((sum,item)=>sum+item.quantity,0),
+    speciesCount:fish.length,
+    simulationNotice:'虚拟数值仅用于游戏体验，不代表真实水质检测或实际物种生长参数。'
+  };
+}
+app.get('/api/aquariums', requireAuth, (req, res) => {
+  res.json({ aquariums:getUserAquariums(req.user.id).map(aquariumSnapshot) });
+});
+app.post('/api/aquariums', requireAuth, (req, res) => {
+  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  const waterType = req.body.waterType;
+  const volumeLitres = req.body.volumeLitres;
+  if (!name || name.length > 40) return res.status(400).json({ error:'鱼缸名称必须为 1 至 40 个字符。' });
+  if (!['freshwater','marine'].includes(waterType)) return res.status(400).json({ error:'请选择淡水或海水系统。' });
+  if (typeof volumeLitres !== 'number' || !Number.isFinite(volumeLitres) || volumeLitres < 10 || volumeLitres > 100000) {
+    return res.status(400).json({ error:'模拟鱼缸水量必须为 10 至 100000 L。' });
+  }
+  const aquariums = getUserAquariums(req.user.id);
+  if (aquariums.length >= 10) return res.status(409).json({ error:'每位用户最多建立 10 个模拟鱼缸。' });
+  const aquarium = {
+    id:id('aq_'), name, waterType, volumeLitres:Math.round(volumeLitres*10)/10,
+    temperatureC:waterType==='marine'?25:25,
+    waterQuality:85, cleanliness:90, fish:[],
+    daily:{date:new Date().toISOString().slice(0,10),feeds:0},
+    lastActionAt:new Date().toISOString(), createdAt:new Date().toISOString(),
+    events:[{id:id('aqevt_'),type:'created',message:'建立了新的模拟水族箱。',createdAt:new Date().toISOString()}]
+  };
+  aquariums.push(aquarium);
+  saveUserAquariums(req.user.id,aquariums);
+  res.status(201).json({ aquarium:aquariumSnapshot(aquarium) });
+});
+app.get('/api/aquariums/:id', requireAuth, (req, res) => {
+  const aquarium = getUserAquariums(req.user.id).find(item=>item.id===req.params.id);
+  if (!aquarium) return res.status(404).json({ error:'模拟鱼缸不存在。' });
+  res.json({ aquarium:aquariumSnapshot(aquarium) });
+});
+app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
+  const aquariums = getUserAquariums(req.user.id);
+  const aquarium = aquariums.find(item=>item.id===req.params.id);
+  if (!aquarium) return res.status(404).json({ error:'模拟鱼缸不存在。' });
+  const action = req.body.action;
+  const now = new Date();
+  const today = now.toISOString().slice(0,10);
+  const addEvent = message => {
+    aquarium.events.push({id:id('aqevt_'),type:action,message,createdAt:now.toISOString()});
+    aquarium.events = aquarium.events.slice(-50);
+    aquarium.lastActionAt = now.toISOString();
+  };
+  if (action==='add_fish') {
+    const speciesId=req.body.speciesId, quantity=req.body.quantity;
+    const species=typeof speciesId==='string'?SPECIES_BY_ID.get(speciesId):null;
+    if (!species || !Number.isInteger(quantity) || quantity<1 || quantity>10) return res.status(400).json({error:'请选择目录物种，并输入 1 至 10 的数量。'});
+    if (species.waterType!==aquarium.waterType) return res.status(409).json({error:'该物种的水体类型与鱼缸不一致。'});
+    const currentCount=aquarium.fish.reduce((sum,item)=>sum+item.quantity,0);
+    if (currentCount+quantity>30) return res.status(409).json({error:'模拟鱼缸最多容纳 30 条模拟个体；这只是游戏上限，不是现实放养建议。'});
+    let existing=aquarium.fish.find(item=>item.speciesId===speciesId);
+    if (existing) existing.quantity+=quantity;
+    else aquarium.fish.push({speciesId,commonName:species.commonName,scientificName:species.scientificName,quantity,satiety:70,growthPoints:0,addedAt:now.toISOString()});
+    addEvent('加入 '+species.commonName+' × '+quantity+'。同为淡水或海水不代表物种一定可以混养。');
+  } else if (action==='feed') {
+    aquarium.daily=aquarium.daily?.date===today?aquarium.daily:{date:today,feeds:0};
+    if (aquarium.fish.length===0) return res.status(409).json({error:'鱼缸里还没有鱼。'});
+    if (aquarium.daily.feeds>=AQUARIUM_ACTION_LIMIT) return res.status(429).json({error:'今日模拟喂食次数已达上限。'});
+    aquarium.fish.forEach(item=>{item.satiety=Math.min(100,item.satiety+20);item.growthPoints=Math.min(30,item.growthPoints+1);});
+    aquarium.daily.feeds+=1;
+    addEvent('投喂了鱼群，饱食度与成长进度有所提升。');
+  } else if (action==='water_change') {
+    aquarium.waterQuality=Math.min(100,aquarium.waterQuality+20);
+    aquarium.cleanliness=Math.min(100,aquarium.cleanliness+10);
+    addEvent('完成一次模拟换水，水质与清洁度恢复。');
+  } else if (action==='filter_clean') {
+    aquarium.cleanliness=Math.min(100,aquarium.cleanliness+25);
+    aquarium.waterQuality=Math.min(100,aquarium.waterQuality+10);
+    addEvent('完成模拟过滤系统维护。');
+  } else {
+    return res.status(400).json({error:'不支持的模拟养护操作。'});
+  }
+  saveUserAquariums(req.user.id,aquariums);
+  res.json({aquarium:aquariumSnapshot(aquarium)});
+});
+app.delete('/api/aquariums/:id', requireAuth, (req, res) => {
+  const aquariums=getUserAquariums(req.user.id);
+  const remaining=aquariums.filter(item=>item.id!==req.params.id);
+  if (remaining.length===aquariums.length) return res.status(404).json({error:'模拟鱼缸不存在。'});
+  saveUserAquariums(req.user.id,remaining);
+  res.json({deleted:true});
+});
+
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
