@@ -674,6 +674,17 @@ app.post('/api/aquarium/compatibility', (req, res) => {
 });
 
 const AQUARIUM_ACTION_LIMIT = 5;
+const AQUARIUM_DECORATIONS = Object.freeze([
+  {id:'anubias',name:'水榕',kind:'plant',waterType:'freshwater',description:'宽叶水草造景元素'},
+  {id:'lotus',name:'墨荷',kind:'plant',waterType:'freshwater',description:'荷叶主题造景元素'},
+  {id:'moss',name:'青苔石',kind:'plant',waterType:'freshwater',description:'苔藓覆盖的石景'},
+  {id:'driftwood',name:'沉木',kind:'hardscape',waterType:'freshwater',description:'自然木质景观'},
+  {id:'river-stone',name:'溪石',kind:'hardscape',waterType:'freshwater',description:'圆润河石组合'},
+  {id:'seagrass',name:'海草景',kind:'plant',waterType:'marine',description:'海洋草场主题造景元素'},
+  {id:'reef-rock',name:'礁岩',kind:'hardscape',waterType:'marine',description:'礁岩主题景观'},
+  {id:'coral-arch',name:'珊瑚拱门',kind:'hardscape',waterType:'marine',description:'装饰性珊瑚造型，不代表活体珊瑚'}
+]);
+const AQUARIUM_DECORATION_BY_ID = new Map(AQUARIUM_DECORATIONS.map(item=>[item.id,item]));
 const GUPPY_STRAINS = Object.freeze({
   'standard':{label:'标准灰身',colour:'灰身',tail:'标准尾型'},
   'mosaic':{label:'马赛克',colour:'彩色斑纹',tail:'彩纹尾型'},
@@ -730,7 +741,7 @@ app.post('/api/aquariums', requireAuth, (req, res) => {
   const aquarium = {
     id:id('aq_'), name, waterType, volumeLitres:Math.round(volumeLitres*10)/10,
     temperatureC:waterType==='marine'?25:25,
-    waterQuality:85, cleanliness:90, fish:[],
+    waterQuality:85, cleanliness:90, fish:[], decorations:[],
     daily:{date:new Date().toISOString().slice(0,10),feeds:0},
     lastActionAt:new Date().toISOString(), createdAt:new Date().toISOString(),
     events:[{id:id('aqevt_'),type:'created',message:'建立了新的模拟水族箱。',createdAt:new Date().toISOString()}]
@@ -760,7 +771,24 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
     aquarium.events = aquarium.events.slice(-50);
     aquarium.lastActionAt = now.toISOString();
   };
-  if (action==='add_fish') {
+  if (action==='decorate') {
+    const item=AQUARIUM_DECORATION_BY_ID.get(req.body.itemId);
+    const operation=req.body.operation;
+    if (!item || !['add','remove'].includes(operation)) return res.status(400).json({error:'请选择有效的造景元素与操作。'});
+    if (item.waterType!==aquarium.waterType) return res.status(409).json({error:'该造景元素不适用于当前鱼缸水体类型。'});
+    aquarium.decorations=Array.isArray(aquarium.decorations)?aquarium.decorations:[];
+    const exists=aquarium.decorations.some(entry=>entry.id===item.id);
+    if (operation==='add') {
+      if (exists) return res.status(409).json({error:'该造景元素已经放置在鱼缸中。'});
+      if (aquarium.decorations.length>=8) return res.status(409).json({error:'每座模拟鱼缸最多放置 8 种造景元素。'});
+      aquarium.decorations.push({id:item.id,name:item.name,kind:item.kind,addedAt:now.toISOString()});
+      addEvent('添加造景元素：'+item.name+'。');
+    } else {
+      if (!exists) return res.status(404).json({error:'鱼缸中没有这个造景元素。'});
+      aquarium.decorations=aquarium.decorations.filter(entry=>entry.id!==item.id);
+      addEvent('移除造景元素：'+item.name+'。');
+    }
+  } else if (action==='add_fish') {
     const speciesId=req.body.speciesId, quantity=req.body.quantity;
     const species=typeof speciesId==='string'?SPECIES_BY_ID.get(speciesId):null;
     if (!species || !Number.isInteger(quantity) || quantity<1 || quantity>10) return res.status(400).json({error:'请选择目录物种，并输入 1 至 10 的数量。'});
@@ -818,6 +846,7 @@ app.delete('/api/aquariums/:id', requireAuth, (req, res) => {
 });
 
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
+app.get('/api/aquarium-decorations', (_req,res)=>res.json(AQUARIUM_DECORATIONS));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
   res.json(products.filter(product => product.active !== false));
