@@ -13,7 +13,7 @@
   const subtitle = document.getElementById('snake-subtitle');
   const startButton = document.getElementById('snake-start');
   const bestKey = 'inkSpirit.snake.best.v1';
-  let snake, direction, nextDirection, food, score, best, timer, running, paused, tick;
+  let snake, direction, nextDirection, food, score, best, timer, running, paused, gameOver, tick;
 
   try { best = Number(localStorage.getItem(bestKey)) || 0; } catch { best = 0; }
   bestEl.textContent = best;
@@ -21,7 +21,7 @@
   function reset() {
     snake = [{x:8,y:12},{x:7,y:12},{x:6,y:12}];
     direction = {x:1,y:0}; nextDirection = {x:1,y:0};
-    score = 0; tick = 150; running = false; paused = false;
+    score = 0; tick = 150; running = false; paused = false; gameOver = false;
     placeFood(); updateHud(); draw();
   }
   function placeFood() {
@@ -50,17 +50,19 @@
     if(candidate.x === -direction.x && candidate.y === -direction.y)return;
     nextDirection=candidate;
   }
-  function endGame() {
-    running=false;clearInterval(timer);overlay.classList.remove('hidden');
-    message.textContent='灵蛇归隐';subtitle.textContent='本局得分：'+score+' · 再来一局？';
+  function endGame(won = false) {
+    running=false;gameOver=true;clearInterval(timer);overlay.classList.remove('hidden');
+    message.textContent=won?'灵蛇游遍全园':'灵蛇归隐';subtitle.textContent=(won?'恭喜完成棋盘！':'本局得分：'+score)+' · 再来一局？';
     startButton.textContent='重新开始';
   }
   function step() {
     direction=nextDirection;
     const head={x:snake[0].x+direction.x,y:snake[0].y+direction.y};
-    if(head.x<0||head.x>=size||head.y<0||head.y>=size||snake.some((part,index)=>index>0&&part.x===head.x&&part.y===head.y)){endGame();return;}
+    const eating=head.x===food.x&&head.y===food.y;
+    const bodyToCheck=eating?snake:snake.slice(0,-1);
+    if(head.x<0||head.x>=size||head.y<0||head.y>=size||bodyToCheck.some(part=>part.x===head.x&&part.y===head.y)){endGame();return;}
     snake.unshift(head);
-    if(head.x===food.x&&head.y===food.y){score++;if(score>best){best=score;try{localStorage.setItem(bestKey,String(best));}catch{}}if(score%5===0){tick=Math.max(65,tick-12);clearInterval(timer);timer=setInterval(step,tick);}placeFood();}
+    if(eating){score++;if(score>best){best=score;try{localStorage.setItem(bestKey,String(best));}catch{}}if(score%5===0){tick=Math.max(65,tick-12);clearInterval(timer);timer=setInterval(step,tick);}if(snake.length===size*size){endGame(true);return;}placeFood();}
     else snake.pop();
     updateHud();draw();
   }
@@ -79,6 +81,6 @@
   document.getElementById('snake-pause').addEventListener('click',pause);
   document.getElementById('snake-restart').addEventListener('click',()=>{clearInterval(timer);reset();overlay.classList.remove('hidden');message.textContent='灵蛇待命';subtitle.textContent='按开始，或使用方向键 / WASD';startButton.textContent='开始游园';});
   document.querySelectorAll('.snake-pad button').forEach(button=>button.addEventListener('click',()=>setDirection(button.dataset.dir)));
-  document.addEventListener('keydown',event=>{const map={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(map[event.key]){event.preventDefault();setDirection(map[event.key]);}if(event.code==='Space'){event.preventDefault();running?pause():start();}});
+  document.addEventListener('keydown',event=>{const map={ArrowUp:'up',w:'up',ArrowDown:'down',s:'down',ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right'};if(map[event.key]){event.preventDefault();setDirection(map[event.key]);}if(event.code==='Space'){event.preventDefault();if(running)pause();else if(gameOver){reset();start();}else start();}});
   reset();
 })();
