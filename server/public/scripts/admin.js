@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return statusMatch && textMatch;
     });
     if (!visible.length) {
-        setLoading(target, 'No products in the catalogue yet.');
+        setLoading(target, cachedProducts.length ? 'No products match these filters.' : 'No products in the catalogue yet.');
         return;
       }
       visible.forEach(product => {
