@@ -685,6 +685,21 @@ const AQUARIUM_DECORATIONS = Object.freeze([
   {id:'coral-arch',name:'珊瑚拱门',kind:'hardscape',waterType:'marine',description:'装饰性珊瑚造型，不代表活体珊瑚'}
 ]);
 const AQUARIUM_DECORATION_BY_ID = new Map(AQUARIUM_DECORATIONS.map(item=>[item.id,item]));
+const AQUARIUM_PLANTS = Object.freeze([
+  {id:'java-fern',name:'爪哇莫丝蕨',waterType:'freshwater',description:'淡水水草模拟收藏'},
+  {id:'anubias-nana',name:'小榕',waterType:'freshwater',description:'阴性水草模拟收藏'},
+  {id:'hornwort',name:'金鱼藻',waterType:'freshwater',description:'茎叶型水草模拟收藏'},
+  {id:'red-mangrove',name:'红树幼苗',waterType:'marine',description:'海岸植物主题模拟收藏'},
+  {id:'macroalgae',name:'海藻丛',waterType:'marine',description:'海藻主题模拟收藏'}
+]);
+const AQUARIUM_PLANT_BY_ID = new Map(AQUARIUM_PLANTS.map(item=>[item.id,item]));
+const AQUARIUM_AUXILIARIES = Object.freeze([
+  {id:'cherry-shrimp',name:'樱花虾',scientificName:'Neocaridina davidi',waterType:'freshwater',description:'淡水辅助生物模拟批次'},
+  {id:'nerite-snail',name:'角螺',scientificName:'Neritina sp.',waterType:'freshwater',description:'淡水辅助生物模拟批次'},
+  {id:'cleaner-shrimp',name:'清洁虾',scientificName:'Lysmata amboinensis',waterType:'marine',description:'海水辅助生物模拟批次'},
+  {id:'hermit-crab',name:'寄居蟹',scientificName:'Paguroidea',waterType:'marine',description:'海水辅助生物模拟批次'}
+]);
+const AQUARIUM_AUXILIARY_BY_ID = new Map(AQUARIUM_AUXILIARIES.map(item=>[item.id,item]));
 const GUPPY_STRAINS = Object.freeze({
   'standard':{label:'标准灰身',colour:'灰身',tail:'标准尾型'},
   'mosaic':{label:'马赛克',colour:'彩色斑纹',tail:'彩纹尾型'},
@@ -706,6 +721,13 @@ function aquariumSnapshot(aquarium) {
   const elapsedHours = Number.isFinite(lastAction) ? Math.max(0, (now - lastAction) / 3600000) : 0;
   const waterQuality = Math.max(0, Math.min(100, aquarium.waterQuality - Math.floor(elapsedHours / 24)));
   const cleanliness = Math.max(0, Math.min(100, aquarium.cleanliness - Math.floor(elapsedHours / 36)));
+  const plants=(Array.isArray(aquarium.plants)?aquarium.plants:[]).map(item=>({
+    ...item,
+    growthStage:item.growthPoints>=12?'成熟':item.growthPoints>=5?'生长中':'幼苗',
+    growthProgress:item.growthPoints>=12?100:Math.round(item.growthPoints/12*100),
+    ageDays:Math.max(0,Math.floor((now-Date.parse(item.addedAt))/86400000))
+  }));
+  const auxiliary=Array.isArray(aquarium.auxiliary)?aquarium.auxiliary:[];
   const fish = aquarium.fish.map(item => ({
     ...item,
     ageDays:Math.max(0, Math.floor((now - Date.parse(item.addedAt)) / 86400000)),
@@ -721,6 +743,11 @@ function aquariumSnapshot(aquarium) {
     decorations:Array.isArray(aquarium.decorations)?aquarium.decorations:[],
     decorationCount:Array.isArray(aquarium.decorations)?aquarium.decorations.length:0,
     aquascapeScore:Math.min(100,(Array.isArray(aquarium.decorations)?aquarium.decorations.length:0)*12),
+    plants,
+    plantCount:plants.reduce((sum,item)=>sum+item.quantity,0),
+    auxiliary,
+    auxiliaryCount:auxiliary.reduce((sum,item)=>sum+item.quantity,0),
+    ecologyScore:Math.min(100,plants.reduce((sum,item)=>sum+item.quantity,0)*4+auxiliary.reduce((sum,item)=>sum+item.quantity,0)*3),
     fish,
     fishCount:fish.reduce((sum,item)=>sum+item.quantity,0),
     speciesCount:new Set(fish.map(item=>item.speciesId)).size,
@@ -744,7 +771,7 @@ app.post('/api/aquariums', requireAuth, (req, res) => {
   const aquarium = {
     id:id('aq_'), name, waterType, volumeLitres:Math.round(volumeLitres*10)/10,
     temperatureC:waterType==='marine'?25:25,
-    waterQuality:85, cleanliness:90, fish:[], decorations:[],
+    waterQuality:85, cleanliness:90, fish:[], decorations:[], plants:[], auxiliary:[],
     daily:{date:new Date().toISOString().slice(0,10),feeds:0},
     lastActionAt:new Date().toISOString(), createdAt:new Date().toISOString(),
     events:[{id:id('aqevt_'),type:'created',message:'建立了新的模拟水族箱。',createdAt:new Date().toISOString()}]
@@ -791,6 +818,33 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
       aquarium.decorations=aquarium.decorations.filter(entry=>entry.id!==item.id);
       addEvent('移除造景元素：'+item.name+'。');
     }
+  } else if (action==='add_plant') {
+    const plant=AQUARIUM_PLANT_BY_ID.get(req.body.plantId),quantity=req.body.quantity;
+    if(!plant||!Number.isInteger(quantity)||quantity<1||quantity>5)return res.status(400).json({error:'请选择有效水草，并输入 1 至 5 的数量。'});
+    if(plant.waterType!==aquarium.waterType)return res.status(409).json({error:'该水草主题不适用于当前鱼缸水体类型。'});
+    aquarium.plants=Array.isArray(aquarium.plants)?aquarium.plants:[];
+    const count=aquarium.plants.reduce((sum,item)=>sum+item.quantity,0);
+    if(count+quantity>20)return res.status(409).json({error:'每座模拟鱼缸最多收藏 20 株模拟水草。'});
+    const existing=aquarium.plants.find(item=>item.plantId===plant.id);
+    if(existing)existing.quantity+=quantity;
+    else aquarium.plants.push({id:id('plant_'),plantId:plant.id,name:plant.name,quantity,growthPoints:0,health:80,addedAt:now.toISOString()});
+    addEvent('加入水草：'+plant.name+' × '+quantity+'。');
+  } else if (action==='plant_care') {
+    aquarium.plants=Array.isArray(aquarium.plants)?aquarium.plants:[];
+    if(!aquarium.plants.length)return res.status(409).json({error:'请先加入水草，再进行模拟养护。'});
+    aquarium.plants.forEach(item=>{item.growthPoints=Math.min(12,(item.growthPoints||0)+1);item.health=Math.min(100,(item.health||80)+5);});
+    addEvent('完成水草模拟养护，成长进度与状态有所提升。');
+  } else if (action==='add_auxiliary') {
+    const organism=AQUARIUM_AUXILIARY_BY_ID.get(req.body.organismId),quantity=req.body.quantity;
+    if(!organism||!Number.isInteger(quantity)||quantity<1||quantity>5)return res.status(400).json({error:'请选择有效辅助生物，并输入 1 至 5 的数量。'});
+    if(organism.waterType!==aquarium.waterType)return res.status(409).json({error:'该辅助生物模拟批次不适用于当前鱼缸水体类型。'});
+    aquarium.auxiliary=Array.isArray(aquarium.auxiliary)?aquarium.auxiliary:[];
+    const count=aquarium.auxiliary.reduce((sum,item)=>sum+item.quantity,0);
+    if(count+quantity>10)return res.status(409).json({error:'每座模拟鱼缸最多收藏 10 个辅助生物模拟个体。'});
+    const existing=aquarium.auxiliary.find(item=>item.organismId===organism.id);
+    if(existing)existing.quantity+=quantity;
+    else aquarium.auxiliary.push({id:id('aux_'),organismId:organism.id,name:organism.name,scientificName:organism.scientificName,quantity,addedAt:now.toISOString()});
+    addEvent('加入辅助生物：'+organism.name+' × '+quantity+'。同一水体类型不代表物种之间一定兼容。');
   } else if (action==='add_fish') {
     const speciesId=req.body.speciesId, quantity=req.body.quantity;
     const species=typeof speciesId==='string'?SPECIES_BY_ID.get(speciesId):null;
@@ -850,6 +904,8 @@ app.delete('/api/aquariums/:id', requireAuth, (req, res) => {
 
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
 app.get('/api/aquarium-decorations', (_req,res)=>res.json(AQUARIUM_DECORATIONS));
+app.get('/api/aquarium-plants', (_req,res)=>res.json(AQUARIUM_PLANTS));
+app.get('/api/aquarium-auxiliaries', (_req,res)=>res.json(AQUARIUM_AUXILIARIES));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
   res.json(products.filter(product => product.active !== false));
