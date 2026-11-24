@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eee9dc">
+<meta name="description" content="探索墨灵世界的四处灵境，与生灵一同发现山水之间的秘密。">
+<title>四方灵境 · Realm Exploration | 墨灵</title>
+<link rel="stylesheet" href="styles/styles.css">
+<link rel="stylesheet" href="styles/habitats.css">
+<script defer src="scripts/habitats.js"></script>
+</head>
+<body>
+<div id="navbar"></div>
+<main class="realm-page">
+<header class="realm-heading">
+<p class="realm-eyebrow">INK SPIRIT · FOUR REALMS</p>
+<h1>山水有境，<em>步履寻灵。</em></h1>
+<p>循着雾气与水声，走访四处灵境。每一次初见，都会成为你与伙伴共同经历的一页。</p>
+<div class="realm-progress"><strong id="realm-count">0 / 4</strong><span>灵境已探索 · REALMS DISCOVERED</span><div class="realm-track"><i id="realm-progress-bar"></i></div></div>
+<p id="realm-status" class="realm-status" aria-live="polite">正在整理你的探索手札……</p>
+</header>
+<section class="realm-grid" aria-label="四方灵境">
+<article class="realm-card lotus" data-habitat="lotus-pond">
+<div class="realm-art" aria-hidden="true"><span class="moon"></span><span class="mountain m1"></span><span class="mountain m2"></span><span class="water"></span><span class="lotus-mark">荷</span></div>
+<div class="realm-copy"><p class="realm-index">壹 · WATER REALM</p><h2>烟雨荷塘</h2><p class="realm-subtitle">Lotus Pond</p><p>薄雾漫过水面，莲叶承接晨露。锦鲤在水影间穿行，静听一池风声。</p><div class="realm-meta"><span>相应生灵 · 锦鲤</span><span>初见奖励 · 25 灵息</span></div><button class="discover-button" type="button" data-discover="lotus-pond">踏入此境</button></div>
+</article>
+<article class="realm-card cloud" data-habitat="cloud-mountain">
+<div class="realm-art" aria-hidden="true"><span class="moon"></span><span class="mountain m1"></span><span class="mountain m2"></span><span class="cloud-ribbon"></span><span class="realm-glyph">龍</span></div>
+<div class="realm-copy"><p class="realm-index">贰 · SKY REALM</p><h2>云海山巅</h2><p class="realm-subtitle">Cloud Mountain</p><p>群峰隐入云海，松影随风而动。青龙栖于高处，俯瞰山河流转。</p><div class="realm-meta"><span>相应生灵 · 青龙</span><span>初见奖励 · 25 灵息</span></div><button class="discover-button" type="button" data-discover="cloud-mountain">踏入此境</button></div>
+</article>
+<article class="realm-card bamboo" data-habitat="bamboo-forest">
+<div class="realm-art" aria-hidden="true"><span class="moon"></span><span class="bamboo-stalk s1"></span><span class="bamboo-stalk s2"></span><span class="bamboo-stalk s3"></span><span class="realm-glyph">竹</span></div>
+<div class="realm-copy"><p class="realm-index">叁 · WOOD REALM</p><h2>幽篁竹林</h2><p class="realm-subtitle">Bamboo Forest</p><p>竹影交错，风过有声。灵蛇隐于青翠深处，等待有缘之人驻足。</p><div class="realm-meta"><span>相应生灵 · 灵蛇</span><span>初见奖励 · 25 灵息</span></div><button class="discover-button" type="button" data-discover="bamboo-forest">踏入此境</button></div>
+</article>
+<article class="realm-card marsh" data-habitat="quiet-marsh">
+<div class="realm-art" aria-hidden="true"><span class="moon"></span><span class="mountain m1"></span><span class="reed r1"></span><span class="reed r2"></span><span class="realm-glyph">玄</span></div>
+<div class="realm-copy"><p class="realm-index">肆 · EARTH REALM</p><h2>静水泽地</h2><p class="realm-subtitle">Quiet Marsh</p><p>浅滩与芦苇相依，水面映出天光。玄龟缓行于泽畔，守望四时。</p><div class="realm-meta"><span>相应生灵 · 玄龟</span><span>初见奖励 · 25 灵息</span></div><button class="discover-button" type="button" data-discover="quiet-marsh">踏入此境</button></div>
+</article>
+</section>
+<section class="realm-footnote"><span class="realm-seal">游</span><p>灵境探索属于墨灵世界的叙事与养成体验。发现记录不会代表真实地理位置或野外物种分布；生态资料请参阅 <a href="map.html">万水生境 · Ecological Atlas</a>。</p></section>
+</main>
+<div id="footer"></div>
+<script src="scripts/auth.js"></script><script src="scripts/include.js"></script>
+</body></html>
