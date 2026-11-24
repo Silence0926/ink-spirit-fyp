@@ -25,6 +25,7 @@ Runtime files:
 - `products.json`
 - `carts.json`
 - `orders.json`\n- `creature-progress.json`
+- `exploration-progress.json`
 
 Carts are stored per authenticated user. Checkout snapshots product names, unit prices and quantities into an order. The order starts as `pending_payment`. The server creates a Billplz bill in the configured environment and redirects the customer to the provider-hosted payment page.
 
@@ -55,3 +56,10 @@ Species data distinguishes:
 - ornamental domestication or selective-breeding history.
 
 Map markers represent broad regional reference points, not precise collection locations or surveyed range polygons.
+
+
+## Habitat exploration
+
+- Four authored realms are tracked per authenticated account: lotus pond, cloud mountain, bamboo forest and quiet marsh.
+- The first discovery of each realm grants 25 XP to the currently selected companion. The server validates habitat IDs and enforces one-time rewards; repeat requests return zero XP.
+- Discovery timestamps and IDs are stored in `exploration-progress.json`. Guest discoveries are browser-local and do not grant server-backed XP.
