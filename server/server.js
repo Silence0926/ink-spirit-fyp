@@ -9,6 +9,9 @@ const app = express();
 const PORT = Number.parseInt(process.env.PORT || '3000', 10);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const SPECIES_FILE = path.join(__dirname, 'species-catalogue.json');
+const SPECIES_CATALOGUE = JSON.parse(fs.readFileSync(SPECIES_FILE, 'utf8'));
+const SPECIES_BY_ID = new Map(SPECIES_CATALOGUE.map(species => [species.id, species]));
 const MUSIC_DIR = path.join(PUBLIC_DIR, 'music');
 const FILES = {
   users: path.join(DATA_DIR, 'users.json'),
@@ -184,6 +187,10 @@ function seedProducts() {
   if (missing.length) writeJson(FILES.products, [...current, ...missing]);
 }
 function validateProduct(input, partial = false) {
+  if (input.speciesId !== undefined) {
+    if (input.speciesId !== null && input.speciesId !== '' && (typeof input.speciesId !== 'string' || !SPECIES_BY_ID.has(input.speciesId))) throw new Error('Unknown species reference.');
+    result.speciesId = input.speciesId || null;
+  }
   const result = {};
   const fields = ['name', 'category', 'description', 'image'];
   for (const field of fields) {
@@ -619,6 +626,7 @@ app.post('/api/exploration/discover', requireAuth, (req, res) => {
 });
 
 
+app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
   res.json(products.filter(product => product.active !== false));
