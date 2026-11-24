@@ -777,3 +777,43 @@ test('aquatic product specifications validate ranges and appear in the public ca
   const listed=(await publicList.json()).find(item=>item.id===product.id);
   assert.equal(listed.specifications.difficulty,'intermediate');
 });
+
+test('admin analytics aggregates verified payments and inventory without exposing customer data', async t => {
+  const { base, dataDir } = await startServer(t, [
+    {id:'analytics-admin',username:'analytics-admin',password:'analytics-admin-pass',role:'admin'},
+    {id:'analytics-manager',username:'analytics-manager',password:'analytics-manager-pass',role:'manager'},
+    {id:'analytics-user',username:'analytics-user',password:'analytics-user-pass',role:'user'}
+  ],[
+    {id:'analytics-koi',name:'Analytics Koi',category:'Ornamental Fish',description:'Koi',price:25,stock:2,stockThreshold:3,active:true,image:'/images/products/koi-card.svg'},
+    {id:'analytics-tank',name:'Analytics Tank',category:'Aquarium',description:'Tank',price:100,stock:10,stockThreshold:2,active:true,image:'/images/products/aquarium-card.svg'},
+    {id:'analytics-hidden',name:'Archived Item',category:'Food',description:'Archived',price:5,stock:0,stockThreshold:2,active:false,image:'/images/products/food-card.svg'}
+  ]);
+  const signIn=async(username,password)=>{const response=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username,password})});assert.equal(response.status,200);return response.headers.get('set-cookie').split(';')[0];};
+  const admin=await signIn('analytics-admin','analytics-admin-pass');
+  const manager=await signIn('analytics-manager','analytics-manager-pass');
+  const user=await signIn('analytics-user','analytics-user-pass');
+  const now=new Date();
+  const recent=new Date(now.getTime()-60*60*1000).toISOString();
+  fs.writeFileSync(path.join(dataDir,'orders.json'),JSON.stringify([
+    {id:'paid-order',userId:'private-customer-id',status:'completed',paymentVerified:true,paidAt:recent,createdAt:recent,total:50,items:[{productId:'analytics-koi',name:'Analytics Koi',quantity:2,unitPrice:25,lineTotal:50}]},
+    {id:'pending-order',userId:'another-private-id',status:'pending_payment',createdAt:recent,total:99,items:[]},
+    {id:'unverified-order',userId:'third-private-id',status:'paid',paymentVerified:false,createdAt:recent,total:500,items:[]}
+  ]));
+  const endpoint=base+'/api/admin/analytics?range=7d';
+  assert.equal((await fetch(endpoint)).status,401);
+  assert.equal((await fetch(endpoint,{headers:{cookie:user}})).status,403);
+  const managerResponse=await fetch(endpoint,{headers:{cookie:manager}});
+  assert.equal(managerResponse.status,200);
+  const data=await managerResponse.json();
+  assert.equal(data.summary.grossVerifiedPayments,50);
+  assert.equal(data.summary.periodGross,50);
+  assert.equal(data.summary.verifiedOrders,1);
+  assert.equal(data.summary.pendingPayment,1);
+  assert.equal(data.summary.lowStock,1);
+  assert.equal(data.summary.outOfStock,0);
+  assert.equal(data.bestSellers[0].units,2);
+  assert.equal(data.daily.length,7);
+  assert.equal(JSON.stringify(data).includes('private-customer-id'),false);
+  assert.equal((await fetch(endpoint,{headers:{cookie:admin}})).status,200);
+  assert.equal((await fetch(base+'/api/admin/analytics?range=all',{headers:{cookie:admin}})).status,200);
+});
