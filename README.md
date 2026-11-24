@@ -10,8 +10,8 @@ Ink Spirit is an interactive Chinese ink-wash ecosystem with companion creatures
 - Original SVG product illustrations for koi, betta, aquarium, filter, fish food and aquatic plants.
 - Sea Garden storefront reads products from the server API.
 - New Snake game: keyboard, WASD, touch controls, pause/restart and local best score.
-- Ecological Atlas with regional distribution summaries for Betta splendens, Amphiprion ocellaris, Carassius auratus and ornamental koi history.
-- Virtual aquarium simulator: authenticated, user-isolated tanks; freshwater/marine selection; fish cohorts, guppy breeding prototype, decorative aquascaping, plant growth and auxiliary organism collections. Simulation values are game mechanics, not real husbandry or compatibility advice.
+- Aquatic life atlas with 8 ornamental fish and 4 auxiliary invertebrates, including native-range notes, care summaries, source references, shop filters and simulator links.
+- Virtual aquarium simulator: authenticated, user-isolated tanks; freshwater/marine selection; fish cohorts, guppy breeding prototype, decorative aquascaping, plant growth and auxiliary organism collections drawn from the shared species catalogue. Simulation values are game mechanics, not real husbandry or compatibility advice.
 - Server-side account sessions using HttpOnly cookies; password hashes use scrypt.
 - Admin/manager product catalogue endpoints, admin-only role management, and stock fields.
 - Server-persisted carts and order records using atomic JSON file writes.
