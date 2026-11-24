@@ -292,8 +292,30 @@ test('creature care is authenticated, validates food, persists bonds and prevent
   });
   assert.equal(full.status, 409, 'feeding a full creature should not consume a care action');
 
-  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-care.json'), 'utf8'));
   const user = (await registration.json()).user;
-  assert.equal(stored[user.id].creatures.koi.bond, 10);
-  assert.equal(stored[user.id].creatures.koi.daily.count, 2);
+  const carePath = path.join(dataDir, 'creature-care.json');
+  const stored = JSON.parse(fs.readFileSync(carePath, 'utf8'));
+  stored[user.id].creatures.koi.lastFedAt = new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString();
+  fs.writeFileSync(carePath, JSON.stringify(stored));
+  const recovered = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal((await recovered.json()).creatures.koi.satiety, 90, 'satiety slowly decreases after six hours');
+
+  const thirdFeed = await fetch(base + '/api/creatures/care/feed', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'cloud-fruit' })
+  });
+  assert.equal(thirdFeed.status, 200);
+  const thirdData = await thirdFeed.json();
+  assert.equal(thirdData.care.creatures.koi.bond, 15);
+  assert.equal(thirdData.care.creatures.koi.dailyFeeds.count, 3);
+
+  const afterThird = JSON.parse(fs.readFileSync(carePath, 'utf8'));
+  afterThird[user.id].creatures.koi.satiety = 0;
+  fs.writeFileSync(carePath, JSON.stringify(afterThird));
+  const dailyLimit = await fetch(base + '/api/creatures/care/feed', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'lotus-seed' })
+  });
+  assert.equal(dailyLimit.status, 429, 'server enforces three feeds per creature per UTC day');
+  const persisted = JSON.parse(fs.readFileSync(carePath, 'utf8'));
+  assert.equal(persisted[user.id].creatures.koi.bond, 15);
+  assert.equal(persisted[user.id].creatures.koi.daily.count, 3);
 });
