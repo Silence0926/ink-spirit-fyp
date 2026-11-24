@@ -590,3 +590,52 @@ test('customers can read their own order details and status history only', async
   assert.equal((await fetch(base + '/api/orders/order-private-001',{ headers:{ cookie:otherCookie } })).status,404);
   assert.equal((await fetch(base + '/api/orders/order-private-001')).status,401);
 });
+
+
+test('inventory adjustments are audited, thresholded and cannot create negative stock', async t => {
+  const { base, dataDir } = await startServer(t, [
+    { id:'inventory-manager', username:'stock-manager', password:'stock-pass-123', role:'manager' },
+    { id:'inventory-user', username:'stock-customer', password:'customer-pass-123', role:'user' }
+  ], [
+    { id:'stock-koi', name:'Ink Koi', category:'Fish', description:'Stock audit test.', price:20, currency:'MYR', stock:8, image:'/images/products/koi-card.svg', active:true }
+  ]);
+  const signIn = async (username,password) => {
+    const response = await fetch(base + '/api/login', {
+      method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ username,password })
+    });
+    assert.equal(response.status,200);
+    return response.headers.get('set-cookie').split(';')[0];
+  };
+  const managerCookie = await signIn('stock-manager','stock-pass-123');
+  const headers = { cookie:managerCookie, 'content-type':'application/json' };
+  assert.equal((await fetch(base + '/api/admin/products/stock-koi/stock', {
+    method:'POST', headers, body:JSON.stringify({ mode:'adjust', quantity:-9, reason:'Damaged stock count' })
+  })).status,409,'stock must not become negative');
+  assert.equal((await fetch(base + '/api/admin/products/stock-koi/stock', {
+    method:'POST', headers, body:JSON.stringify({ mode:'adjust', quantity:-2, reason:'' })
+  })).status,400,'reason is mandatory');
+  const adjusted = await fetch(base + '/api/admin/products/stock-koi/stock', {
+    method:'POST', headers, body:JSON.stringify({ mode:'adjust', quantity:-3, reason:'Physical count correction' })
+  });
+  assert.equal(adjusted.status,200);
+  const adjustment = await adjusted.json();
+  assert.equal(adjustment.product.stock,5);
+  assert.equal(adjustment.movement.delta,-3);
+  assert.equal(adjustment.movement.previousStock,8);
+  assert.equal(adjustment.movement.newStock,5);
+  const threshold = await fetch(base + '/api/admin/products/stock-koi/stock-threshold', {
+    method:'PATCH', headers, body:JSON.stringify({ threshold:6 })
+  });
+  assert.equal(threshold.status,200);
+  assert.equal((await threshold.json()).product.stockThreshold,6);
+  const products = await fetch(base + '/api/admin/products',{ headers });
+  assert.equal((await products.json())[0].stockThreshold,6);
+  const history = await fetch(base + '/api/admin/products/stock-koi/stock-movements',{ headers });
+  const movements = await history.json();
+  assert.equal(movements.movements.length,1);
+  assert.equal(movements.movements[0].reason,'Physical count correction');
+  const userCookie = await signIn('stock-customer','customer-pass-123');
+  assert.equal((await fetch(base + '/api/admin/products/stock-koi/stock',{ method:'POST', headers:{ cookie:userCookie, 'content-type':'application/json' }, body:JSON.stringify({ mode:'adjust', quantity:2, reason:'Not allowed' }) })).status,403);
+  const saved = JSON.parse(fs.readFileSync(path.join(dataDir,'inventory-movements.json'),'utf8'));
+  assert.equal(saved.length,1);
+});
