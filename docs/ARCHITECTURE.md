@@ -123,3 +123,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - Admin and Manager roles can upload product images through `POST /api/admin/media/products`. The endpoint accepts raw JPEG, PNG or WebP bodies up to 5 MB, verifies the declared MIME type against file signatures, generates a UUID filename, and stores the asset under `server/public/uploads/products/` for static delivery.
 - Product image fields accept site-local `/images/...` or `/uploads/...` paths with supported image extensions, or HTTPS URLs. Protocol-relative paths, traversal segments and non-HTTPS external URLs are rejected.
 - Uploads are not automatically resized or optimized. Replacing an image does not yet garbage-collect the previous asset; production should add image processing, malware scanning, storage quotas, orphan cleanup and object storage/CDN integration.
+
+
+## Structured aquatic product specifications
+
+- Products may carry an optional `specifications` object: water type (freshwater, marine, brackish or any), care difficulty, minimum tank volume, temperature range, adult size and short care notes.
+- The API validates enumerations and numeric bounds and rejects inverted temperature ranges. Generic equipment, food and aquarium products can leave aquatic-life fields empty.
+- Admin/Manager edit forms expose the same fields. The public catalogue can filter by water type, care difficulty and stock availability; product detail pages display only supplied values.
+- Values are seller-entered catalogue metadata, not independently verified husbandry guarantees. Staff should use reliable species references and distinguish adult size, minimum tank volume and temperature ranges from universal standards.
