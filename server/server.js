@@ -674,6 +674,12 @@ app.post('/api/aquarium/compatibility', (req, res) => {
 });
 
 const AQUARIUM_ACTION_LIMIT = 5;
+const GUPPY_STRAINS = Object.freeze({
+  'standard':{label:'标准灰身',colour:'灰身',tail:'标准尾型'},
+  'mosaic':{label:'马赛克',colour:'彩色斑纹',tail:'彩纹尾型'},
+  'tuxedo':{label:'礼服',colour:'深色后半身',tail:'扇形尾型'},
+  'cobra':{label:'蛇纹',colour:'蛇纹斑点',tail:'彩斑尾型'}
+});
 function getUserAquariums(userId) {
   const all = readJson(FILES.aquariums, {});
   return Array.isArray(all[userId]) ? all[userId] : [];
@@ -692,7 +698,10 @@ function aquariumSnapshot(aquarium) {
   const fish = aquarium.fish.map(item => ({
     ...item,
     ageDays:Math.max(0, Math.floor((now - Date.parse(item.addedAt)) / 86400000)),
-    growthStage:item.growthPoints >= 20 ? '成体' : item.growthPoints >= 7 ? '亚成体' : '幼鱼'
+    growthStage:item.growthPoints >= 20 ? '成体' : item.growthPoints >= 7 ? '亚成体' : '幼鱼',
+    growthProgress:item.growthPoints >= 20 ? Math.min(100,Math.round((item.growthPoints-20)/10*100)) : item.growthPoints >= 7 ? Math.round((item.growthPoints-7)/13*100) : Math.round(item.growthPoints/7*100),
+    strain:item.speciesId==='guppy'?(GUPPY_STRAINS[item.strain]||GUPPY_STRAINS.standard).label:null,
+    generation:Number.isInteger(item.generation)?item.generation:0
   }));
   return {
     ...aquarium,
@@ -758,10 +767,12 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
     if (species.waterType!==aquarium.waterType) return res.status(409).json({error:'该物种的水体类型与鱼缸不一致。'});
     const currentCount=aquarium.fish.reduce((sum,item)=>sum+item.quantity,0);
     if (currentCount+quantity>30) return res.status(409).json({error:'模拟鱼缸最多容纳 30 条模拟个体；这只是游戏上限，不是现实放养建议。'});
-    let existing=aquarium.fish.find(item=>item.speciesId===speciesId);
+    const strain=speciesId==='guppy'?(req.body.strain===undefined?'standard':req.body.strain):null;
+    if (speciesId==='guppy' && !Object.prototype.hasOwnProperty.call(GUPPY_STRAINS,strain)) return res.status(400).json({error:'请选择有效的孔雀鱼模拟品系。'});
+    const existing=aquarium.fish.find(item=>item.speciesId===speciesId && (speciesId!=='guppy' || (item.strain||'standard')===strain));
     if (existing) existing.quantity+=quantity;
-    else aquarium.fish.push({speciesId,commonName:species.commonName,scientificName:species.scientificName,quantity,satiety:70,growthPoints:0,addedAt:now.toISOString()});
-    addEvent('加入 '+species.commonName+' × '+quantity+'。同为淡水或海水不代表物种一定可以混养。');
+    else aquarium.fish.push({cohortId:id('cohort_'),speciesId,commonName:species.commonName,scientificName:species.scientificName,quantity,satiety:70,growthPoints:0,addedAt:now.toISOString(),...(speciesId==='guppy'?{strain,generation:0}: {})});
+    addEvent('加入 '+species.commonName+' × '+quantity+(speciesId==='guppy'?'（'+GUPPY_STRAINS[strain].label+'品系）':'')+'。同为淡水或海水不代表物种一定可以混养。');
   } else if (action==='feed') {
     aquarium.daily=aquarium.daily?.date===today?aquarium.daily:{date:today,feeds:0};
     if (aquarium.fish.length===0) return res.status(409).json({error:'鱼缸里还没有鱼。'});
@@ -778,12 +789,12 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
     const currentCount=aquarium.fish.reduce((sum,item)=>sum+item.quantity,0);
     const fryCount=Math.min(3,30-currentCount);
     if (fryCount<1) return res.status(409).json({error:'鱼缸已达到 30 条模拟个体的游戏容量上限，暂时无法加入幼鱼。'});
-    aquarium.fish.push({speciesId:'guppy',commonName:parents.commonName,scientificName:parents.scientificName,quantity:fryCount,satiety:70,growthPoints:0,addedAt:now.toISOString(),cohort:'fry'});
+    aquarium.fish.push({cohortId:id('cohort_'),speciesId:'guppy',commonName:parents.commonName,scientificName:parents.scientificName,quantity:fryCount,satiety:70,growthPoints:0,addedAt:now.toISOString(),cohort:'fry',strain:parents.strain||'standard',generation:(Number.isInteger(parents.generation)?parents.generation:0)+1,parentCohortId:parents.cohortId||null});
     parents.satiety=Math.max(0,parents.satiety-15);
     aquarium.waterQuality=Math.max(0,aquarium.waterQuality-5);
     aquarium.cleanliness=Math.max(0,aquarium.cleanliness-3);
     aquarium.lastBreedAt=now.toISOString();
-    addEvent('孔雀鱼繁殖模拟完成，新增幼鱼 × '+fryCount+'。幼鱼作为独立成长批次记录。');
+    addEvent('孔雀鱼「'+(GUPPY_STRAINS[parents.strain||'standard'].label)+'」品系繁殖模拟完成，新增第 '+((Number.isInteger(parents.generation)?parents.generation:0)+1)+' 代幼鱼 × '+fryCount+'。品系外观标签沿用亲代批次。');
   } else if (action==='water_change') {
     aquarium.waterQuality=Math.min(100,aquarium.waterQuality+20);
     aquarium.cleanliness=Math.min(100,aquarium.cleanliness+10);
