@@ -192,8 +192,19 @@ test('authenticated creature progression persists server-side and validates rewa
   const user = (await registration.json()).user;
   assert.equal(stored[user.id].creatures.dragon.totalExperience, 100);
 
-  const limit = await fetch(base + '/api/creatures/interact', {
+  for (let index = 0; index < 40; index += 1) {
+    const interaction = await fetch(base + '/api/creatures/interact', {
+      method:'POST', headers, body:JSON.stringify({ creatureId:'koi' })
+    });
+    assert.equal(interaction.status, 200);
+  }
+  const capped = await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi' })
+  });
+  assert.equal(capped.status, 429, 'daily interaction rewards must be capped server-side');
+
+  const invalid = await fetch(base + '/api/creatures/interact', {
     method:'POST', headers, body:JSON.stringify({ creatureId:'unknown' })
   });
-  assert.equal(limit.status, 400);
+  assert.equal(invalid.status, 400);
 });
