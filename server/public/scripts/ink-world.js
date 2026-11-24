@@ -29,7 +29,7 @@
   let selected = 'koi';
   let authenticated = false;
   let dailyInteractions = { count:0, limit:50 };
-  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, bondStage:'初识', mood:'平静', dailyFeeds:{ count:0, limit:3 }, lastFedAt:null }]));
+  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, bondStage:'初识', mood:'平静', dailyFeeds:{ count:0, limit:3 }, ability:{ id:({koi:'ripple-leap',dragon:'cloudborne-presence',snake:'veil-of-ink',turtle:'tortoise-ward'})[id], name:({koi:'锦鲤跃波',dragon:'云龙现世',snake:'幽影潜行',turtle:'玄甲守心'})[id], description:({koi:'跃出水面，唤起层层水纹。',dragon:'云气舒展，龙影穿过山岚。',snake:'墨影隐现，于竹影间悄然穿行。',turtle:'玄甲凝光，水泽泛起守护涟漪。'})[id], unlocked:false, unlockBond:50, unlockLevel:5, dailyUses:{count:0,limit:5} }, lastFedAt:null }]));
   let careProgress = defaultCare();
   let journalEvents = [];
   const $ = id => document.getElementById(id);
@@ -62,7 +62,7 @@
       item.className = 'journal-entry';
       const marker = document.createElement('span');
       marker.className = 'journal-marker';
-      marker.textContent = event.type === 'feeding' ? '食' : event.type === 'exploration' ? '游' : '伴';
+      marker.textContent = event.type === 'feeding' ? '食' : event.type === 'exploration' ? '游' : event.type === 'ability' ? '技' : '伴';
       const body = document.createElement('div');
       const title = document.createElement('strong');
       title.textContent = event.title || '相伴记录';
@@ -186,6 +186,16 @@
     feedButton.disabled = exhausted || full;
     feedButton.textContent = exhausted ? '今日照料已达上限' : full ? '伙伴已经吃饱' : '喂给伙伴';
 
+    const ability = care.ability || {};
+    const unlocked = Boolean(ability.unlocked || (care.bond >= 50 && progress[selected].level >= 5));
+    $('ability-name').textContent = ability.name || '本命灵技';
+    $('ability-description').textContent = ability.description || '与伙伴建立更深的羁绊，唤醒专属灵技。';
+    $('ability-requirements').textContent = unlocked
+      ? '今日施展 · ' + (ability.dailyUses?.count || 0) + ' / ' + (ability.dailyUses?.limit || 5)
+      : '觉醒条件：等级 LV. 5 · 亲密度 50';
+    const abilityButton = $('ability-button');
+    abilityButton.disabled = !unlocked || (authenticated && (ability.dailyUses?.count || 0) >= (ability.dailyUses?.limit || 5));
+    abilityButton.textContent = !unlocked ? '尚未觉醒' : abilityButton.disabled ? '今日次数已用尽' : '施展灵技';
   }
   function applyCare(data) {
     if (!data || !data.creatures) return;
@@ -280,6 +290,47 @@
       renderProgress();
     } finally {
       if (!(authenticated && dailyInteractions.count >= dailyInteractions.limit)) button.disabled = false;
+    }
+  });
+  const abilityMotions = {
+    koi:[{transform:'translateY(0) scale(1)'},{transform:'translateY(-22px) scale(1.08)'},{transform:'translateY(5px) scale(.98)'},{transform:'translateY(0) scale(1)'}],
+    dragon:[{transform:'translateX(0) translateY(0) scale(1)'},{transform:'translateX(18px) translateY(-18px) scale(1.08)'},{transform:'translateX(-12px) translateY(-8px) scale(1.04)'},{transform:'translate(0) scale(1)'}],
+    snake:[{opacity:1,transform:'translateX(0) scale(1)'},{opacity:.18,transform:'translateX(24px) scale(.94)'},{opacity:.55,transform:'translateX(-14px) scale(1.04)'},{opacity:1,transform:'translateX(0) scale(1)'}],
+    turtle:[{transform:'scale(1)'},{transform:'scale(1.13)'},{transform:'scale(.96)'},{transform:'scale(1)'}]
+  };
+  $('ability-button').addEventListener('click', async () => {
+    const button = $('ability-button');
+    const care = careProgress[selected];
+    const ability = care.ability || {};
+    button.disabled = true;
+    try {
+      if (authenticated) {
+        const result = await api('/api/creatures/ability', {
+          method:'POST', body:JSON.stringify({ creatureId:selected, abilityId:ability.id })
+        });
+        applyCare(result.care);
+        $('ability-note').textContent = result.ability.name + ' · ' + result.ability.description;
+        await loadJournal();
+      } else {
+        if (care.bond < 50 || progress[selected].level < 5) throw new Error('需要等级 LV. 5 与亲密度 50 才能觉醒本命灵技。');
+        const today = new Date().toISOString().slice(0,10);
+        if (!care.abilityDaily || care.abilityDaily.date !== today) care.abilityDaily = { date:today, count:0 };
+        if (care.abilityDaily.count >= 5) throw new Error('今日灵技施展次数已达上限。');
+        care.abilityDaily.count += 1;
+        care.ability = { ...ability, unlocked:true, dailyUses:{count:care.abilityDaily.count,limit:5} };
+        safeLocalWrite('inkSpirit.care.v1', JSON.stringify(careProgress));
+        $('ability-note').textContent = ability.name + ' · ' + ability.description + '（访客记录保存在当前浏览器）';
+        addLocalJournal('ability', ability.name, ability.description);
+        renderCare();
+      }
+      const art = $('creature-art');
+      art.dataset.ability = selected;
+      if (typeof art.animate === 'function') art.animate(abilityMotions[selected], { duration:1100, easing:'ease-in-out' });
+      $('painting').dataset.ability = selected;
+    } catch (error) {
+      $('ability-note').textContent = error.message;
+    } finally {
+      renderCare();
     }
   });
   $('feed-button').addEventListener('click', async () => {
