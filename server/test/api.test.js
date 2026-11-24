@@ -907,10 +907,15 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   });
   assert.equal(invalidWater.status,409);
   const add = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
-    method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'guppy',quantity:3})
+    method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'guppy',quantity:3,strain:'mosaic'})
   });
   assert.equal(add.status,200);
-  assert.equal((await add.json()).aquarium.fishCount,3);
+  const addedAquarium=(await add.json()).aquarium;
+  assert.equal(addedAquarium.fishCount,3);
+  assert.equal(addedAquarium.fish[0].strain,'马赛克');
+  assert.equal(addedAquarium.fish[0].generation,0);
+  const invalidStrain=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'guppy',quantity:1,strain:'invented'})});
+  assert.equal(invalidStrain.status,400);
   const feed = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
     method:'POST',headers,body:JSON.stringify({action:'feed'})
   });
@@ -926,6 +931,11 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   const bredAquarium=(await breed.json()).aquarium;
   assert.equal(bredAquarium.fishCount,6);
   assert.equal(bredAquarium.fish.filter(item=>item.cohort==='fry').length,1);
+  const fry= bredAquarium.fish.find(item=>item.cohort==='fry');
+  assert.equal(fry.strain,'马赛克');
+  assert.equal(fry.generation,1);
+  assert.equal(fry.growthStage,'幼鱼');
+  assert.equal(typeof fry.growthProgress,'number');
   const cooldown=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'breed'})});
   assert.equal(cooldown.status,429);
   const water = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
