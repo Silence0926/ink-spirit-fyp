@@ -202,6 +202,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     document.getElementById('product-image-file').value = '';
     document.getElementById('product-gallery').value = Array.isArray(product?.images) ? product.images.join('\n') : '';
+    const specs = product?.specifications || {};
+    document.getElementById('product-water-type').value = specs.waterType || '';
+    document.getElementById('product-difficulty').value = specs.difficulty || '';
+    document.getElementById('product-min-tank').value = specs.minTankLitres ?? '';
+    document.getElementById('product-temp-min').value = specs.temperatureMinC ?? '';
+    document.getElementById('product-temp-max').value = specs.temperatureMaxC ?? '';
+    document.getElementById('product-adult-size').value = specs.adultSizeCm ?? '';
+    document.getElementById('product-care-notes').value = specs.careNotes || '';
     const preset = document.getElementById('product-image-preset');
     preset.value = [...preset.options].some(option => option.value === values['product-image']) ? values['product-image'] : 'custom';
     document.getElementById('product-image-preview').src = values['product-image'];
@@ -266,6 +274,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       stockThreshold: Number(document.getElementById('product-stock-threshold').value),
       image: document.getElementById('product-image').value.trim(),
       images: document.getElementById('product-gallery').value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean),
+      specifications: {
+        waterType:document.getElementById('product-water-type').value,
+        difficulty:document.getElementById('product-difficulty').value,
+        minTankLitres:document.getElementById('product-min-tank').value === '' ? null : Number(document.getElementById('product-min-tank').value),
+        temperatureMinC:document.getElementById('product-temp-min').value === '' ? null : Number(document.getElementById('product-temp-min').value),
+        temperatureMaxC:document.getElementById('product-temp-max').value === '' ? null : Number(document.getElementById('product-temp-max').value),
+        adultSizeCm:document.getElementById('product-adult-size').value === '' ? null : Number(document.getElementById('product-adult-size').value),
+        careNotes:document.getElementById('product-care-notes').value.trim()
+      },
       active: document.getElementById('product-active').checked
     };
     try {
