@@ -31,6 +31,7 @@
   let dailyInteractions = { count:0, limit:50 };
   const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, mood:'平静', dailyFeeds:{ count:0, limit:3 }, lastFedAt:null }]));
   let careProgress = defaultCare();
+  let journalEvents = [];
   const $ = id => document.getElementById(id);
   const threshold = level => level * 100;
   const api = async (url, options = {}) => {
@@ -46,6 +47,53 @@
   function safeLocalWrite(key, value) {
     try { localStorage.setItem(key, value); } catch {}
   }
+  function renderJournal() {
+    const list = $('creature-journal');
+    list.replaceChildren();
+    if (!journalEvents.length) {
+      const empty = document.createElement('li');
+      empty.className = 'journal-empty';
+      empty.textContent = '每一次相伴，都会留下一笔。';
+      list.append(empty);
+      return;
+    }
+    journalEvents.slice(0, 8).forEach(event => {
+      const item = document.createElement('li');
+      item.className = 'journal-entry';
+      const marker = document.createElement('span');
+      marker.className = 'journal-marker';
+      marker.textContent = event.type === 'feeding' ? '食' : event.type === 'exploration' ? '游' : '伴';
+      const body = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = event.title || '相伴记录';
+      const detail = document.createElement('p');
+      detail.textContent = event.detail || '';
+      const time = document.createElement('time');
+      time.textContent = event.createdAt ? new Date(event.createdAt).toLocaleString() : '';
+      body.append(title, detail, time);
+      item.append(marker, body);
+      list.append(item);
+    });
+  }
+  async function loadJournal() {
+    if (authenticated) {
+      const data = await api('/api/creatures/journal');
+      journalEvents = Array.isArray(data.events) ? data.events : [];
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem('inkSpirit.journal.v1') || '[]');
+        journalEvents = Array.isArray(saved) ? saved.slice(0, 30) : [];
+      } catch { journalEvents = []; }
+    }
+    renderJournal();
+  }
+  function addLocalJournal(type, title, detail, creatureId = selected) {
+    journalEvents.unshift({ type, title, detail, creatureId, createdAt:new Date().toISOString() });
+    journalEvents = journalEvents.slice(0, 30);
+    safeLocalWrite('inkSpirit.journal.v1', JSON.stringify(journalEvents));
+    renderJournal();
+  }
+
   function applyServerProgress(data) {
     if (!data || !data.creatures) return;
     for (const id of Object.keys(creatures)) {
@@ -169,6 +217,7 @@
         });
         applyServerProgress(result.progress);
         $('progress-note').textContent = '灵息增加了 ' + result.reward + ' 点。成长记录已保存至服务器。';
+        await loadJournal();
       } else {
         const p = progress[selected];
         p.experience += creatures[selected].reward;
@@ -180,6 +229,7 @@
         }
         safeLocalWrite(STORAGE_KEY, JSON.stringify(progress));
         $('progress-note').textContent = '灵息增加了 ' + creatures[selected].reward + ' 点。访客进度保存在此浏览器；登录后可使用跨设备同步。';
+        addLocalJournal('interaction', '相伴互动', '与' + creatures[selected].name + '相伴片刻，获得 ' + creatures[selected].reward + ' 点灵息。');
       }
       renderProgress();
       const art = $('creature-art');
@@ -204,6 +254,7 @@
         });
         applyCare(result.care);
         $('care-note').textContent = '已奉上' + result.food + '，饱足恢复 ' + result.satietyRestored + ' 点，亲密度增加 5。';
+        await loadJournal();
       } else {
         const care = careProgress[selected];
         if (care.dailyFeeds.count >= 3) throw new Error('今日的喂养次数已达上限。');
@@ -216,6 +267,7 @@
         safeLocalWrite('inkSpirit.care.v1', JSON.stringify(careProgress));
         renderCare();
         $('care-note').textContent = '已奉上灵食，亲密度增加 5。访客记录保存在当前浏览器。';
+        addLocalJournal('feeding', '灵食照料', '奉上所选灵食，饱足恢复 20 点，亲密度增加 5。');
       }
     } catch (error) {
       $('care-note').textContent = error.message;
@@ -227,6 +279,7 @@
       authenticated = true;
       applyServerProgress(data);
       try { applyCare(await api('/api/creatures/care')); } catch { renderCare(); }
+      try { await loadJournal(); } catch { renderJournal(); }
       $('progress-note').textContent = '已登录：成长记录保存在服务器，可跨设备继续。每日最多获得 50 次互动奖励。';
       try {
         const exploration = await api('/api/exploration/progress');
@@ -234,6 +287,7 @@
       } catch { renderCodex([]); }
     } catch {
       authenticated = false;
+      try { await loadJournal(); } catch { renderJournal(); }
       try {
         const savedCare = JSON.parse(localStorage.getItem('inkSpirit.care.v1') || 'null');
         if (savedCare && typeof savedCare === 'object') {
