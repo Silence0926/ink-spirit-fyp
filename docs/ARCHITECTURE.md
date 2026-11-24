@@ -108,3 +108,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - The composition is procedurally synthesized for this project: guzheng-like plucked tones, airy bamboo-flute-like melody and a softly filtered, tide-like ambient bed. The water texture is synthesized ambience, not a field recording.
 - Playback is user-initiated, loops continuously, and includes a volume control. No third-party song or external streaming service is required.
 - The earlier Web Audio real-time sketch has been replaced on the homepage by the standalone audio asset. Other pages are unchanged.
+
+
+## Inventory control
+
+- Admin and Manager roles can adjust stock with a signed integer delta or set an absolute quantity through the staff API. Every manual movement requires a reason and records previous/new stock, delta, product, actor ID/role and timestamp.
+- The server rejects adjustments that would make stock negative or exceed 1,000,000 units. Each product has a configurable low-stock threshold (default 5); Admin Studio highlights active products at or below that threshold and offers a low-stock filter.
+- The latest 10,000 manual movements are retained in `inventory-movements.json`; the per-product history endpoint returns the latest 50. Existing checkout/payment stock allocation and order cancellation restoration remain separate from manual movements.
+- This audit file and product file are still JSON documents. Updates are not transactional across processes, so the feature is suitable for the current single-instance prototype only; production requires database transactions and a unified inventory ledger that also records order allocations, cancellations, returns and supplier receipts.
