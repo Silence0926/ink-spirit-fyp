@@ -21,4 +21,8 @@ document.addEventListener('DOMContentLoaded',()=>{
  function render(){layer.clearLayers();list.replaceChildren();let visible=species.filter(s=>activeFilter==='all'||s.type===activeFilter);visible.forEach(s=>{const marker=markers.get(s.id);marker.addTo(layer);const button=document.createElement('button');button.type='button';button.className='species-entry';button.dataset.id=s.id;button.setAttribute('aria-pressed','false');const head=document.createElement('span');head.className='species-entry-head';const name=document.createElement('strong');name.textContent=s.name;const kind=document.createElement('i');kind.className=s.type==='marine'?'type-marine':'type-fresh';kind.textContent=s.type==='marine'?'海水':'淡水';head.append(name,kind);const latin=document.createElement('em');latin.textContent=s.latin;const range=document.createElement('small');range.textContent=s.range;const details=document.createElement('small');details.textContent=s.origin;button.append(head,latin,range,details);button.addEventListener('click',()=>select(s.id));list.append(button);buttons.set(s.id,button);});document.getElementById('species-count').textContent=visible.length+' SPECIES';if(visible.length)select(visible[0].id);}
  document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{activeFilter=button.dataset.filter;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===button));render();}));
  render();
+ const requestedSpecies = new URLSearchParams(window.location.search).get('species');
+ if (requestedSpecies && markers.has(requestedSpecies) && buttons.has(requestedSpecies)) {
+   window.setTimeout(() => select(requestedSpecies), 120);
+ }
 });
