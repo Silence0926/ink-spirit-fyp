@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sortSelect = document.getElementById('product-sort');
   const filters = document.getElementById('category-filters');
   const count = document.getElementById('catalog-count');
+  const waterFilter = document.getElementById('water-filter');
+  const difficultyFilter = document.getElementById('difficulty-filter');
+  const inStockFilter = document.getElementById('in-stock-filter');
+  const clearFilters = document.getElementById('clear-filters');
   let products = [];
   let activeCategory = 'all';
   const activeSpecies = new URLSearchParams(location.search).get('species') || '';
@@ -28,9 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let visible = products.filter(product => {
       const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
       const matchesSpecies = !activeSpecies || (speciesProducts[activeSpecies] || []).includes(product.id);
-      const haystack = [product.name, product.category, product.description, categoryNames[product.category] || '']
-        .join(' ').toLocaleLowerCase();
-      return matchesCategory && matchesSpecies && (!query || haystack.includes(query));
+      const specs = product.specifications || {};
+      const matchesWater = !waterFilter || waterFilter.value === 'all' || specs.waterType === waterFilter.value;
+      const matchesDifficulty = !difficultyFilter || difficultyFilter.value === 'all' || specs.difficulty === difficultyFilter.value;
+      const matchesStock = !inStockFilter?.checked || Number(product.stock) > 0;
+      const haystack = [product.name, product.category, product.description, categoryNames[product.category] || '',
+        specs.waterType, specs.difficulty, specs.careNotes, specs.minTankLitres, specs.temperatureMinC, specs.temperatureMaxC]
+        .filter(value=>value!==undefined&&value!==null).join(' ').toLocaleLowerCase();
+      return matchesCategory && matchesSpecies && matchesWater && matchesDifficulty && matchesStock && (!query || haystack.includes(query));
     });
 
     if (sort === 'price-asc') visible.sort((a,b) => Number(a.price)-Number(b.price));
@@ -80,6 +89,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       stock.className = product.stock > 0 ? 'stock-state' : 'stock-state unavailable';
       stock.textContent = product.stock > 0 ? '现货 · ' + product.stock : '暂时售罄';
       meta.append(category, stock);
+      const specs = product.specifications || {};
+      if (specs.waterType || specs.difficulty) {
+        const attributes = document.createElement('div');attributes.className='product-spec-tags';
+        const waterNames={freshwater:'淡水',marine:'海水',brackish:'汽水',any:'通用'};
+        const difficultyNames={beginner:'入门饲养',intermediate:'中等难度',advanced:'进阶饲养'};
+        if(specs.waterType){const tag=document.createElement('span');tag.textContent=waterNames[specs.waterType]||specs.waterType;attributes.append(tag);}
+        if(specs.difficulty){const tag=document.createElement('span');tag.textContent=difficultyNames[specs.difficulty]||specs.difficulty;attributes.append(tag);}
+        card.append(attributes);
+      }
 
       const title = document.createElement('h3');
       const titleLink = document.createElement('a');
@@ -153,6 +171,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   searchInput?.addEventListener('input', render);
   sortSelect?.addEventListener('change', render);
+  waterFilter?.addEventListener('change',render);
+  difficultyFilter?.addEventListener('change',render);
+  inStockFilter?.addEventListener('change',render);
+  clearFilters?.addEventListener('click',()=>{
+    if(searchInput)searchInput.value='';
+    if(sortSelect)sortSelect.value='featured';
+    if(waterFilter)waterFilter.value='all';
+    if(difficultyFilter)difficultyFilter.value='all';
+    if(inStockFilter)inStockFilter.checked=false;
+    activeCategory='all';
+    filters?.querySelectorAll('.filter-chip').forEach(chip=>{const selected=chip.dataset.category==='all';chip.classList.toggle('active',selected);chip.setAttribute('aria-pressed',String(selected));});
+    render();
+  });
 
   try {
     const response = await fetch('/api/products', { credentials:'same-origin' });
