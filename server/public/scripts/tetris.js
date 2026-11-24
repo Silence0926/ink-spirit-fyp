@@ -10,7 +10,7 @@ const COLORS={I:'#8b9b91',O:'#c3a66b',T:'#a66c5c',S:'#879779',Z:'#b56e60',J:'#71
 const boardCanvas=document.getElementById('tetris-board'), ctx=boardCanvas.getContext('2d');
 const nextCanvas=document.getElementById('tetris-next'), nctx=nextCanvas.getContext('2d');
 const $=id=>document.getElementById(id);
-let board, piece, nextType, bag=[], score=0, lines=0, level=1, best=Number(localStorage.getItem('inkTetrisBest')||0);
+let board, piece, nextType, bag=[], score=0, lines=0, level=1, best=0;\ntry{best=Number(localStorage.getItem('inkTetrisBest')||0)||0;}catch{best=0;}
 let running=false, paused=false, over=false, last=0, dropCounter=0, raf=0;
 $('tetris-best').textContent=best;
 function refillBag(){bag=Object.keys(SHAPES);for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}}
@@ -24,7 +24,7 @@ function move(dx,dy){if(!running||paused||over)return false;if(!collides(piece.m
 function hardDrop(){if(!running||paused||over)return;let distance=0;while(!collides(piece.matrix,piece.x,piece.y+1)){piece.y++;distance++;}score+=distance*2;lock();}
 function lock(){piece.matrix.forEach((row,y)=>row.forEach((v,x)=>{if(v&&piece.y+y>=0)board[piece.y+y][piece.x+x]=piece.type;}));clearLines();spawn();updateStats();draw();}
 function clearLines(){let count=0;for(let y=ROWS-1;y>=0;y--){if(board[y].every(Boolean)){board.splice(y,1);board.unshift(Array(COLS).fill(0));count++;y++;}}if(count){lines+=count;score+=[0,100,300,500,800][count]*level;level=Math.floor(lines/10)+1;}}
-function updateStats(){$('tetris-score').textContent=score;$('tetris-lines').textContent=lines;$('tetris-level').textContent=level;if(score>best){best=score;localStorage.setItem('inkTetrisBest',best);$('tetris-best').textContent=best;}}
+function updateStats(){$('tetris-score').textContent=score;$('tetris-lines').textContent=lines;$('tetris-level').textContent=level;if(score>best){best=score;try{localStorage.setItem('inkTetrisBest',String(best));}catch{}$('tetris-best').textContent=best;}}
 function cell(c,type,col,row,size=SIZE){c.fillStyle=COLORS[type]||'#777';c.fillRect(col*size+1,row*size+1,size-2,size-2);c.strokeStyle='rgba(255,255,255,.3)';c.strokeRect(col*size+2,row*size+2,size-4,size-4);}
 function draw(){ctx.clearRect(0,0,300,600);ctx.fillStyle='#e8e3d5';ctx.fillRect(0,0,300,600);ctx.strokeStyle='rgba(75,80,66,.12)';for(let x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*SIZE,0);ctx.lineTo(x*SIZE,600);ctx.stroke();}for(let y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*SIZE);ctx.lineTo(300,y*SIZE);ctx.stroke();}board.forEach((row,y)=>row.forEach((v,x)=>{if(v)cell(ctx,v,x,y);}));if(piece)piece.matrix.forEach((row,y)=>row.forEach((v,x)=>{if(v)cell(ctx,piece.type,piece.x+x,piece.y+y);}));}
 function drawNext(){nctx.clearRect(0,0,120,120);nctx.fillStyle='#e8e3d5';nctx.fillRect(0,0,120,120);const m=SHAPES[nextType],w=m[0].length*24,h=m.length*24,ox=(120-w)/2,oy=(120-h)/2;m.forEach((row,y)=>row.forEach((v,x)=>{if(v){nctx.fillStyle=COLORS[nextType];nctx.fillRect(ox+x*24+1,oy+y*24+1,22,22);}}));}
