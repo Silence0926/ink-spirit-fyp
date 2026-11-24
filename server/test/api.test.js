@@ -323,6 +323,50 @@ test('creature care is authenticated, validates food, persists bonds and prevent
 });
 
 
+
+test('creature evolution requires both level and bond thresholds', async t => {
+  const { base, dataDir } = await startServer(t);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST',
+    headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'evolution-user', password:'evolution-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const user = (await registration.json()).user;
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+
+  const initial = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal((await initial.json()).creatures.koi.evolution.id, 'young');
+
+  await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi' })
+  });
+  const progressPath = path.join(dataDir, 'creature-progress.json');
+  const carePath = path.join(dataDir, 'creature-care.json');
+  const progress = JSON.parse(fs.readFileSync(progressPath, 'utf8'));
+  const care = JSON.parse(fs.readFileSync(carePath, 'utf8'));
+
+  progress[user.id].creatures.koi.level = 5;
+  care[user.id].creatures.koi.bond = 19;
+  fs.writeFileSync(progressPath, JSON.stringify(progress));
+  fs.writeFileSync(carePath, JSON.stringify(care));
+  let response = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal((await response.json()).creatures.koi.evolution.id, 'young', 'level alone must not unlock evolution');
+
+  care[user.id].creatures.koi.bond = 20;
+  fs.writeFileSync(carePath, JSON.stringify(care));
+  response = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal((await response.json()).creatures.koi.evolution.id, 'awakened');
+
+  progress[user.id].creatures.koi.level = 10;
+  care[user.id].creatures.koi.bond = 50;
+  fs.writeFileSync(progressPath, JSON.stringify(progress));
+  fs.writeFileSync(carePath, JSON.stringify(care));
+  response = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal((await response.json()).creatures.koi.evolution.id, 'transcendent');
+});
+
 test('creature journal records interactions, feeding and first-time habitat discoveries', async t => {
   const { base, dataDir } = await startServer(t);
   const anonymous = await fetch(base + '/api/creatures/journal');
