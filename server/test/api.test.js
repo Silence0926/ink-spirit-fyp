@@ -253,3 +253,47 @@ test('habitat discoveries are authenticated, persistent, one-time and reward the
   const progress = await fetch(base + '/api/exploration/progress', { headers });
   assert.deepEqual((await progress.json()).discovered, ['lotus-pond']);
 });
+
+
+test('creature care is authenticated, validates food, persists bonds and prevents feeding a full creature', async t => {
+  const { base, dataDir } = await startServer(t);
+  const anonymous = await fetch(base + '/api/creatures/care');
+  assert.equal(anonymous.status, 401);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST',
+    headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'care-user', password:'care-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+  const initial = await fetch(base + '/api/creatures/care', { headers });
+  assert.equal(initial.status, 200);
+  assert.equal((await initial.json()).creatures.koi.satiety, 60);
+
+  const invalid = await fetch(base + '/api/creatures/care/feed', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'poison' })
+  });
+  assert.equal(invalid.status, 400);
+
+  let result;
+  for (let index = 0; index < 2; index += 1) {
+    const response = await fetch(base + '/api/creatures/care/feed', {
+      method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'moon-dew' })
+    });
+    assert.equal(response.status, 200);
+    result = await response.json();
+  }
+  assert.equal(result.care.creatures.koi.satiety, 100);
+  assert.equal(result.care.creatures.koi.bond, 10);
+  assert.equal(result.care.creatures.koi.mood, '安然');
+  const full = await fetch(base + '/api/creatures/care/feed', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'lotus-seed' })
+  });
+  assert.equal(full.status, 409, 'feeding a full creature should not consume a care action');
+
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-care.json'), 'utf8'));
+  const user = (await registration.json()).user;
+  assert.equal(stored[user.id].creatures.koi.bond, 10);
+  assert.equal(stored[user.id].creatures.koi.daily.count, 2);
+});
