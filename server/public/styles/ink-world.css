@@ -32,3 +32,11 @@
 .journal-entry time{font-size:9px;color:#99958a}
 .journal-empty{grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);font-size:11px;border:1px dashed var(--line)}
 @media(max-width:620px){.journal-panel{padding:17px 0}.journal-list{grid-template-columns:1fr}.journal-heading h3{font-size:19px}}
+
+
+.creature-personality{display:flex;align-items:center;gap:12px;margin:16px 0 18px;padding:13px 14px;border-left:2px solid var(--red);background:rgba(255,255,255,.24)}
+.personality-seal{flex:none;width:29px;height:29px;display:grid;place-items:center;border:1px solid var(--red);border-radius:50%;font-family:var(--calligraphy);font-size:16px;color:var(--red)}
+.creature-personality strong{display:block;font-size:12px;font-weight:500;letter-spacing:1px}
+.creature-personality p{margin:4px 0 0;font-size:11px;line-height:1.8;color:var(--muted)}
+#creature-art{will-change:transform}
+@media(max-width:620px){.creature-personality{align-items:flex-start;padding:11px}.creature-personality p{font-size:10px}}
