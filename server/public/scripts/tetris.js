@@ -10,7 +10,8 @@ const COLORS={I:'#8b9b91',O:'#c3a66b',T:'#a66c5c',S:'#879779',Z:'#b56e60',J:'#71
 const boardCanvas=document.getElementById('tetris-board'), ctx=boardCanvas.getContext('2d');
 const nextCanvas=document.getElementById('tetris-next'), nctx=nextCanvas.getContext('2d');
 const $=id=>document.getElementById(id);
-let board, piece, nextType, bag=[], score=0, lines=0, level=1, best=0;\ntry{best=Number(localStorage.getItem('inkTetrisBest')||0)||0;}catch{best=0;}
+let board, piece, nextType, bag=[], score=0, lines=0, level=1, best=0;
+try{best=Number(localStorage.getItem('inkTetrisBest')||0)||0;}catch{best=0;}
 let running=false, paused=false, over=false, last=0, dropCounter=0, raf=0;
 $('tetris-best').textContent=best;
 function refillBag(){bag=Object.keys(SHAPES);for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}}
