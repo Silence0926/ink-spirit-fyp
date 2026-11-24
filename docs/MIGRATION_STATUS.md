@@ -34,3 +34,5 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 | Original Ink Spirit soundtrack | Implemented prototype | Committed standalone 48-second original WAV master and 128 kbps MP3 export; guzheng-inspired plucks, flute-like melody, synthesized sea ambience, looping playback and volume control on homepage. |
 
 | Aquatic product specifications | Implemented prototype | Optional water type, care difficulty, minimum tank volume, temperature range, adult size and care notes; Admin/Manager editing; catalogue filters for water type, difficulty and stock; product detail display. Values are seller-entered and require factual review. |
+
+| Admin business dashboard | Implemented prototype | Role-protected aggregate dashboard for verified gross payments, 7/30-day trend, order status, best-selling lines, category counts and low-stock alerts. Metrics exclude pending/unverified payments; refunds are not integrated, so gross payments are not net revenue. |
