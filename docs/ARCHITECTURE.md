@@ -95,3 +95,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - Abilities unlock only when the companion reaches level 5 and bond 50. The server derives this from stored progression and care records; clients cannot submit an unlock state or another creature's ability ID.
 - Authenticated activation is limited to five uses per creature per UTC day and is recorded in the companion journal. No XP, damage, combat advantage or paid item is granted.
 - Guest activations are stored locally in the browser. Effects are 2D Web Animations and CSS presentation, not physics, autonomous AI or 3D skills.
+
+
+## Original soundtrack
+
+- The homepage now plays the repository-owned original track `server/public/audio/ink-spirit-original.wav` (48 seconds, mono PCM WAV at 22.05 kHz).
+- The composition is procedurally synthesized for this project: guzheng-like plucked tones, airy bamboo-flute-like melody and a softly filtered, tide-like ambient bed. The water texture is synthesized ambience, not a field recording.
+- Playback is user-initiated, loops continuously, and includes a volume control. No third-party song or external streaming service is required.
+- The earlier Web Audio real-time sketch has been replaced on the homepage by the standalone audio asset. Other pages are unchanged.

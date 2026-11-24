@@ -119,5 +119,18 @@
     </section>
   </main>
   <footer><span class="footer-seal">墨</span><span>墨灵 · INK SPIRIT</span><span>一卷山水，万物有灵。</span></footer>
-  <button id="music-btn" class="music-toggle" type="button" aria-label="播放原创水墨古风海洋音乐" title="原创配乐 · 水墨 / 古风 / 海洋">♫</button>\n  <script src="scripts/music.js"></script>\n</body>
+  <audio id="ink-spirit-audio" preload="metadata" loop>
+    <source src="audio/ink-spirit-original.wav" type="audio/wav">
+  </audio>
+  <button id="music-settings-btn" class="music-settings" type="button" aria-label="音乐设置" aria-expanded="false" aria-controls="music-panel">调</button>
+  <section id="music-panel" class="music-panel hidden" aria-label="音乐设置">
+    <p class="music-kicker">INK SPIRIT · ORIGINAL MUSIC</p>
+    <strong>山海入墨</strong>
+    <span class="music-track-description">古琴意象 · 竹笛旋律 · 潮汐氛围</span>
+    <label for="music-volume">音量 <output id="music-volume-value">46%</output></label>
+    <input id="music-volume" type="range" min="0" max="100" value="46">
+    <small id="music-status" aria-live="polite">已暂停 · READY TO PLAY</small>
+  </section>
+  <button id="music-btn" class="music-toggle" type="button" aria-label="播放原创水墨古风海洋音乐" title="播放原创配乐 · 山海入墨">♫</button>
+  <script src="scripts/music.js"></script>\n</body>
 </html>
