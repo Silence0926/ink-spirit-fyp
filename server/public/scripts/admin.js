@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       field.value = value;
     });
+    document.getElementById('product-image-file').value = '';
     const preset = document.getElementById('product-image-preset');
     preset.value = [...preset.options].some(option => option.value === values['product-image']) ? values['product-image'] : 'custom';
     document.getElementById('product-image-preview').src = values['product-image'];
@@ -220,6 +221,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   imagePreview.addEventListener('error', () => {
     imagePreview.src = '/images/products/aquarium-card.svg';
+  });
+
+  const imageFile = document.getElementById('product-image-file');
+  const uploadImageButton = document.getElementById('upload-product-image');
+  uploadImageButton.addEventListener('click', async () => {
+    const file = imageFile.files?.[0];
+    if (!file) { showMessage('Choose an image file first.', true); return; }
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      showMessage('Choose a JPEG, PNG or WebP image no larger than 5 MB.', true);
+      return;
+    }
+    uploadImageButton.disabled = true;
+    uploadImageButton.textContent = 'Uploading…';
+    try {
+      const response = await fetch('/api/admin/media/products', {
+        method:'POST', credentials:'same-origin',
+        headers:{ 'Content-Type':file.type },
+        body:file
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Image upload failed.');
+      imagePath.value = result.image;
+      imagePreset.value = 'custom';
+      imagePreview.src = result.image;
+      showMessage('Image uploaded. Save the product to apply this image.');
+    } catch (error) {
+      showMessage(error.message, true);
+    } finally {
+      uploadImageButton.disabled = false;
+      uploadImageButton.textContent = 'Upload image';
+    }
   });
 
   document.getElementById('new-product').addEventListener('click', () => editProduct(null));
