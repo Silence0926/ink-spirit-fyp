@@ -639,3 +639,44 @@ test('inventory adjustments are audited, thresholded and cannot create negative 
   const saved = JSON.parse(fs.readFileSync(path.join(dataDir,'inventory-movements.json'),'utf8'));
   assert.equal(saved.length,1);
 });
+
+
+test('product image uploads require staff, enforce image signatures and serve stored assets', async t => {
+  const { base } = await startServer(t, [
+    { id:'media-admin', username:'media-admin', password:'media-pass-123', role:'admin' },
+    { id:'media-user', username:'media-user', password:'media-user-pass', role:'user' }
+  ]);
+  const signIn = async (username,password) => {
+    const response = await fetch(base + '/api/login', {
+      method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ username,password })
+    });
+    assert.equal(response.status,200);
+    return response.headers.get('set-cookie').split(';')[0];
+  };
+  const png = Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),Buffer.alloc(24)]);
+  const unauthorized = await fetch(base + '/api/admin/media/products', {
+    method:'POST', headers:{ 'content-type':'image/png' }, body:png
+  });
+  assert.equal(unauthorized.status,401);
+  const userCookie = await signIn('media-user','media-user-pass');
+  const forbidden = await fetch(base + '/api/admin/media/products', {
+    method:'POST', headers:{ cookie:userCookie, 'content-type':'image/png' }, body:png
+  });
+  assert.equal(forbidden.status,403);
+  const adminCookie = await signIn('media-admin','media-pass-123');
+  const invalid = await fetch(base + '/api/admin/media/products', {
+    method:'POST', headers:{ cookie:adminCookie, 'content-type':'image/png' }, body:Buffer.from('not really a png image')
+  });
+  assert.equal(invalid.status,400);
+  const uploaded = await fetch(base + '/api/admin/media/products', {
+    method:'POST', headers:{ cookie:adminCookie, 'content-type':'image/png' }, body:png
+  });
+  assert.equal(uploaded.status,201);
+  const result = await uploaded.json();
+  assert.match(result.image,/^\/uploads\/products\/[a-f0-9-]+\.png$/);
+  assert.equal(result.size,png.length);
+  const asset = await fetch(base + result.image);
+  assert.equal(asset.status,200);
+  assert.equal(asset.headers.get('content-type'),'image/png');
+  assert.deepEqual(Buffer.from(await asset.arrayBuffer()),png);
+});
