@@ -17,5 +17,3 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
-      - key: PUBLIC_BASE_URL
-        sync: false
