@@ -817,3 +817,25 @@ test('admin analytics aggregates verified payments and inventory without exposin
   assert.equal((await fetch(endpoint,{headers:{cookie:admin}})).status,200);
   assert.equal((await fetch(base+'/api/admin/analytics?range=all',{headers:{cookie:admin}})).status,200);
 });
+
+test('public species catalogue and product species references stay consistent', async t => {
+  const { base } = await startServer(t, [
+    {id:'species-admin',username:'species-admin',password:'species-admin-pass',role:'admin'},
+    {id:'species-user',username:'species-user',password:'species-user-pass',role:'user'}
+  ]);
+  const catalogueResponse=await fetch(base+'/api/species');
+  assert.equal(catalogueResponse.status,200);
+  const catalogue=await catalogueResponse.json();
+  assert.equal(catalogue.length,8);
+  assert.ok(catalogue.every(item=>item.id&&item.commonName&&item.scientificName&&Array.isArray(item.coordinates)&&item.sources.length));
+  const login=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'species-admin',password:'species-admin-pass'})});
+  const cookie=login.headers.get('set-cookie').split(';')[0];
+  const product={name:'Linked Koi',category:'Ornamental Fish',description:'Koi linked to the shared species record.',price:20,stock:4,image:'/images/products/koi-card.svg',speciesId:'koi'};
+  const created=await fetch(base+'/api/admin/products',{method:'POST',headers:{'content-type':'application/json',cookie},body:JSON.stringify(product)});
+  assert.equal(created.status,201);
+  assert.equal((await created.json()).product.speciesId,'koi');
+  const invalid=await fetch(base+'/api/admin/products',{method:'POST',headers:{'content-type':'application/json',cookie},body:JSON.stringify({...product,name:'Invalid Species',speciesId:'unknown-fish'})});
+  assert.equal(invalid.status,400);
+  const publicProducts=await (await fetch(base+'/api/products')).json();
+  assert.equal(publicProducts.find(item=>item.name==='Linked Koi').speciesId,'koi');
+});
