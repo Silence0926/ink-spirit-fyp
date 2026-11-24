@@ -39,8 +39,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const details = make('details','order-details');
       const summaryLabel = make('summary','','View order details & tracking');
       const body = make('div','order-detail-body');
-      const itemList = make('ul','order-item-list');
-      (order.items || []).forEach(item => itemList.append(make('li','',item.name+' × '+item.quantity+' · RM '+Number(item.lineTotal ?? item.unitPrice*item.quantity).toFixed(2))));
+      const itemList = make('div','order-item-list');
+      (order.items || []).forEach(item => {
+        const line=make('article','order-line');
+        const image=make('img','order-line-image');
+        image.src=item.image||'/images/products/aquarium-card.svg';image.alt=item.name;image.loading='lazy';
+        image.addEventListener('error',()=>{image.src='/images/products/aquarium-card.svg';},{once:true});
+        const info=make('div','order-line-info');
+        const name=make('a','order-line-name',item.name);name.href='product.html?id='+encodeURIComponent(item.productId||'');
+        info.append(name,make('p','',item.quantity+' 件 × RM '+Number(item.unitPrice).toFixed(2)));
+        line.append(image,info,make('strong','','RM '+Number(item.lineTotal ?? item.unitPrice*item.quantity).toFixed(2)));
+        itemList.append(line);
+      });
       body.append(make('h3','','Items'),itemList);
       const detailResponse = await fetch('/api/orders/'+encodeURIComponent(order.id),{ credentials:'same-origin' });
       const detailData = await detailResponse.json().catch(()=>({}));
