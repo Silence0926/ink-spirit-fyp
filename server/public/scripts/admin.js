@@ -449,7 +449,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderAnalyticsTable(document.getElementById('analytics-categories'),data.categories,'暂无上架商品',[row=>row.category,row=>row.products+' 个商品',row=>row.stockUnits+' 件库存']);
     } catch(error) { setLoading(metrics,error.message);showMessage(error.message,true); }
   };
-\n  const loaders = { dashboard: loadDashboard, products: loadProducts, orders: loadOrders, users: loadUsers };
+
+  const loaders = { dashboard: loadDashboard, products: loadProducts, orders: loadOrders, users: loadUsers };
   const activateTab = async name => {
     tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
     panels.forEach(panel => { panel.hidden = panel.id !== 'admin-' + name; });
