@@ -25,3 +25,5 @@
 - No payment should be represented as successful until a trusted provider callback or server-side verification confirms it.
 
 See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring production services.
+
+| Companion signature abilities | Implemented prototype | Four creature-specific non-combat visual techniques; level 5 + bond 50 unlock, server-validated IDs, five daily authenticated activations per creature, journal events and guest-local fallback. Effects remain 2D presentation. |
