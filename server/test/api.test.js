@@ -98,3 +98,46 @@ test('products endpoint seeds the starter catalogue when no catalogue file exist
   assert.ok(products.some(product => product.id === 'koi-001'));
   assert.ok(products.some(product => product.id === 'tank-001'));
 });
+
+test('admin and manager API permissions are enforced server-side', async t => {
+  const { base } = await startServer(t, [
+    { id:'manager-id', username:'manager-test', password:'manager-pass-123', role:'manager' },
+    { id:'admin-id', username:'admin-test', password:'admin-pass-123', role:'admin' }
+  ], [
+    { id:'permission-product', name:'Test Koi', category:'Fish', description:'Permission test product.', price:10, currency:'MYR', stock:5, image:'/images/products/koi-card.svg', active:true }
+  ]);
+
+  const signIn = async (username, password) => {
+    const response = await fetch(base + '/api/login', {
+      method:'POST',
+      headers:{ 'content-type':'application/json' },
+      body:JSON.stringify({ username, password })
+    });
+    assert.equal(response.status, 200);
+    const cookie = response.headers.get('set-cookie');
+    assert.ok(cookie, 'login should issue a session cookie');
+    return cookie.split(';')[0];
+  };
+
+  const managerCookie = await signIn('manager-test', 'manager-pass-123');
+  const managerHeaders = { cookie:managerCookie };
+  assert.equal((await fetch(base + '/api/admin/products', { headers:managerHeaders })).status, 200);
+  assert.equal((await fetch(base + '/api/admin/orders', { headers:managerHeaders })).status, 200);
+  assert.equal((await fetch(base + '/api/admin/users', { headers:managerHeaders })).status, 403);
+  assert.equal((await fetch(base + '/api/admin/products/permission-product', {
+    method:'DELETE', headers:managerHeaders
+  })).status, 403);
+
+  const adminCookie = await signIn('admin-test', 'admin-pass-123');
+  const adminHeaders = { cookie:adminCookie };
+  assert.equal((await fetch(base + '/api/admin/users', { headers:adminHeaders })).status, 200);
+  const selfDemotion = await fetch(base + '/api/admin/users/admin-id/role', {
+    method:'PATCH',
+    headers:{ ...adminHeaders, 'content-type':'application/json' },
+    body:JSON.stringify({ role:'manager' })
+  });
+  assert.equal(selfDemotion.status, 400, 'an administrator cannot demote their own account');
+  assert.equal((await fetch(base + '/api/admin/products/permission-product', {
+    method:'DELETE', headers:adminHeaders
+  })).status, 200);
+});
