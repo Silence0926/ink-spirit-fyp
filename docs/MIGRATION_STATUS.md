@@ -14,7 +14,7 @@
 | Habitat exploration | Implemented prototype | Four realms, authenticated discovery records, one-time server-calculated 25 XP reward to selected companion, guest-local fallback; JSON persistence. |
 | Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
 | Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. Admin Studio includes catalogue search, active/archive filters, built-in image asset selection and live image preview; custom upload is not implemented. |
-| Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
+| Server cart/orders | Expanded prototype | JSON file persistence; Admin/Manager can advance verified, inventory-allocated orders through processing, shipped and completed states; cancellation restores allocated stock once; staff cannot forge paid status. Payment callback verifies provider state and flags paid orders with insufficient stock for manual inventory review. Persistent single-instance disk required. |
 | Payment gateway | Deferred | No live provider enabled. TNG eWallet is the first Malaysia provider to evaluate if payment becomes necessary. Billplz remains legacy prototype code only. |
 | Original video assets | Pending | Visual direction uses original ink-wash SVG/CSS artwork; animation/video production remains a separate task. |
 
@@ -22,7 +22,8 @@
 - Species locations are broad educational reference points, not field-verified boundaries or collection coordinates.
 - Live-animal availability, local regulations, health certificates and shipping requirements must be verified before listing animals for sale.
 - JSON persistence is not a substitute for transactional SQL storage in a production multi-instance shop.
-- No payment should be represented as successful until a trusted provider callback or server-side verification confirms it.
+- No payment should be represented as successful until a trusted provider callback or server-side verification confirms it. Staff order-status controls cannot mark an order as paid.
+- Order inventory uses JSON-file updates and is not transaction-safe under concurrent multi-instance traffic. A production shop needs database transactions, stock reservation/locking, idempotency keys and a refund workflow.
 
 See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring production services.
 
