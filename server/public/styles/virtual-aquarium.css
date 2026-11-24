@@ -13,3 +13,16 @@
 .va-decor-card button{justify-self:start;border:0;border-radius:8px;padding:8px 12px;background:#355f5d;color:white;cursor:pointer;font:inherit;font-size:12px}
 .va-decor-card button:disabled{opacity:.45;cursor:not-allowed}
 .va-decor-card button.va-secondary{background:#f0ebdf;color:#385351;border:1px solid #cfc5b4}
+
+.va-ecology{margin:22px 0;padding:20px;border:1px solid #d9d0bf;border-radius:15px;background:linear-gradient(145deg,#f5f2e8,#e5eee8)}
+.va-ecology h3,.va-ecology h4{font-family:'Noto Serif SC',serif;color:#365957}
+.va-ecology-forms{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.va-ecology-forms form{display:grid;gap:10px;padding:16px;border:1px solid #d5dfd5;border-radius:12px;background:#fffdf8}
+.va-ecology-forms h4{margin:0}
+.va-ecology-forms label{display:grid;gap:6px;color:#536b69;font-size:13px}
+.va-ecology-forms select,.va-ecology-forms input{padding:10px;border:1px solid #d2c9b8;border-radius:9px;background:#fff}
+.va-ecology-forms button,.va-ecology-actions button{justify-self:start;border:0;border-radius:9px;padding:10px 14px;background:#355f5d;color:#fff;cursor:pointer;font:inherit}
+.va-ecology-actions{margin:14px 0}
+.va-ecology-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.va-ecology-columns h4{margin:8px 0}
+@media(max-width:650px){.va-ecology-forms,.va-ecology-columns{grid-template-columns:1fr}}
