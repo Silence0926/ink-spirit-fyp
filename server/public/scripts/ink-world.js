@@ -29,7 +29,7 @@
   let selected = 'koi';
   let authenticated = false;
   let dailyInteractions = { count:0, limit:50 };
-  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, mood:'平静', dailyFeeds:{ count:0, limit:3 }, lastFedAt:null }]));
+  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, bondStage:'初识', mood:'平静', dailyFeeds:{ count:0, limit:3 }, lastFedAt:null }]));
   let careProgress = defaultCare();
   let journalEvents = [];
   const $ = id => document.getElementById(id);
@@ -158,7 +158,7 @@
 
   function renderCare() {
     const care = careProgress[selected] || defaultCare()[selected];
-    $('care-bond').textContent = '亲密度 · ' + care.bond;
+    $('care-bond').textContent = '亲密度 · ' + care.bond + ' · ' + (care.bondStage || (care.bond >= 100 ? '心契' : care.bond >= 50 ? '亲近' : care.bond >= 20 ? '熟悉' : '初识'));
     $('care-mood').textContent = '心境 · ' + care.mood;
     $('care-satiety-text').textContent = '饱足 · ' + care.satiety + ' / 100';
     $('care-satiety-bar').style.width = care.satiety + '%';
@@ -236,12 +236,16 @@
           method:'POST', body:JSON.stringify({ creatureId:selected })
         });
         applyServerProgress(result.progress);
+        if (result.care) applyCare(result.care);
         $('progress-note').textContent = creatures[selected].interactionText + ' 灵息增加 ' + result.reward + ' 点，记录已保存。'
         await loadJournal();
       } else {
         const p = progress[selected];
         p.experience += creatures[selected].reward;
         p.visits += 1;
+        careProgress[selected].bond += 1;
+        careProgress[selected].bondStage = careProgress[selected].bond >= 100 ? '心契' : careProgress[selected].bond >= 50 ? '亲近' : careProgress[selected].bond >= 20 ? '熟悉' : '初识';
+        safeLocalWrite('inkSpirit.care.v1', JSON.stringify(careProgress));
         p.totalExperience = (p.totalExperience || 0) + creatures[selected].reward;
         while (p.experience >= threshold(p.level)) {
           p.experience -= threshold(p.level);
@@ -249,7 +253,7 @@
         }
         safeLocalWrite(STORAGE_KEY, JSON.stringify(progress));
         $('progress-note').textContent = creatures[selected].interactionText + ' 灵息增加 ' + creatures[selected].reward + ' 点。访客进度保存在此浏览器。'
-        addLocalJournal('interaction', '相伴互动', '与' + creatures[selected].name + '相伴片刻，获得 ' + creatures[selected].reward + ' 点灵息。');
+        addLocalJournal('interaction', '相伴互动', '与' + creatures[selected].name + '相伴片刻，获得 ' + creatures[selected].reward + ' 点灵息，亲密度增加 1。');
       }
       renderProgress();
       animateCompanion();
