@@ -49,3 +49,10 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 - Added a guppy-only abstract breeding action with adult-growth, satiety, environment-score and 24-hour cooldown checks.
 - Fry are stored as separate cohorts and count toward the existing 30-individual simulation limit.
 - This release does not simulate sex, genetics, gestation or scientifically validated breeding conditions.
+
+
+## Virtual aquarium growth and guppy line labels V2.0
+
+- Fish are represented as separate cohorts with server-derived fry, juvenile and adult stages and growth progress.
+- Guppy cohorts can be assigned one of four visual line labels: standard grey, mosaic, tuxedo and cobra.
+- Simulated offspring retain the parent cohort's label and increment the generation counter. The labels do not represent scientifically modelled genetics.
