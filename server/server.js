@@ -706,7 +706,7 @@ app.get('/api/admin/analytics', requireRole('admin', 'manager'), (req, res) => {
   const windowStart = now - range * 24 * 60 * 60 * 1000;
   const orders = readJson(FILES.orders, []);
   const products = readJson(FILES.products, []);
-  const paidOrders = orders.filter(order => order.paymentVerified === true || ['paid','processing','shipped','completed'].includes(order.status));
+  const paidOrders = orders.filter(order => order.paymentVerified === true);
   const verifiedInRange = paidOrders.filter(order => {
     const timestamp = Date.parse(order.paidAt || order.updatedAt || order.createdAt);
     return Number.isFinite(timestamp) && timestamp >= windowStart && timestamp <= now;
