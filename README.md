@@ -11,6 +11,7 @@ Ink Spirit is an interactive Chinese ink-wash ecosystem with companion creatures
 - Sea Garden storefront reads products from the server API.
 - New Snake game: keyboard, WASD, touch controls, pause/restart and local best score.
 - Ecological Atlas with regional distribution summaries for Betta splendens, Amphiprion ocellaris, Carassius auratus and ornamental koi history.
+- Virtual aquarium simulator: authenticated, user-isolated tanks; freshwater/marine selection; fish cohorts, guppy breeding prototype, decorative aquascaping, plant growth and auxiliary organism collections. Simulation values are game mechanics, not real husbandry or compatibility advice.
 - Server-side account sessions using HttpOnly cookies; password hashes use scrypt.
 - Admin/manager product catalogue endpoints, admin-only role management, and stock fields.
 - Server-persisted carts and order records using atomic JSON file writes.
@@ -35,6 +36,17 @@ Run checks:
 npm run check:frontend
 npm test
 ```
+
+## Virtual aquarium testing
+
+1. Start the server using the local setup above and open `http://localhost:3000`.
+2. Register a normal account from the site, then sign in.
+3. Open **模拟水族箱 / Virtual Aquarium** from the homepage navigation, or visit `http://localhost:3000/virtual-aquarium.html`.
+4. Create a freshwater tank (for example, 60 L), add a fish, then try the plant, auxiliary-organism and aquascape controls.
+5. Create a marine tank separately to see the marine catalogue. The server rejects freshwater catalogue entries in marine tanks and vice versa.
+6. Refresh the page to confirm tank data persists. Register a second account to verify that it cannot access the first account's tank.
+
+Automated checks: run `npm run check:frontend` and `npm test` from the `server` directory. The CI workflow runs both checks on every push to `main`.
 
 ## Administrator setup
 
