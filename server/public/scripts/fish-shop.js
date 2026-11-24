@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     'Aquarium':'鱼缸与造景',
     'Equipment':'设备与检测',
     'Food':'鱼粮与营养',
-    'Aquatic Plants':'水草'
+    'Aquatic Plants':'水草','Aquatic Invertebrates':'水族无脊椎生物'
   };
 
   function render() {
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!visible.length) {
       const empty = document.createElement('div');
       empty.className = 'catalog-empty';
-      empty.innerHTML = '<span>空</span><h3>此卷暂未寻得藏品</h3><p>' + (activeSpecies && Object.prototype.hasOwnProperty.call(legacySpeciesProducts, activeSpecies) || ['koi','betta','goldfish','guppy','clown','arowana','blue-tang','seahorse'].includes(activeSpecies) ? '目前没有与此物种直接对应的在售商品。可浏览全部藏品，或先阅读生态照护资料。' : '试试其他关键词，或切换商品类别。') + '</p>';
+      empty.innerHTML = '<span>空</span><h3>此卷暂未寻得藏品</h3><p>' + (activeSpecies && Object.prototype.hasOwnProperty.call(legacySpeciesProducts, activeSpecies) || ['koi','betta','goldfish','guppy','clown','arowana','blue-tang','seahorse','cherry-shrimp','nerite-snail','cleaner-shrimp','blue-leg-hermit'].includes(activeSpecies) ? '目前没有与此物种直接对应的在售商品。可浏览全部藏品，或先阅读生态照护资料。' : '试试其他关键词，或切换商品类别。') + '</p>';
       grid.appendChild(empty);
       return;
     }
