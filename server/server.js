@@ -643,6 +643,34 @@ app.get('/api/encyclopedia/:slug', (req, res) => {
   if (!article) return res.status(404).json({ error:'Article not found.' });
   res.json(article);
 });
+app.post('/api/aquarium/compatibility', (req, res) => {
+  const entries = req.body && req.body.species;
+  if (!Array.isArray(entries) || entries.length < 1 || entries.length > 8) return res.status(400).json({ error:'Select between 1 and 8 species.' });
+  const selected = [];
+  for (const entry of entries) {
+    if (!entry || typeof entry.id !== 'string' || !SPECIES_BY_ID.has(entry.id) || !Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > 30) {
+      return res.status(400).json({ error:'Each species must use a catalogue ID and a quantity from 1 to 30.' });
+    }
+    selected.push({ ...SPECIES_BY_ID.get(entry.id), quantity:entry.quantity });
+  }
+  const waterTypes = [...new Set(selected.map(item => item.waterType))];
+  const issues = [];
+  if (waterTypes.length > 1) issues.push({ severity:'incompatible', code:'water-type-mismatch', message:'所选物种需要不同水体类型，不能放入同一个普通水族系统。', species:selected.filter(item => item.waterType !== waterTypes[0]).map(item => item.id) });
+  const bettaCount = selected.filter(item => item.id === 'betta').reduce((sum,item)=>sum+item.quantity,0);
+  if (bettaCount > 1) issues.push({ severity:'caution', code:'betta-social-risk', message:'暹罗斗鱼具有明显个体与性别相关的攻击风险；仅凭物种名称和数量无法判断能否同缸，请先核实性别、品系、缸体结构与专业饲养条件。', species:['betta'] });
+  const hasUnknownPairRules = selected.length > 1 && !issues.some(issue=>issue.severity==='incompatible');
+  res.json({
+    status:issues.some(issue=>issue.severity==='incompatible')?'incompatible':issues.some(issue=>issue.severity==='caution')?'caution':'insufficient_information',
+    selected:selected.map(item=>({id:item.id,commonName:item.commonName,scientificName:item.scientificName,waterType:item.waterType,quantity:item.quantity,care:item.care})),
+    issues,
+    notes:[
+      '相同水体类型不代表物种彼此兼容；本工具不会仅凭淡水/海水标签判定可以混养。',
+      '当前物种资料尚未覆盖所有成年体型、温度、行为、食性和空间需求；未知条件不会被视为安全。',
+      '新增物种、数量或环境后，应重新评估，并在实际混养前咨询可靠的专业资料或鱼类兽医。'
+    ],
+    pairAssessment:hasUnknownPairRules?'unknown':'not_applicable'
+  });
+});
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
