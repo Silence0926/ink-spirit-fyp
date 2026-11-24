@@ -826,7 +826,10 @@ test('public species catalogue and product species references stay consistent', 
   const catalogueResponse=await fetch(base+'/api/species');
   assert.equal(catalogueResponse.status,200);
   const catalogue=await catalogueResponse.json();
-  assert.equal(catalogue.length,8);
+  assert.equal(catalogue.length,12);
+  assert.equal(catalogue.filter(item=>item.organismType==='fish').length,8);
+  assert.equal(catalogue.filter(item=>item.organismType==='auxiliary').length,4);
+  assert.ok(catalogue.filter(item=>item.organismType==='auxiliary').every(item=>item.image&&item.sources.length));
   assert.ok(catalogue.every(item=>item.id&&item.commonName&&item.scientificName&&Array.isArray(item.coordinates)&&item.sources.length));
   const login=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'species-admin',password:'species-admin-pass'})});
   const cookie=login.headers.get('set-cookie').split(';')[0];
@@ -906,7 +909,12 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   assert.ok((await plantsCatalogue.json()).some(item=>item.id==='java-fern'));
   const auxiliaryCatalogue=await fetch(base+'/api/aquarium-auxiliaries');
   assert.equal(auxiliaryCatalogue.status,200);
-  assert.ok((await auxiliaryCatalogue.json()).some(item=>item.id==='cherry-shrimp'));
+  const auxiliaryItems=await auxiliaryCatalogue.json();
+   assert.equal(auxiliaryItems.length,4);
+   assert.ok(auxiliaryItems.some(item=>item.id==='cherry-shrimp'));
+   assert.ok(auxiliaryItems.some(item=>item.id==='blue-leg-hermit'));
+   const rejectAuxAsFish=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'cherry-shrimp',quantity:1})});
+   assert.equal(rejectAuxAsFish.status,400);
   const addWrongPlant=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'add_plant',plantId:'macroalgae',quantity:1})});
   assert.equal(addWrongPlant.status,409);
   const addPlant=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'add_plant',plantId:'java-fern',quantity:2})});
