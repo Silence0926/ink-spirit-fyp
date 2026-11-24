@@ -29,6 +29,8 @@
   let selected = 'koi';
   let authenticated = false;
   let dailyInteractions = { count:0, limit:50 };
+  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, mood:'平静', dailyFeeds:{ count:0, limit:3 } }]));
+  let careProgress = defaultCare();
   const $ = id => document.getElementById(id);
   const threshold = level => level * 100;
   const api = async (url, options = {}) => {
@@ -87,6 +89,29 @@
       if (lore) lore.textContent = unlocked ? codexLore[id] : '灵境尚未探索，图鉴记载暂未显现。';
     });
   }
+  function renderCare() {
+    const care = careProgress[selected] || defaultCare()[selected];
+    $('care-bond').textContent = '亲密度 · ' + care.bond;
+    $('care-mood').textContent = '心境 · ' + care.mood;
+    $('care-satiety-text').textContent = '饱足 · ' + care.satiety + ' / 100';
+    $('care-satiety-bar').style.width = care.satiety + '%';
+    const feedButton = $('feed-button');
+    const exhausted = care.dailyFeeds.count >= care.dailyFeeds.limit;
+    const full = care.satiety >= 100;
+    feedButton.disabled = exhausted || full;
+    feedButton.textContent = exhausted ? '今日照料已达上限' : full ? '伙伴已经吃饱' : '喂给伙伴';
+    $('care-note').textContent = authenticated
+      ? '今日喂养 · ' + care.dailyFeeds.count + ' / ' + care.dailyFeeds.limit + ' 次。照料记录已同步至账号。'
+      : '访客模式 · 今日喂养 ' + care.dailyFeeds.count + ' / ' + care.dailyFeeds.limit + ' 次，记录保存在当前浏览器。';
+  }
+  function applyCare(data) {
+    if (!data || !data.creatures) return;
+    for (const id of Object.keys(creatures)) {
+      const item = data.creatures[id];
+      if (item) careProgress[id] = item;
+    }
+    renderCare();
+  }
   function renderProgress() {
     const p = progress[selected];
     const needed = threshold(p.level);
@@ -103,6 +128,7 @@
     const button = $('interact-button');
     button.disabled = authenticated && dailyInteractions.count >= dailyInteractions.limit;
     button.textContent = button.disabled ? '今日互动已达上限' : '与它互动 +10';
+    renderCare();
   }
   function selectCreature(id, sync = true) {
     if (!creatures[id]) return;
@@ -169,11 +195,39 @@
       if (!(authenticated && dailyInteractions.count >= dailyInteractions.limit)) button.disabled = false;
     }
   });
+  $('feed-button').addEventListener('click', async () => {
+    const button = $('feed-button');
+    button.disabled = true;
+    try {
+      const foodId = $('care-food').value;
+      if (authenticated) {
+        const result = await api('/api/creatures/care/feed', {
+          method:'POST', body:JSON.stringify({ creatureId:selected, foodId })
+        });
+        applyCare(result.care);
+        $('care-note').textContent = '已奉上' + result.food + '，饱足恢复 ' + result.satietyRestored + ' 点，亲密度增加 5。';
+      } else {
+        const care = careProgress[selected];
+        if (care.dailyFeeds.count >= 3) throw new Error('今日的喂养次数已达上限。');
+        if (care.satiety >= 100) throw new Error('伙伴现在已经吃饱了。');
+        care.satiety = Math.min(100, care.satiety + 20);
+        care.bond += 5;
+        care.mood = care.satiety >= 70 ? '安然' : care.satiety >= 35 ? '平静' : '需要照料';
+        care.dailyFeeds.count += 1;
+        safeLocalWrite('inkSpirit.care.v1', JSON.stringify(careProgress));
+        renderCare();
+        $('care-note').textContent = '已奉上灵食，亲密度增加 5。访客记录保存在当前浏览器。';
+      }
+    } catch (error) {
+      $('care-note').textContent = error.message;
+    } finally { renderCare(); }
+  });
   async function init() {
     try {
       const data = await api('/api/creatures/progress');
       authenticated = true;
       applyServerProgress(data);
+      try { applyCare(await api('/api/creatures/care')); } catch { renderCare(); }
       $('progress-note').textContent = '已登录：成长记录保存在服务器，可跨设备继续。每日最多获得 50 次互动奖励。';
       try {
         const exploration = await api('/api/exploration/progress');
@@ -181,6 +235,12 @@
       } catch { renderCodex([]); }
     } catch {
       authenticated = false;
+      try {
+        const savedCare = JSON.parse(localStorage.getItem('inkSpirit.care.v1') || 'null');
+        if (savedCare && typeof savedCare === 'object') {
+          for (const id of Object.keys(creatures)) if (savedCare[id]) careProgress[id] = savedCare[id];
+        }
+      } catch {}
       try {
         const saved = localStorage.getItem('inkSpirit.selected');
         if (creatures[saved]) selected = saved;
