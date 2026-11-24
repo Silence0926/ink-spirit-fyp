@@ -45,3 +45,13 @@
 - Stock is not reduced by an unverified browser redirect.
 - Ecological map distinguishes native distribution from ornamental breeding history.
 - Music is original and user-initiated.
+
+
+## M6 — Virtual aquarium playable prototype
+**V1–V4 prototype implemented; automated CI passed**
+- Create and manage per-user freshwater/marine virtual tanks.
+- Add fish cohorts, simulate feeding, water changes, filter maintenance and a limited guppy breeding loop.
+- Customize tanks with water-type-filtered decorative elements.
+- Add plant cohorts with deterministic growth stages and care actions.
+- Add auxiliary organism cohorts, with water-type category validation and per-tank quantity limits.
+- Next validation: manual browser acceptance on desktop and mobile; improve scene rendering and refine ecosystem rules only after user testing.
