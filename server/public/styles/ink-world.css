@@ -40,3 +40,18 @@
 .creature-personality p{margin:4px 0 0;font-size:11px;line-height:1.8;color:var(--muted)}
 #creature-art{will-change:transform}
 @media(max-width:620px){.creature-personality{align-items:flex-start;padding:11px}.creature-personality p{font-size:10px}}
+
+
+.evolution-panel{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px 15px;border:1px solid var(--line);background:rgba(230,226,214,.42)}
+.evolution-seal{flex:none;width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--red);color:var(--red);font-family:var(--calligraphy);font-size:23px}
+.evolution-copy{min-width:0;flex:1}
+.evolution-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.evolution-top strong{font-size:12px;font-weight:600;letter-spacing:.08em}
+.evolution-top span,.evolution-requirements{font-size:10px;color:var(--muted)}
+.evolution-copy p{margin:5px 0;font-size:11px;color:var(--muted);line-height:1.7}
+.evolution-requirements{letter-spacing:.02em}
+#creature-art[data-evolution="awakened"]{filter:drop-shadow(0 0 7px rgba(151,137,91,.48))}
+#creature-art[data-evolution="transcendent"]{filter:drop-shadow(0 0 9px rgba(163,116,72,.55)) brightness(1.08)}
+#painting[data-evolution="awakened"] .stamp{color:#9a7c4c;transform:scale(1.08)}
+#painting[data-evolution="transcendent"] .stamp{color:#a64b3e;transform:scale(1.18);text-shadow:0 0 12px rgba(166,75,62,.25)}
+@media(max-width:620px){.evolution-panel{padding:12px;gap:11px}.evolution-top{align-items:flex-start;flex-direction:column;gap:3px}.evolution-seal{width:36px;height:36px;font-size:20px}}
