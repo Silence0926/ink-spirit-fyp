@@ -1,1 +1,67 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fish Shop | Sea Garden</title><link rel="stylesheet" href="styles/styles.css"><link rel="stylesheet" href="styles/fish-shop.css"></head><body><div id="navbar"></div><main class="page-shell"><header class="page-heading"><p class="eyebrow">SEA GARDEN · AQUATIC LIVING</p><h1>水族雅集 · Fish Shop</h1><p>Species, aquariums and equipment selected for thoughtful aquatic care.</p></header><section id="product-grid" class="product-grid"><p>Loading products…</p></section></main><div id="footer"></div><script src="scripts/auth.js"></script><script src="scripts/include.js"></script><script src="scripts/fish-shop.js"></script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#eee9dc">
+  <meta name="description" content="墨灵水族雅集：探索观赏鱼、水族造景、设备与养护用品。">
+  <title>水族雅集 · 墨灵 Ink Spirit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/styles.css">
+  <link rel="stylesheet" href="styles/fish-shop.css">
+</head>
+<body class="ink-shop-page">
+  <div id="navbar"></div>
+  <main class="shop-shell">
+    <header class="shop-intro">
+      <div class="shop-intro-copy">
+        <p class="shop-kicker">INK SPIRIT · AQUATIC COLLECTION</p>
+        <h1>水族雅集<span>。</span></h1>
+        <p class="shop-subtitle">一方清水，一卷生趣。精选观赏鱼、造景与养护器材，让每一处水境都安然有灵。</p>
+        <a class="shop-cta" href="#catalog">浏览雅集 <span>↓</span></a>
+      </div>
+      <div class="shop-art" aria-label="水墨风格的淡水与珊瑚海境插画">
+        <figure><img src="images/products/freshwater-aquarium-scene.svg" alt="烟雨淡水水境插画"><figcaption>烟雨淡水 · FRESHWATER</figcaption></figure>
+        <figure><img src="images/products/reef-aquarium-scene.svg" alt="珊瑚海境插画"><figcaption>珊瑚海境 · MARINE</figcaption></figure>
+        <span class="shop-seal" aria-hidden="true">雅</span>
+      </div>
+    </header>
+
+    <section class="shop-values" aria-label="选购提示">
+      <div><span>壹</span><b>适养优先</b><small>先了解物种需求，再选择伙伴</small></div>
+      <div><span>贰</span><b>生态友善</b><small>优先关注人工繁殖与负责任来源</small></div>
+      <div><span>叁</span><b>稳定水质</b><small>过滤、循环与检测同样重要</small></div>
+    </section>
+
+    <section id="catalog" class="catalog-section">
+      <div class="catalog-heading">
+        <div><p class="shop-kicker">THE AQUATIC CATALOGUE</p><h2>雅集藏品</h2></div>
+        <p id="catalog-count" class="catalog-count" aria-live="polite">正在整理藏品…</p>
+      </div>
+      <div class="catalog-tools">
+        <label class="shop-search"><span aria-hidden="true">⌕</span><input id="product-search" type="search" placeholder="搜索鱼种、器材或用品…" autocomplete="off" aria-label="搜索商品"></label>
+        <label class="shop-sort"><span>排序</span><select id="product-sort" aria-label="商品排序"><option value="featured">精选排序</option><option value="price-asc">价格由低至高</option><option value="price-desc">价格由高至低</option><option value="name">名称排序</option></select></label>
+      </div>
+      <div class="category-filters" id="category-filters" role="group" aria-label="商品类别">
+        <button type="button" class="filter-chip active" data-category="all" aria-pressed="true">全部藏品</button>
+        <button type="button" class="filter-chip" data-category="Ornamental Fish" aria-pressed="false">淡水观赏鱼</button>
+        <button type="button" class="filter-chip" data-category="Marine Fish" aria-pressed="false">海水鱼</button>
+        <button type="button" class="filter-chip" data-category="Aquarium" aria-pressed="false">鱼缸造景</button>
+        <button type="button" class="filter-chip" data-category="Equipment" aria-pressed="false">过滤与检测</button>
+        <button type="button" class="filter-chip" data-category="Food" aria-pressed="false">鱼粮</button>
+        <button type="button" class="filter-chip" data-category="Aquatic Plants" aria-pressed="false">水草</button>
+      </div>
+      <div id="product-grid" class="ink-product-grid" aria-live="polite" aria-busy="true">
+        <div class="catalog-loading"><span>墨</span><p>正在展开水族画卷…</p></div>
+      </div>
+      <p class="shop-footnote">商品库存与价格以结账前显示为准。购买活体前，请确认鱼缸已完成循环，并具备适合该物种的空间、水质与同伴条件。</p>
+    </section>
+  </main>
+  <div id="footer"></div>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/include.js"></script>
+  <script src="scripts/fish-shop.js"></script>
+</body>
+</html>

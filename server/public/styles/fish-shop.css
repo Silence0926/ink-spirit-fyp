@@ -1,2 +1,65 @@
-.product-card{transition:transform .2s,box-shadow .2s}.product-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px #174c6818}.product-card button:hover{background:#105f82}.product-card a{color:#167ba4}
-\n.product-image{display:block;width:100%;height:175px;object-fit:cover;border-radius:12px;background:#e9e5d9;margin-bottom:14px}.product-card small{display:block;color:#758477;margin:10px 0}.product-card button:disabled{opacity:.45;cursor:not-allowed}\n
+/* Ink Spirit aquatic collection */
+.ink-shop-page{background:#eee9dc;color:#30382f;font-family:"Noto Serif SC",serif}
+.shop-shell{width:min(1180px,92%);margin:0 auto;padding:44px 0 90px}
+.shop-intro{position:relative;display:grid;grid-template-columns:.85fr 1.15fr;align-items:center;gap:36px;min-height:360px;padding:40px 4.5%;overflow:hidden;background:linear-gradient(112deg,#e4dfd1 0%,#f4f0e6 52%,#d6ddd2 100%);border:1px solid #c9c7b9;box-shadow:0 18px 50px #26392b12}
+.shop-intro:before,.shop-intro:after{content:"";position:absolute;pointer-events:none;border:1px solid #536b5828;border-radius:50%}
+.shop-intro:before{width:340px;height:340px;right:-120px;top:-180px}
+.shop-intro:after{width:210px;height:210px;left:-140px;bottom:-150px}
+.shop-intro-copy{position:relative;z-index:1}
+.shop-kicker{margin:0 0 12px;color:#8c5145;font-size:10px;letter-spacing:2.5px}
+.shop-intro h1{margin:0;color:#303b31;font-family:"Ma Shan Zheng","Noto Serif SC",serif;font-size:clamp(48px,7vw,76px);font-weight:400;letter-spacing:7px}
+.shop-intro h1 span{color:#a84f40}
+.shop-subtitle{max-width:410px;margin:16px 0 24px;color:#697468;font-size:13px;line-height:2.1}
+.shop-cta{display:inline-flex;align-items:center;gap:25px;padding:11px 17px;border:1px solid #647565;color:#3c5143;text-decoration:none;font-size:12px;letter-spacing:1px;transition:background .2s,color .2s}
+.shop-cta:hover{background:#455c4c;color:#f4f0e6}
+.shop-art{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center}
+.shop-art figure{position:relative;margin:0;padding:7px;background:#f5f1e7;border:1px solid #c7c8ba;box-shadow:0 9px 22px #26392b18}
+.shop-art figure:first-child{transform:translateY(15px) rotate(-2deg)}
+.shop-art figure:nth-child(2){transform:translateY(-14px) rotate(2deg)}
+.shop-art img{display:block;width:100%;aspect-ratio:1.45;object-fit:cover;filter:saturate(.7) contrast(.96)}
+.shop-art figcaption{padding:8px 3px 2px;color:#667366;font-size:9px;letter-spacing:1.3px;text-align:center}
+.shop-seal{position:absolute;right:-12px;bottom:0;display:grid;place-items:center;width:42px;height:42px;border:2px solid #a74f42;color:#a74f42;font-family:"Ma Shan Zheng",serif;font-size:25px;transform:rotate(8deg)}
+.shop-values{display:grid;grid-template-columns:repeat(3,1fr);margin:30px 0 64px;border-top:1px solid #c8c5b7;border-bottom:1px solid #c8c5b7}
+.shop-values>div{position:relative;display:grid;grid-template-columns:38px 1fr;column-gap:10px;padding:18px 16px}
+.shop-values>div+div{border-left:1px solid #d0ccbe}
+.shop-values>div>span{grid-row:span 2;color:#a45344;font-family:"Ma Shan Zheng",serif;font-size:23px}
+.shop-values b{font-size:13px;font-weight:600}
+.shop-values small{margin-top:5px;color:#7a8175;font-size:10px;line-height:1.6}
+.catalog-heading{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:20px}
+.catalog-heading h2{margin:0;color:#303b31;font-family:"Ma Shan Zheng","Noto Serif SC",serif;font-size:37px;font-weight:400;letter-spacing:4px}
+.catalog-count{margin:0 0 5px;color:#8b8b7d;font-size:11px}
+.catalog-tools{display:flex;gap:12px;justify-content:space-between;align-items:center}
+.shop-search{display:flex;align-items:center;gap:10px;flex:1;max-width:540px;padding:0 13px;border:1px solid #cbc8b9;background:#f6f2e8}
+.shop-search>span{color:#9d5546;font-size:23px}
+.shop-search input{width:100%;height:42px;border:0;outline:0;background:transparent;color:#354137;font:inherit;font-size:12px}
+.shop-sort{display:flex;align-items:center;gap:10px;color:#818477;font-size:11px}
+.shop-sort select{height:42px;padding:0 30px 0 12px;border:1px solid #cbc8b9;background:#f6f2e8;color:#49564a;font:inherit;font-size:11px}
+.category-filters{display:flex;flex-wrap:wrap;gap:8px;margin:17px 0 25px}
+.filter-chip{padding:8px 13px;border:1px solid #c9c7b9;border-radius:0;background:transparent;color:#667265;font-family:inherit;font-size:11px;cursor:pointer;transition:all .18s}
+.filter-chip:hover,.filter-chip.active{border-color:#526a58;background:#526a58;color:#f4f0e6}
+.ink-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.ink-product-card{min-width:0;padding:12px 12px 15px;border:1px solid #d0ccbe;background:#f5f1e7;box-shadow:0 8px 24px #26392b0a;transition:transform .22s,box-shadow .22s}
+.ink-product-card:hover{transform:translateY(-4px);box-shadow:0 14px 28px #26392b17}
+.product-image-wrap{position:relative;overflow:hidden;background:#e7e3d7}
+.product-image{display:block;width:100%;height:190px;object-fit:cover;transition:transform .45s;filter:saturate(.78) contrast(.97)}
+.ink-product-card:hover .product-image{transform:scale(1.035)}
+.product-seal{position:absolute;right:10px;top:10px;display:grid;place-items:center;width:30px;height:30px;border:1px solid #a35345;background:#eee9dcdd;color:#a35345;font-size:9px}
+.product-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 1px 7px}
+.product-category{color:#9b5749;font-size:10px;letter-spacing:.5px}
+.stock-state{color:#71816e;font-size:9px;white-space:nowrap}
+.stock-state.unavailable{color:#a35a4b}
+.ink-product-card h3{margin:0 1px 8px;color:#344034;font-size:17px;font-weight:600}
+.product-description{min-height:54px;margin:0 1px;color:#788073;font-family:Arial,"Noto Sans SC",sans-serif;font-size:11px;line-height:1.75}
+.product-card-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:15px;padding-top:13px;border-top:1px solid #dedacc;flex-wrap:wrap}
+.product-price{color:#9d5144;font-family:Georgia,serif;font-size:18px;font-weight:500}
+.add-to-cart{padding:9px 12px;border:1px solid #526a58;border-radius:0;background:#526a58;color:#f5f1e7;font-family:inherit;font-size:10px;letter-spacing:.4px;cursor:pointer;transition:background .2s}
+.add-to-cart:hover:not(:disabled){background:#344c3c}
+.add-to-cart:disabled{border-color:#c7c4b7;background:#d5d1c5;color:#898a7f;cursor:not-allowed}
+.cart-feedback{flex-basis:100%;margin:0;color:#a34f43;font-size:10px}
+.catalog-loading,.catalog-empty,.catalog-error{grid-column:1/-1;display:grid;justify-items:center;padding:55px 15px;color:#858779;text-align:center}
+.catalog-loading>span,.catalog-empty>span{color:#a65345;font-family:"Ma Shan Zheng",serif;font-size:36px}
+.catalog-loading p,.catalog-empty p{font-size:12px}
+.catalog-empty h3{margin:8px 0 0;color:#475548;font-family:"Ma Shan Zheng",serif;font-size:25px;font-weight:400}
+.shop-footnote{margin:24px 0 0;padding-top:14px;border-top:1px solid #d2cebf;color:#898a7e;font-size:10px;line-height:1.8}
+@media(max-width:900px){.shop-intro{grid-template-columns:1fr;gap:22px}.shop-intro-copy{max-width:620px}.shop-art{max-width:650px;margin:0 auto}.ink-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.shop-shell{padding-top:24px}.shop-intro{padding:27px 22px}.shop-intro h1{font-size:52px}.shop-art{gap:7px}.shop-art figure{padding:4px}.shop-art figcaption{font-size:8px}.shop-values{margin:22px 0 42px;grid-template-columns:1fr}.shop-values>div{padding:12px 10px}.shop-values>div+div{border-left:0;border-top:1px solid #d0ccbe}.catalog-heading{align-items:start;flex-direction:column;gap:5px}.catalog-tools{align-items:stretch;flex-direction:column}.shop-search{max-width:none}.shop-sort{justify-content:space-between}.shop-sort select{flex:1}.category-filters{gap:6px}.filter-chip{padding:7px 9px;font-size:10px}.ink-product-grid{grid-template-columns:1fr;gap:14px}.product-image{height:210px}.product-description{min-height:0}}
