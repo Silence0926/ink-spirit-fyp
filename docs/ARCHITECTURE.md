@@ -87,3 +87,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - Stage 1 (初生灵形) is the starting form. Stage 2 (灵脉初醒) requires level 5 and bond 20. Stage 3 (灵韵化境) requires level 10 and bond 50.
 - The care API returns the calculated evolution for each creature. The homepage renders the stage, next-stage requirements and a restrained 2D ink-aura treatment. Guest mode calculates the same thresholds from browser-local progress.
 - These are presentation-stage unlocks, not separate 3D models. Unique stage-specific creature meshes, rigging, skeletal animation and special ability systems remain future work.
+
+
+## Companion signature abilities
+
+- Each companion has one authored, non-combat visual technique: koi (锦鲤跃波 / ripple leap), dragon (云龙现世 / cloudborne presence), snake (幽影潜行 / veil of ink), and turtle (玄甲守心 / tortoise ward).
+- Abilities unlock only when the companion reaches level 5 and bond 50. The server derives this from stored progression and care records; clients cannot submit an unlock state or another creature's ability ID.
+- Authenticated activation is limited to five uses per creature per UTC day and is recorded in the companion journal. No XP, damage, combat advantage or paid item is granted.
+- Guest activations are stored locally in the browser. Effects are 2D Web Animations and CSS presentation, not physics, autonomous AI or 3D skills.
