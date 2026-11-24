@@ -210,6 +210,20 @@ function validateProduct(input, partial = false) {
     if (!Number.isInteger(input.stock) || input.stock < 0 || input.stock > 1000000) throw new Error('Stock must be a non-negative integer.');
     result.stock = input.stock;
   }
+  if (input.images !== undefined) {
+    if (!Array.isArray(input.images) || input.images.length > 8) throw new Error('Product gallery must contain no more than 8 images.');
+    const images = [];
+    for (const value of input.images) {
+      if (typeof value !== 'string' || !value.trim() || value.length > 500) throw new Error('Invalid product gallery image.');
+      const image = value.trim();
+      const isLocalImage = image.startsWith('/') && !image.startsWith('//') && !image.includes('..') && !image.includes('\\') && /^\/(?:images|uploads)\/[a-zA-Z0-9_./-]+\.(?:svg|png|jpe?g|webp)$/i.test(image);
+      let isHttpsImage = false;
+      try { const parsed = new URL(image); isHttpsImage = parsed.protocol === 'https:' && Boolean(parsed.hostname); } catch {}
+      if (!isLocalImage && !isHttpsImage) throw new Error('Gallery images must be site image paths or HTTPS URLs.');
+      if (!images.includes(image)) images.push(image);
+    }
+    result.images = images;
+  }
   if (input.stockThreshold !== undefined) {
     if (!Number.isInteger(input.stockThreshold) || input.stockThreshold < 0 || input.stockThreshold > 1000000) throw new Error('Stock threshold must be a non-negative integer.');
     result.stockThreshold = input.stockThreshold;
@@ -242,7 +256,7 @@ function cartSummary(items) {
     if (product.stock < item.quantity) throw new Error('Insufficient stock for ' + product.name + '.');
     const unitCents = Math.round(product.price * 100);
     totalCents += unitCents * item.quantity;
-    return { productId: product.id, name: product.name, image: product.image, unitPrice: product.price, quantity: item.quantity, lineTotal: unitCents * item.quantity / 100 };
+    return { productId: product.id, name: product.name, image: product.image, images: Array.isArray(product.images) ? product.images : [product.image], unitPrice: product.price, quantity: item.quantity, lineTotal: unitCents * item.quantity / 100 };
   });
   return { lines, totalCents, total: totalCents / 100 };
 }
