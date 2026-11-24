@@ -626,6 +626,23 @@ app.post('/api/exploration/discover', requireAuth, (req, res) => {
 });
 
 
+const ENCYCLOPEDIA_FILE = path.join(__dirname, 'aquarium-encyclopedia.json');
+const ENCYCLOPEDIA = JSON.parse(fs.readFileSync(ENCYCLOPEDIA_FILE, 'utf8'));
+const ENCYCLOPEDIA_BY_SLUG = new Map(ENCYCLOPEDIA.articles.map(article => [article.slug, article]));
+app.get('/api/encyclopedia', (req, res) => {
+  const category = typeof req.query.category === 'string' ? req.query.category : '';
+  const query = typeof req.query.q === 'string' ? req.query.q.trim().toLocaleLowerCase() : '';
+  const articles = ENCYCLOPEDIA.articles.filter(article =>
+    (!category || article.category === category) &&
+    (!query || [article.title, article.subtitle, article.summary, ...article.tags].join(' ').toLocaleLowerCase().includes(query))
+  );
+  res.json({ version:ENCYCLOPEDIA.version, updatedAt:ENCYCLOPEDIA.updatedAt, categories:ENCYCLOPEDIA.categories, articles });
+});
+app.get('/api/encyclopedia/:slug', (req, res) => {
+  const article = ENCYCLOPEDIA_BY_SLUG.get(req.params.slug);
+  if (!article) return res.status(404).json({ error:'Article not found.' });
+  res.json(article);
+});
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
