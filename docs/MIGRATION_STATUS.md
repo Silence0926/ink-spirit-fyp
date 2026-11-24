@@ -42,3 +42,10 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 | Aquarium encyclopedia | Implemented prototype | 12 structured knowledge articles across five categories; searchable/category-filterable API and reader page; external references and veterinary-safety caveats included. |
 
 | Aquarium planner and compatibility assessment | Implemented prototype | Geometric gross-volume estimator, catalogue-driven species selection, explicit mixed-water warnings, conservative unknown pair status, and specification-based equipment filtering. Does not claim stocking capacity or unverified pair compatibility. |
+
+
+## Virtual aquarium breeding V1.0
+
+- Added a guppy-only abstract breeding action with adult-growth, satiety, environment-score and 24-hour cooldown checks.
+- Fry are stored as separate cohorts and count toward the existing 30-individual simulation limit.
+- This release does not simulate sex, genetics, gestation or scientifically validated breeding conditions.
