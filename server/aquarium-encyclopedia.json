@@ -1,0 +1,588 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-24",
+  "categories": [
+    {
+      "id": "water",
+      "name": "水质与循环",
+      "english": "Water Quality"
+    },
+    {
+      "id": "equipment",
+      "name": "设备与系统",
+      "english": "Equipment"
+    },
+    {
+      "id": "care",
+      "name": "日常照护",
+      "english": "Daily Care"
+    },
+    {
+      "id": "health",
+      "name": "健康与检疫",
+      "english": "Health & Quarantine"
+    },
+    {
+      "id": "systems",
+      "name": "水族系统",
+      "english": "Aquarium Systems"
+    }
+  ],
+  "articles": [
+    {
+      "slug": "nitrogen-cycle",
+      "category": "water",
+      "title": "认识氮循环",
+      "subtitle": "The Aquarium Nitrogen Cycle",
+      "level": "入门",
+      "summary": "理解氨、亚硝酸盐与硝酸盐如何在成熟生物过滤系统中转化。",
+      "tags": [
+        "氨",
+        "亚硝酸盐",
+        "硝酸盐",
+        "开缸",
+        "生物过滤"
+      ],
+      "warning": "新缸不能仅凭水体清澈或经过固定天数就判断成熟；应以连续水质检测结果确认。",
+      "sections": [
+        {
+          "heading": "循环如何运作",
+          "body": [
+            "鱼类排泄物、残饵和腐败有机物会产生氨。硝化微生物先将氨氧化为亚硝酸盐，再由另一群微生物将亚硝酸盐氧化为硝酸盐。",
+            "硝化过程需要氧气，也依赖适当的碱度。生物过滤菌群主要附着在滤材、底床和其他有表面积的湿润表面，而不是单纯漂浮在水中。"
+          ]
+        },
+        {
+          "heading": "如何判断系统建立",
+          "body": [
+            "使用可靠测试剂监测氨、亚硝酸盐和硝酸盐。只有在系统能持续处理预期生物负荷、氨与亚硝酸盐维持不可检出或接近测试下限时，才考虑逐步增加生物。",
+            "建立时间受温度、pH、碱度、氧气、菌源和负荷影响，不能把四周或六周当成保证。"
+          ]
+        },
+        {
+          "heading": "常见错误",
+          "bullets": [
+            "一次加入过多鱼只或大量投喂。",
+            "用未经除氯的自来水冲洗生物滤材。",
+            "同时更换全部滤材，导致菌群损失。",
+            "只看硝酸盐，不测氨与亚硝酸盐。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "RSPCA Australia · Aquarium water quality",
+          "url": "https://kb.rspca.org.au/categories/companion-animals/fish/why-is-water-quality-important-when-setting-up-a-fish-aquarium"
+        },
+        {
+          "label": "University of Florida IFAS · Ammonia in Aquatic Systems",
+          "url": "https://ask.ifas.ufl.edu/publication/fa031"
+        }
+      ]
+    },
+    {
+      "slug": "water-testing",
+      "category": "water",
+      "title": "水质检测与记录",
+      "subtitle": "Water Testing & Records",
+      "level": "入门",
+      "summary": "建立可追踪的检测习惯，避免只凭气味、颜色或鱼的表现判断水质。",
+      "tags": [
+        "pH",
+        "氨",
+        "亚硝酸盐",
+        "硝酸盐",
+        "温度",
+        "盐度"
+      ],
+      "warning": "不同物种、生境和系统类型的目标范围可能不同；不要把单一数值表套用到所有水族箱。",
+      "sections": [
+        {
+          "heading": "建议关注的指标",
+          "bullets": [
+            "温度：使用独立温度计，并观察昼夜波动。",
+            "总氨/游离氨：新缸、异常或生物负荷变化时优先检测。",
+            "亚硝酸盐：尤其关注新缸与过滤系统受损后的变化。",
+            "硝酸盐：用于观察营养盐累积趋势，结合换水和生物负荷判断。",
+            "pH 与 KH/碱度：共同影响酸碱稳定性和硝化过程。",
+            "海水系统另需监测盐度；珊瑚系统通常还需按需求监测碱度、钙和镁。"
+          ]
+        },
+        {
+          "heading": "记录方法",
+          "body": [
+            "记录日期、时间、温度、检测方法、读数、换水量、添加剂、喂食变化和异常行为。趋势通常比单次读数更有解释力。"
+          ]
+        },
+        {
+          "heading": "何时增加检测频率",
+          "bullets": [
+            "新缸建立期间。",
+            "新鱼入缸、增加饲养密度或大量喂食之后。",
+            "滤材清洗、更换设备或停电之后。",
+            "鱼只呼吸急促、拒食、失衡或突然死亡时。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "UF/IFAS · Marine Aquarium Project Book",
+          "url": "https://ask.ifas.ufl.edu/publication/4H433"
+        },
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "water-change",
+      "category": "water",
+      "title": "换水与补水",
+      "subtitle": "Water Changes & Top-Off",
+      "level": "入门",
+      "summary": "理解换水、蒸发补水与水源处理之间的区别。",
+      "tags": [
+        "换水",
+        "除氯",
+        "蒸发",
+        "RO水",
+        "温差"
+      ],
+      "warning": "换水比例与频率应根据检测结果、鱼只负荷和系统稳定性调整，不存在适合所有缸的固定百分比。",
+      "sections": [
+        {
+          "heading": "换水前检查",
+          "bullets": [
+            "确认新水适用于淡水或海水系统。",
+            "自来水按产品说明处理氯和氯胺。",
+            "尽量匹配温度；海水系统还需匹配盐度。",
+            "避免一次性造成剧烈的温度、pH 或渗透压变化。"
+          ]
+        },
+        {
+          "heading": "蒸发补水不等于换水",
+          "body": [
+            "蒸发主要带走水分，溶解盐分通常留在缸内。淡水缸可用合适的处理水补足；海水缸通常以低矿物质淡水（例如合适的 RO/DI 水）补偿蒸发，再独立管理盐度。直接用海水补蒸发会使盐度逐渐升高。"
+          ]
+        },
+        {
+          "heading": "换水后的观察",
+          "body": [
+            "观察鱼只呼吸、游动和摄食情况，并复测温度及关键水质指标。若出现异常，先检测并排查水源、温差和添加剂，不要连续盲目添加化学品。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "UF/IFAS · Marine Aquarium Project Book",
+          "url": "https://ask.ifas.ufl.edu/publication/4H433"
+        }
+      ]
+    },
+    {
+      "slug": "filtration",
+      "category": "equipment",
+      "title": "过滤系统的组成",
+      "subtitle": "Mechanical, Biological & Chemical Filtration",
+      "level": "入门",
+      "summary": "认识物理过滤、生物过滤与化学过滤的分工，以及滤材维护原则。",
+      "tags": [
+        "过滤器",
+        "滤棉",
+        "生化滤材",
+        "活性炭",
+        "水流"
+      ],
+      "warning": "过滤器额定流量不等于实际过滤能力；鱼缸体积、鱼只负荷、滤材结构和维护都会影响结果。",
+      "sections": [
+        {
+          "heading": "三种过滤任务",
+          "bullets": [
+            "物理过滤：拦截悬浮颗粒和残饵，常见滤棉或海绵。",
+            "生物过滤：为硝化微生物提供附着表面，将氨和亚硝酸盐转化。",
+            "化学过滤：使用活性炭或特定吸附介质处理某些溶解物；必须按用途和说明更换。"
+          ]
+        },
+        {
+          "heading": "维护原则",
+          "body": [
+            "不要为了让滤材看起来干净而频繁彻底清洗。需要清理时，尽量使用取出的缸水轻柔清洗机械滤材；保留足够成熟的生物滤材，并避免同时大幅更换。",
+            "确保滤材持续有水流和氧气。过滤器停摆、堵塞或干涸都可能影响生物过滤。"
+          ]
+        },
+        {
+          "heading": "选型考虑",
+          "bullets": [
+            "考虑鱼只成年体型、摄食量和排泄负荷。",
+            "确保进出水布局不会形成明显死角，也不会让弱游泳鱼承受过强水流。",
+            "预留维护空间，并确认断电后能安全复电。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "RSPCA Australia · Aquarium water quality",
+          "url": "https://kb.rspca.org.au/categories/companion-animals/fish/why-is-water-quality-important-when-setting-up-a-fish-aquarium"
+        },
+        {
+          "label": "UF/IFAS · Ammonia in Aquatic Systems",
+          "url": "https://ask.ifas.ufl.edu/publication/fa031"
+        }
+      ]
+    },
+    {
+      "slug": "temperature",
+      "category": "equipment",
+      "title": "温度控制与设备安全",
+      "subtitle": "Temperature Control & Equipment Safety",
+      "level": "入门",
+      "summary": "为鱼类选择适合的温度范围，并避免加热器故障造成剧烈温度变化。",
+      "tags": [
+        "加热棒",
+        "冷水机",
+        "温度计",
+        "恒温",
+        "停电"
+      ],
+      "warning": "不要把所有热带鱼设定为同一温度；应先确认物种需求，并避免快速升降温。",
+      "sections": [
+        {
+          "heading": "设备配置",
+          "bullets": [
+            "使用可靠的温度计独立核对加热器显示。",
+            "加热器功率按水量、室温差和设备说明选择，不只看缸体尺寸。",
+            "高温环境可考虑风扇或冷水机，并注意蒸发补水。",
+            "海水缸与高价值系统可配置温控报警和备用供电方案。"
+          ]
+        },
+        {
+          "heading": "风险控制",
+          "body": [
+            "加热器应按说明保持浸没，避免干烧；维护前断电并等待冷却。不要让玻璃加热器承受撞击或突然的冷热变化。",
+            "停电时优先保持温度稳定和水面气体交换，避免频繁开盖、翻动底床或过度喂食。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "lighting",
+      "category": "equipment",
+      "title": "照明与藻类管理",
+      "subtitle": "Lighting & Algae Management",
+      "level": "入门",
+      "summary": "理解光照时长、强度、营养盐和藻类之间的关系。",
+      "tags": [
+        "LED",
+        "光照",
+        "藻类",
+        "水草",
+        "珊瑚"
+      ],
+      "warning": "珊瑚照明涉及光谱与 PAR 等专业参数，不能直接套用普通观赏鱼缸的灯具设置。",
+      "sections": [
+        {
+          "heading": "基础原则",
+          "body": [
+            "鱼缸照明应服务于生物需求和观赏目标。水草缸需考虑植物种类、灯具强度和 CO₂；珊瑚缸还需考虑珊瑚种类、光照适应和 PAR 分布。"
+          ]
+        },
+        {
+          "heading": "藻类不只由灯光决定",
+          "body": [
+            "藻类增长通常与光照、营养盐输入、维护节奏和系统成熟度共同相关。单纯长时间关灯可能伤害植物或珊瑚，却没有解决过量喂食、过滤不足或营养盐累积等根因。"
+          ]
+        },
+        {
+          "heading": "管理方法",
+          "bullets": [
+            "使用定时器保持稳定光周期。",
+            "避免阳光直射造成不可控的热量与藻类增长。",
+            "按系统需求管理喂食、清洁和营养盐。",
+            "新灯或提高强度时循序渐进，观察生物反应。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "UF/IFAS · Marine Aquarium Project Book",
+          "url": "https://ask.ifas.ufl.edu/publication/4H433"
+        }
+      ]
+    },
+    {
+      "slug": "stocking",
+      "category": "care",
+      "title": "放养密度与鱼缸容量",
+      "subtitle": "Stocking & Aquarium Volume",
+      "level": "入门",
+      "summary": "不要依赖简单的每厘米鱼长公式；从成年体型、行为、水质负荷和游泳空间评估。",
+      "tags": [
+        "鱼缸容量",
+        "成年体型",
+        "放养密度",
+        "混养",
+        "过滤负荷"
+      ],
+      "warning": "本百科不提供一条适用于所有物种的厘米/升公式。鱼缸尺寸和结构可能比单纯水体升数更重要。",
+      "sections": [
+        {
+          "heading": "评估维度",
+          "bullets": [
+            "成年体长与身体高度，而不是购买时的幼鱼尺寸。",
+            "游泳方式、领地行为、群游需求和活动范围。",
+            "排泄量、摄食量及过滤系统可处理的生物负荷。",
+            "鱼缸长度、宽度、水深、底面积和躲藏结构。",
+            "同缸物种的温度、水质与食性需求是否一致。"
+          ]
+        },
+        {
+          "heading": "循序增加生物",
+          "body": [
+            "先让生物过滤稳定，再逐步加入鱼只。每次增加后密切检测氨和亚硝酸盐，并观察攻击、抢食和躲藏等行为。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "quarantine",
+      "category": "health",
+      "title": "新鱼检疫与生物安全",
+      "subtitle": "Quarantine & Biosecurity",
+      "level": "进阶",
+      "summary": "通过独立观察、独立工具和记录降低新鱼将疾病带入主缸的风险。",
+      "tags": [
+        "检疫缸",
+        "新鱼",
+        "隔离",
+        "疾病",
+        "消毒"
+      ],
+      "warning": "检疫无法排除所有病原体，也不能代替鱼类兽医诊断。药物使用应依据确切诊断和专业指导。",
+      "sections": [
+        {
+          "heading": "检疫系统",
+          "bullets": [
+            "使用独立容器、过滤、温控和专用网具。",
+            "避免检疫缸与主缸共用水、滤材、虹吸管和湿润工具。",
+            "记录来源、到货日期、摄食、排泄、呼吸和体表变化。",
+            "检疫结束前不要将运输水倒入主缸。"
+          ]
+        },
+        {
+          "heading": "观察重点",
+          "body": [
+            "留意呼吸频率、体表损伤、白点或异常附着物、鳍部变化、擦缸、失衡和拒食。不同病原体的潜伏期不同，检疫时长应结合物种、来源、风险与兽医建议决定。"
+          ]
+        },
+        {
+          "heading": "卫生管理",
+          "body": [
+            "先处理健康主缸，再处理检疫系统；清洁与消毒后按产品说明充分冲洗、干燥。不要混用消毒剂或在鱼只存在时随意使用强氧化剂。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "feeding",
+      "category": "care",
+      "title": "喂食与营养管理",
+      "subtitle": "Feeding & Nutrition",
+      "level": "入门",
+      "summary": "根据物种食性、体型和摄食行为安排食物，减少残饵和水质负担。",
+      "tags": [
+        "饲料",
+        "食性",
+        "投喂",
+        "残饵",
+        "营养"
+      ],
+      "warning": "拒食、腹胀或消瘦可能涉及水质、寄生虫、感染或其他问题；不要只靠更换饲料处理。",
+      "sections": [
+        {
+          "heading": "选择食物",
+          "bullets": [
+            "确认物种为肉食、杂食、草食或特殊摄食类型。",
+            "选择适合口器、体型和摄食方式的颗粒、薄片或冷冻饵料。",
+            "注意饲料保存期限、储存环境和营养完整性。"
+          ]
+        },
+        {
+          "heading": "投喂管理",
+          "body": [
+            "以鱼只能够在合理时间内摄取、且不留下大量残饵为原则。不同物种和生长阶段的频率差异很大，避免机械套用统一次数。",
+            "残饵应及时移除，并将摄食量与氨、硝酸盐和体况变化一起观察。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Overview of Aquarium Fish",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/overview-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "disease-warning",
+      "category": "health",
+      "title": "疾病预警与异常行为",
+      "subtitle": "Recognising Health Warning Signs",
+      "level": "进阶",
+      "summary": "学会识别异常信号，先检查水质和环境，再寻求专业诊断。",
+      "tags": [
+        "拒食",
+        "急促呼吸",
+        "白点",
+        "失衡",
+        "鱼病"
+      ],
+      "warning": "本页不是疾病诊断或处方。不要在未确认病因时混合使用药物、抗生素、铜剂或盐浴。",
+      "sections": [
+        {
+          "heading": "需要重视的信号",
+          "bullets": [
+            "持续浮头、急促呼吸或聚集在出水口。",
+            "突然拒食、长期消瘦或异常腹胀。",
+            "失衡、旋转、擦缸或长时间躲藏。",
+            "体表溃疡、出血、白点、棉絮状附着或鳍部快速恶化。",
+            "短时间内多条鱼同时出现异常或死亡。"
+          ]
+        },
+        {
+          "heading": "排查顺序",
+          "body": [
+            "先测温度、氨、亚硝酸盐、pH；海水系统同时核对盐度。检查过滤、供氧、停电、清洁剂或其他污染物暴露。若有急性异常，及时联系具备鱼类诊疗经验的兽医。"
+          ]
+        },
+        {
+          "heading": "避免的做法",
+          "bullets": [
+            "不要因症状相似就认定是同一种疾病。",
+            "不要随意混合药物或按网络帖子估算剂量。",
+            "不要把病鱼、用过的水或未经处理的设备带入其他水体。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    },
+    {
+      "slug": "freshwater-marine",
+      "category": "systems",
+      "title": "淡水与海水系统的差异",
+      "subtitle": "Freshwater vs Marine Aquariums",
+      "level": "入门",
+      "summary": "从盐度、设备、循环稳定性和生物需求理解两种系统的不同。",
+      "tags": [
+        "淡水",
+        "海水",
+        "盐度",
+        "海水缸",
+        "珊瑚缸"
+      ],
+      "warning": "海水系统不是在淡水中加盐即可完成；盐度、离子组成、温度和过滤成熟度都需要受控。",
+      "sections": [
+        {
+          "heading": "淡水系统",
+          "body": [
+            "淡水系统覆盖范围很广，从软水溪流到硬水湖泊都有。不同鱼类对 pH、硬度、温度和流速的需求并不相同。"
+          ]
+        },
+        {
+          "heading": "海水系统",
+          "body": [
+            "海水系统需要配制适当海盐水并监测盐度。珊瑚礁系统通常对盐度、温度和碱度稳定性要求更高，设备和维护复杂度也更高。"
+          ]
+        },
+        {
+          "heading": "不要混淆的概念",
+          "bullets": [
+            "半咸水是淡水与海水之间的盐度环境，不等于普通淡水缸。",
+            "海水蒸发补水与换水不同；蒸发补水通常使用适当淡水。",
+            "不能仅凭“海水鱼”标签推断所有物种适合相同盐度和温度。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "UF/IFAS · Marine Aquarium Project Book",
+          "url": "https://ask.ifas.ufl.edu/publication/4H433"
+        },
+        {
+          "label": "RSPCA Australia · Aquarium water quality",
+          "url": "https://kb.rspca.org.au/categories/companion-animals/fish/why-is-water-quality-important-when-setting-up-a-fish-aquarium"
+        }
+      ]
+    },
+    {
+      "slug": "emergency",
+      "category": "care",
+      "title": "鱼缸紧急情况处理",
+      "subtitle": "Aquarium Emergency Response",
+      "level": "进阶",
+      "summary": "面对停电、过滤故障或疑似污染时，优先保障溶氧和稳定环境。",
+      "tags": [
+        "停电",
+        "过滤故障",
+        "缺氧",
+        "污染",
+        "紧急换水"
+      ],
+      "warning": "出现大量死亡、疑似化学污染或严重呼吸困难时，应尽快联系鱼类兽医或专业水族人员。",
+      "sections": [
+        {
+          "heading": "停电或过滤停止",
+          "bullets": [
+            "优先维持水面扰动与供氧，使用安全的备用气泵。",
+            "减少或暂停喂食，避免增加氨负荷。",
+            "观察温度，避免快速冷热变化。",
+            "恢复供电前检查滤桶是否积存腐败污物；不要将明显腐败的滞留水直接冲入主缸。"
+          ]
+        },
+        {
+          "heading": "疑似水质中毒",
+          "body": [
+            "立即检测氨、亚硝酸盐、温度和 pH；海水系统另测盐度。确认是否有清洁剂、喷雾、金属或其他污染物接触。是否换水以及换水量取决于污染物、备用水质量和系统参数，避免盲目大幅调整。"
+          ]
+        },
+        {
+          "heading": "准备清单",
+          "bullets": [
+            "备用气泵及电源。",
+            "可靠温度计与基础水质测试剂。",
+            "已处理且参数合适的备用水。",
+            "记录鱼类兽医、水族维护人员和设备售后联系方式。"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "label": "Merck Veterinary Manual · Aquarium Fish Management",
+          "url": "https://www.merckvetmanual.com/exotic-and-laboratory-animals/aquarium-fish/management-of-aquarium-fish"
+        }
+      ]
+    }
+  ]
+}
