@@ -15,6 +15,7 @@
 - Public registration always creates role `user`.
 - Bootstrap admin is created from `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables.
 - Product management is available to admin/manager roles. User role changes and product archiving require admin.
+- Admin Studio supports catalogue search, active/archive filtering, fixed product categories, built-in SVG asset selection and live preview. It stores an asset path, not uploaded image bytes.
 - APIs enforce roles on the server; localStorage is no longer an authorization source.
 
 ## Commerce data
@@ -46,9 +47,13 @@ The current JSON persistence is durable on a persistent filesystem and uses atom
 
 ## Music and games
 
-The original soundtrack is synthesized in the browser using Web Audio. It does not download or redistribute third-party music. The Snake game stores its best score locally. Other legacy mini-games are tracked separately in the migration checklist.
+The original 48-second instrumental soundtrack is bundled as MP3 with WAV master fallback. Playback is user-initiated, loops, and supports volume control. The Snake game stores its best score locally; game progress is not server-synced.
 
 ## Ecological Atlas
+
+- The species guide and Leaflet atlas share stable species IDs (`koi`, `betta`, `goldfish`, `guppy`, `arowana`, `clown`, `blue-tang`, `seahorse`).
+- The guide supports text search and freshwater/marine filters; each entry opens the matching atlas marker with `?species=<id>`.
+- Map markers are regional educational references, not precise occurrence records or verified collection coordinates.
 
 Species data distinguishes:
 - wild/native range,
