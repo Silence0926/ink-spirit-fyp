@@ -15,7 +15,8 @@ const FILES = {
   sessions: path.join(DATA_DIR, 'sessions.json'),
   products: path.join(DATA_DIR, 'products.json'),
   carts: path.join(DATA_DIR, 'carts.json'),
-  orders: path.join(DATA_DIR, 'orders.json')
+  orders: path.join(DATA_DIR, 'orders.json'),
+  creatureProgress: path.join(DATA_DIR, 'creature-progress.json')
 };
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 const COOKIE_NAME = 'inkspirit_session';
@@ -270,6 +271,85 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/me', requireAuth, (req, res) => res.json({ user:safeUser(req.user) }));
 app.post('/api/logout', (req, res) => { clearSession(req, res); res.json({ message:'Logged out.' }); });
+
+const CREATURE_IDS = ['koi', 'dragon', 'snake', 'turtle'];
+const DAILY_INTERACTION_LIMIT = 50;
+function defaultCreatureProgress() {
+  return Object.fromEntries(CREATURE_IDS.map(creatureId => [creatureId, {
+    experience:0, level:1, visits:0, totalExperience:0
+  }]));
+}
+function getCreatureProgress(userId) {
+  const all = readJson(FILES.creatureProgress, {});
+  const record = all[userId] || {};
+  const creatures = defaultCreatureProgress();
+  for (const creatureId of CREATURE_IDS) {
+    const saved = record.creatures?.[creatureId];
+    if (saved && Number.isInteger(saved.experience) && saved.experience >= 0 &&
+        Number.isInteger(saved.level) && saved.level >= 1) {
+      creatures[creatureId] = {
+        experience:saved.experience,
+        level:saved.level,
+        visits:Number.isInteger(saved.visits) && saved.visits >= 0 ? saved.visits : 0,
+        totalExperience:Number.isInteger(saved.totalExperience) && saved.totalExperience >= 0 ? saved.totalExperience : 0
+      };
+    }
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const daily = record.daily?.date === today && Number.isInteger(record.daily.count)
+    ? { date:today, count:Math.max(0, record.daily.count) }
+    : { date:today, count:0 };
+  return {
+    selectedCreature:CREATURE_IDS.includes(record.selectedCreature) ? record.selectedCreature : 'koi',
+    creatures,
+    daily
+  };
+}
+function saveCreatureProgress(userId, progress) {
+  const all = readJson(FILES.creatureProgress, {});
+  all[userId] = progress;
+  writeJson(FILES.creatureProgress, all);
+}
+function publicCreatureProgress(progress) {
+  return {
+    selectedCreature:progress.selectedCreature,
+    creatures:progress.creatures,
+    dailyInteractions:{ count:progress.daily.count, limit:DAILY_INTERACTION_LIMIT, date:progress.daily.date }
+  };
+}
+app.get('/api/creatures/progress', requireAuth, (req, res) => {
+  res.json(publicCreatureProgress(getCreatureProgress(req.user.id)));
+});
+app.patch('/api/creatures/selected', requireAuth, (req, res) => {
+  const creatureId = req.body.creatureId;
+  if (!CREATURE_IDS.includes(creatureId)) return res.status(400).json({ error:'Unknown creature.' });
+  const progress = getCreatureProgress(req.user.id);
+  progress.selectedCreature = creatureId;
+  saveCreatureProgress(req.user.id, progress);
+  res.json(publicCreatureProgress(progress));
+});
+app.post('/api/creatures/interact', requireAuth, (req, res) => {
+  const creatureId = req.body.creatureId;
+  if (!CREATURE_IDS.includes(creatureId)) return res.status(400).json({ error:'Unknown creature.' });
+  const progress = getCreatureProgress(req.user.id);
+  if (progress.daily.count >= DAILY_INTERACTION_LIMIT) {
+    return res.status(429).json({ error:'今日的互动次数已达上限，请明天再来。' });
+  }
+  const creature = progress.creatures[creatureId];
+  const reward = 10;
+  creature.experience += reward;
+  creature.totalExperience += reward;
+  creature.visits += 1;
+  while (creature.experience >= creature.level * 100) {
+    creature.experience -= creature.level * 100;
+    creature.level += 1;
+  }
+  progress.daily.count += 1;
+  progress.selectedCreature = creatureId;
+  saveCreatureProgress(req.user.id, progress);
+  res.json({ reward, progress:publicCreatureProgress(progress) });
+});
+
 
 app.get('/api/products', (_req, res) => {
   const products = readJson(FILES.products, []);
