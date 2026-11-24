@@ -24,13 +24,13 @@ Runtime files:
 - `sessions.json`
 - `products.json`
 - `carts.json`
-- `orders.json`
+- `orders.json`\n- `creature-progress.json`
 
 Carts are stored per authenticated user. Checkout snapshots product names, unit prices and quantities into an order. The order starts as `pending_payment`. The server creates a Billplz bill in the configured environment and redirects the customer to the provider-hosted payment page.
 
 The Billplz callback is not trusted by itself. The server retrieves the Bill from Billplz using the server-side API key, checks the paid state and exact amount, and only then marks the order `paid`, decrements stock and clears the user's cart. Duplicate callbacks are idempotent at the order-status level.
 
-## Payment boundary
+## Creature progression\n\n- Authenticated players have per-account progression for koi, dragon, snake and turtle.\n- The server owns the fixed interaction reward, XP-to-level calculation, visit count and selected companion. Client-submitted reward values are ignored.\n- A daily UTC-based cap of 50 rewarded interactions per account limits trivial reward farming.\n- Guest progress remains browser-local; signing in loads the server record for cross-device continuity.\n- Progress is stored in `creature-progress.json` and inherits the single-instance JSON-storage limitation described below.\n\n## Payment boundary
 
 - Billplz API key is server-side only.
 - Use the sandbox endpoint unless `BILLPLZ_MODE=live` is explicitly configured.
