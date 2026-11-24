@@ -664,6 +664,19 @@ test('product image uploads require staff, enforce image signatures and serve st
   });
   assert.equal(forbidden.status,403);
   const adminCookie = await signIn('media-admin','media-pass-123');
+  const invalidProductImage = await fetch(base + '/api/admin/products', {
+    method:'POST',
+    headers:{ cookie:adminCookie, 'content-type':'application/json' },
+    body:JSON.stringify({ name:'Unsafe image', category:'Fish', description:'Reject protocol-relative paths.', price:10, stock:1, image:'//evil.example/image.png' })
+  });
+  assert.equal(invalidProductImage.status,400,'protocol-relative external image paths must be rejected');
+  const insecureProductImage = await fetch(base + '/api/admin/products', {
+    method:'POST',
+    headers:{ cookie:adminCookie, 'content-type':'application/json' },
+    body:JSON.stringify({ name:'Insecure image', category:'Fish', description:'Reject plain HTTP image URLs.', price:10, stock:1, image:'http://example.com/image.png' })
+  });
+  assert.equal(insecureProductImage.status,400,'external images must use HTTPS');
+
   const invalid = await fetch(base + '/api/admin/media/products', {
     method:'POST', headers:{ cookie:adminCookie, 'content-type':'image/png' }, body:Buffer.from('not really a png image')
   });
