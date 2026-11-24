@@ -740,6 +740,10 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
   const aquarium = aquariums.find(item=>item.id===req.params.id);
   if (!aquarium) return res.status(404).json({ error:'模拟鱼缸不存在。' });
   const action = req.body.action;
+  const previousActionAt = Date.parse(aquarium.lastActionAt || aquarium.createdAt);
+  const elapsedHours = Number.isFinite(previousActionAt) ? Math.max(0,(Date.now()-previousActionAt)/3600000) : 0;
+  aquarium.waterQuality = Math.max(0,aquarium.waterQuality-Math.floor(elapsedHours/24));
+  aquarium.cleanliness = Math.max(0,aquarium.cleanliness-Math.floor(elapsedHours/36));
   const now = new Date();
   const today = now.toISOString().slice(0,10);
   const addEvent = message => {
