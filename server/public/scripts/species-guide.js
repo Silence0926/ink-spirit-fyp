@@ -19,9 +19,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
    const map=document.createElement('a');map.className='species-map-link';map.href='map.html?species='+encodeURIComponent(item.id);map.textContent='在地图中查看生境 ↗';
    const simulator=document.createElement('a');simulator.className='species-simulator-link';simulator.href='virtual-aquarium.html';simulator.textContent='在模拟水族箱中养殖 ↗';
    const shop=document.createElement('a');shop.className='species-shop-link';shop.href='fish-shop.html?species='+encodeURIComponent(item.id);shop.textContent='查看相关藏品 ↗';
-   copy.append(kindLabel,kicker,title,description,dl,map,shop,simulator);card.append(image,copy);grid.append(card);
+   const sources=document.createElement('div');sources.className='species-sources';const sourceTitle=document.createElement('strong');sourceTitle.textContent='资料来源 / REFERENCES';sources.append(sourceTitle);(item.sources||[]).forEach(url=>{const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=new URL(url).hostname; sources.append(link);});
+   copy.append(kindLabel,kicker,title,description,dl,map,shop,simulator,sources);card.append(image,copy);grid.append(card);
   });
-  count.textContent=visible.length+' 个物种';
+  count.textContent=visible.length+' 个水族生物';
   if(!visible.length){const empty=document.createElement('p');empty.className='species-empty';empty.textContent='没有找到符合条件的物种。';grid.append(empty);}
  };
  try{const response=await fetch('/api/species');if(!response.ok)throw new Error('物种资料暂不可用。');species=await response.json();render();}
