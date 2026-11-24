@@ -32,3 +32,5 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 | Companion signature abilities | Implemented prototype | Four creature-specific non-combat visual techniques; level 5 + bond 50 unlock, server-validated IDs, five daily authenticated activations per creature, journal events and guest-local fallback. Effects remain 2D presentation. |
 
 | Original Ink Spirit soundtrack | Implemented prototype | Committed standalone 48-second original WAV master and 128 kbps MP3 export; guzheng-inspired plucks, flute-like melody, synthesized sea ambience, looping playback and volume control on homepage. |
+
+| Aquatic product specifications | Implemented prototype | Optional water type, care difficulty, minimum tank volume, temperature range, adult size and care notes; Admin/Manager editing; catalogue filters for water type, difficulty and stock; product detail display. Values are seller-entered and require factual review. |
