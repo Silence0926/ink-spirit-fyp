@@ -693,12 +693,7 @@ const AQUARIUM_PLANTS = Object.freeze([
   {id:'macroalgae',name:'海藻丛',waterType:'marine',description:'海藻主题模拟收藏'}
 ]);
 const AQUARIUM_PLANT_BY_ID = new Map(AQUARIUM_PLANTS.map(item=>[item.id,item]));
-const AQUARIUM_AUXILIARIES = Object.freeze([
-  {id:'cherry-shrimp',name:'樱花虾',scientificName:'Neocaridina davidi',waterType:'freshwater',description:'淡水辅助生物模拟批次'},
-  {id:'nerite-snail',name:'角螺',scientificName:'Neritina sp.',waterType:'freshwater',description:'淡水辅助生物模拟批次'},
-  {id:'cleaner-shrimp',name:'清洁虾',scientificName:'Lysmata amboinensis',waterType:'marine',description:'海水辅助生物模拟批次'},
-  {id:'hermit-crab',name:'寄居蟹',scientificName:'Paguroidea',waterType:'marine',description:'海水辅助生物模拟批次'}
-]);
+const AQUARIUM_AUXILIARIES = Object.freeze(SPECIES_CATALOGUE.filter(item=>item.organismType==='auxiliary').map(item=>({id:item.id,name:item.commonName,scientificName:item.scientificName,waterType:item.waterType,description:item.care})));
 const AQUARIUM_AUXILIARY_BY_ID = new Map(AQUARIUM_AUXILIARIES.map(item=>[item.id,item]));
 const GUPPY_STRAINS = Object.freeze({
   'standard':{label:'标准灰身',colour:'灰身',tail:'标准尾型'},
@@ -848,7 +843,7 @@ app.post('/api/aquariums/:id/actions', requireAuth, (req, res) => {
   } else if (action==='add_fish') {
     const speciesId=req.body.speciesId, quantity=req.body.quantity;
     const species=typeof speciesId==='string'?SPECIES_BY_ID.get(speciesId):null;
-    if (!species || !Number.isInteger(quantity) || quantity<1 || quantity>10) return res.status(400).json({error:'请选择目录物种，并输入 1 至 10 的数量。'});
+    if (!species || species.organismType==='auxiliary' || !Number.isInteger(quantity) || quantity<1 || quantity>10) return res.status(400).json({error:'请选择目录物种，并输入 1 至 10 的数量。'});
     if (species.waterType!==aquarium.waterType) return res.status(409).json({error:'该物种的水体类型与鱼缸不一致。'});
     const currentCount=aquarium.fish.reduce((sum,item)=>sum+item.quantity,0);
     if (currentCount+quantity>30) return res.status(409).json({error:'模拟鱼缸最多容纳 30 条模拟个体；这只是游戏上限，不是现实放养建议。'});
