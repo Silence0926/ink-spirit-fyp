@@ -156,9 +156,26 @@
     art.animate(motions[selected], { duration:selected === 'turtle' ? 950 : 700, easing:'ease-in-out' });
   }
 
+  function localEvolution(level, bond) {
+    if (level >= 10 && bond >= 50) return { id:'transcendent', stage:3, name:'灵韵化境', description:'灵息充盈，灵契相通。', nextLevel:null, nextBond:null };
+    if (level >= 5 && bond >= 20) return { id:'awakened', stage:2, name:'灵脉初醒', description:'灵脉苏醒，形态显现。', nextLevel:10, nextBond:50 };
+    return { id:'young', stage:1, name:'初生灵形', description:'灵性尚在积蓄，等待下一次蜕变。', nextLevel:5, nextBond:20 };
+  }
+  function renderEvolution(care) {
+    const evolution = care.evolution || localEvolution(progress[selected].level, care.bond);
+    $('evolution-name').textContent = evolution.name;
+    $('evolution-stage').textContent = '形态 · ' + evolution.stage + ' / 3';
+    $('evolution-description').textContent = evolution.description;
+    $('evolution-seal').textContent = evolution.stage === 3 ? '化' : evolution.stage === 2 ? '醒' : '初';
+    $('evolution-requirements').textContent = evolution.stage === 3
+      ? '已达到当前原型的最高形态。'
+      : '下一阶段：等级 LV. ' + evolution.nextLevel + ' · 亲密度 ' + evolution.nextBond;
+    $('creature-art').dataset.evolution = evolution.id;
+  }
   function renderCare() {
     const care = careProgress[selected] || defaultCare()[selected];
     $('care-bond').textContent = '亲密度 · ' + care.bond + ' · ' + (care.bondStage || (care.bond >= 100 ? '心契' : care.bond >= 50 ? '亲近' : care.bond >= 20 ? '熟悉' : '初识'));
+    renderEvolution(care);
     $('care-mood').textContent = '心境 · ' + care.mood;
     $('care-satiety-text').textContent = '饱足 · ' + care.satiety + ' / 100';
     $('care-satiety-bar').style.width = care.satiety + '%';
