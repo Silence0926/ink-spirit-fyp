@@ -70,5 +70,5 @@ Map markers represent broad regional reference points, not precise collection lo
 - Authenticated care records are stored per account and creature in `creature-care.json`.
 - Three fictional care foods are available: moon dew, lotus seed and cloud fruit. They are narrative items, not real animal diet recommendations.
 - Each feeding restores 20 satiety (capped at 100) and adds 5 bond points. Each creature has a server-enforced daily limit of three feedings; a full creature cannot be fed.
-- Mood is derived from satiety: 70–100 calm/comfortable, 35–69 peaceful, 0–34 needs care. Guest care state is browser-local.
+- Satiety decreases by 10 points per six elapsed hours after feeding; mood is derived from satiety: 70–100 calm/comfortable, 35–69 peaceful, 0–34 needs care. Guest care state is browser-local.
 - Daily counters use UTC dates. The current prototype does not simulate passive hunger decay or real-time biological needs.
