@@ -70,7 +70,7 @@ Map markers represent broad regional reference points, not precise collection lo
 - Authenticated care records are stored per account and creature in `creature-care.json`.
 - A per-account activity journal in `creature-journal.json` records companion interactions, feedings and first-time realm discoveries. The API returns the latest 30 events; storage retains the latest 100.
 - Three fictional care foods are available: moon dew, lotus seed and cloud fruit. They are narrative items, not real animal diet recommendations.
-- Each feeding restores 20 satiety (capped at 100) and adds 5 bond points. Each creature has a server-enforced daily limit of three feedings; a full creature cannot be fed.
+- Each feeding restores 20 satiety (capped at 100) and adds 5 bond points; each successful companionship interaction adds 1 bond point. Relationship stage is derived at 0–19 (初识), 20–49 (熟悉), 50–99 (亲近), and 100+ (心契). Each creature has a server-enforced daily limit of three feedings; a full creature cannot be fed.
 - Satiety decreases by 10 points per six elapsed hours after feeding; mood is derived from satiety: 70–100 calm/comfortable, 35–69 peaceful, 0–34 needs care. Guest care state is browser-local.
 - Daily counters use UTC dates. The current prototype does not simulate passive hunger decay or real-time biological needs.
 
