@@ -1,5 +1,7 @@
 # 墨灵 · Ink Spirit / Sea Garden FYP
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Silence0926/ink-spirit-fyp)
+
 Ink Spirit is an interactive Chinese ink-wash ecosystem with companion creatures, ecological exploration, creature growth, original procedural music and a connected Sea Garden aquarium storefront.
 
 ## Current features
@@ -74,6 +76,16 @@ Configure:
 Create a Billplz Sandbox account and collection first. The application creates bills server-side, redirects the customer to Billplz, receives the callback, and verifies the bill by retrieving it from Billplz before marking an order paid. Do not switch to live mode until merchant verification, payment-method activation, webhook reachability, and end-to-end sandbox tests are complete.
 
 The current deployment is not yet configured with merchant credentials, so real checkout cannot be activated from the repository alone.
+
+## Public online demo deployment
+
+This repository includes a Render Blueprint at the repository root. To create a public online demo, use the **Deploy to Render** button above, sign in to Render, review the service configuration, and approve deployment.
+
+The Blueprint deploys the Express application from the `server/` directory to a Singapore-region free web service. During setup, provide private values for `ADMIN_USERNAME` and `ADMIN_PASSWORD` (use a long, unique password). Never put these values in GitHub files. Render then builds and starts the app and exposes it at its generated `onrender.com` address. Connect the Render service to the repository's `main` branch to enable automatic deployment on future pushes.
+
+**Demo limitations:** Render Free services sleep after 15 minutes without traffic, may take about a minute to wake, and use an ephemeral filesystem. Accounts, aquarium progress, orders, uploaded product images and other JSON-backed data can be lost after a restart, sleep or redeploy. This free configuration is for online acceptance testing only, not production or real customer data. Durable public operation requires persistent storage or a database migration; do not enable live payments on this demo.
+
+GitHub Pages alone is not suitable for this repository because the application requires an Express server for authentication, API routes, shopping carts, orders and simulator persistence. Render hosts the server; GitHub remains the source repository and CI/CD trigger.
 
 ## Data and deployment notes
 
