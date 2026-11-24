@@ -830,6 +830,8 @@ test('public species catalogue and product species references stay consistent', 
   assert.equal(catalogue.filter(item=>item.organismType==='fish').length,8);
   assert.equal(catalogue.filter(item=>item.organismType==='auxiliary').length,4);
   assert.ok(catalogue.filter(item=>item.organismType==='auxiliary').every(item=>item.image&&item.sources.length));
+  const auxCompatibility=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'cherry-shrimp',quantity:1}]})});
+  assert.equal(auxCompatibility.status,400);
   assert.ok(catalogue.every(item=>item.id&&item.commonName&&item.scientificName&&Array.isArray(item.coordinates)&&item.sources.length));
   const login=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'species-admin',password:'species-admin-pass'})});
   const cookie=login.headers.get('set-cookie').split(';')[0];
