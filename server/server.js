@@ -16,7 +16,8 @@ const FILES = {
   products: path.join(DATA_DIR, 'products.json'),
   carts: path.join(DATA_DIR, 'carts.json'),
   orders: path.join(DATA_DIR, 'orders.json'),
-  creatureProgress: path.join(DATA_DIR, 'creature-progress.json')
+  creatureProgress: path.join(DATA_DIR, 'creature-progress.json'),
+  explorationProgress: path.join(DATA_DIR, 'exploration-progress.json')
 };
 const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 const COOKIE_NAME = 'inkspirit_session';
@@ -348,6 +349,63 @@ app.post('/api/creatures/interact', requireAuth, (req, res) => {
   progress.selectedCreature = creatureId;
   saveCreatureProgress(req.user.id, progress);
   res.json({ reward, progress:publicCreatureProgress(progress) });
+});
+
+
+
+const HABITAT_IDS = ['lotus-pond', 'cloud-mountain', 'bamboo-forest', 'quiet-marsh'];
+const HABITAT_REWARD_XP = 25;
+function getExplorationProgress(userId) {
+  const all = readJson(FILES.explorationProgress, {});
+  const record = all[userId] || {};
+  return {
+    discovered: HABITAT_IDS.filter(habitatId => Array.isArray(record.discovered) && record.discovered.includes(habitatId)),
+    discoveries: record.discoveries && typeof record.discoveries === 'object' ? record.discoveries : {}
+  };
+}
+function publicExplorationProgress(progress) {
+  return {
+    discovered:progress.discovered,
+    total:HABITAT_IDS.length,
+    habitats:HABITAT_IDS.map(habitatId => ({
+      id:habitatId,
+      discovered:progress.discovered.includes(habitatId),
+      discoveredAt:progress.discoveries[habitatId] || null
+    }))
+  };
+}
+app.get('/api/exploration/progress', requireAuth, (req, res) => {
+  res.json(publicExplorationProgress(getExplorationProgress(req.user.id)));
+});
+app.post('/api/exploration/discover', requireAuth, (req, res) => {
+  const habitatId = req.body.habitatId;
+  if (!HABITAT_IDS.includes(habitatId)) return res.status(400).json({ error:'Unknown habitat.' });
+  const exploration = getExplorationProgress(req.user.id);
+  if (exploration.discovered.includes(habitatId)) {
+    return res.json({ alreadyDiscovered:true, reward:0, exploration:publicExplorationProgress(exploration) });
+  }
+  exploration.discovered.push(habitatId);
+  exploration.discoveries[habitatId] = new Date().toISOString();
+  const all = readJson(FILES.explorationProgress, {});
+  all[req.user.id] = exploration;
+  writeJson(FILES.explorationProgress, all);
+
+  const creatureProgress = getCreatureProgress(req.user.id);
+  const companion = creatureProgress.creatures[creatureProgress.selectedCreature];
+  companion.experience += HABITAT_REWARD_XP;
+  companion.totalExperience += HABITAT_REWARD_XP;
+  while (companion.experience >= companion.level * 100) {
+    companion.experience -= companion.level * 100;
+    companion.level += 1;
+  }
+  saveCreatureProgress(req.user.id, creatureProgress);
+  res.status(201).json({
+    alreadyDiscovered:false,
+    reward:HABITAT_REWARD_XP,
+    rewardedCreature:creatureProgress.selectedCreature,
+    creatureProgress:publicCreatureProgress(creatureProgress),
+    exploration:publicExplorationProgress(exploration)
+  });
 });
 
 
