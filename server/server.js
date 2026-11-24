@@ -649,7 +649,7 @@ app.post('/api/aquarium/compatibility', (req, res) => {
   if (!Array.isArray(entries) || entries.length < 1 || entries.length > 8) return res.status(400).json({ error:'Select between 1 and 8 species.' });
   const selected = [];
   for (const entry of entries) {
-    if (!entry || typeof entry.id !== 'string' || !SPECIES_BY_ID.has(entry.id) || !Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > 30) {
+    if (!entry || typeof entry.id !== 'string' || !SPECIES_BY_ID.has(entry.id) || SPECIES_BY_ID.get(entry.id).organismType==='auxiliary' || !Number.isInteger(entry.quantity) || entry.quantity < 1 || entry.quantity > 30) {
       return res.status(400).json({ error:'Each species must use a catalogue ID and a quantity from 1 to 30.' });
     }
     selected.push({ ...SPECIES_BY_ID.get(entry.id), quantity:entry.quantity });
