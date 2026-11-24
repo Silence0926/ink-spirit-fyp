@@ -839,3 +839,22 @@ test('public species catalogue and product species references stay consistent', 
   const publicProducts=await (await fetch(base+'/api/products')).json();
   assert.equal(publicProducts.find(item=>item.name==='Linked Koi').speciesId,'koi');
 });
+
+test('aquarium encyclopedia exposes searchable, categorised reference articles', async t => {
+  const { base } = await startServer(t);
+  const response=await fetch(base+'/api/encyclopedia');
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.ok(data.articles.length>=10);
+  assert.ok(data.categories.some(category=>category.id==='water'));
+  assert.ok(data.articles.every(article=>article.slug&&article.title&&article.sections.length&&article.sources.length));
+  const water=await (await fetch(base+'/api/encyclopedia?category=water')).json();
+  assert.ok(water.articles.length>=2);
+  assert.ok(water.articles.every(article=>article.category==='water'));
+  const search=await (await fetch(base+'/api/encyclopedia?q=nitrogen')).json();
+  assert.ok(search.articles.some(article=>article.slug==='nitrogen-cycle'));
+  const article=await fetch(base+'/api/encyclopedia/nitrogen-cycle');
+  assert.equal(article.status,200);
+  assert.equal((await article.json()).slug,'nitrogen-cycle');
+  assert.equal((await fetch(base+'/api/encyclopedia/not-a-real-article')).status,404);
+});
