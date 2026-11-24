@@ -858,3 +858,22 @@ test('aquarium encyclopedia exposes searchable, categorised reference articles',
   assert.equal((await article.json()).slug,'nitrogen-cycle');
   assert.equal((await fetch(base+'/api/encyclopedia/not-a-real-article')).status,404);
 });
+
+test('aquarium compatibility assessment rejects mixed water types and avoids false safety claims', async t => {
+  const { base } = await startServer(t);
+  const incompatible=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'koi',quantity:1},{id:'clown',quantity:1}]})});
+  assert.equal(incompatible.status,200);
+  const result=await incompatible.json();
+  assert.equal(result.status,'incompatible');
+  assert.ok(result.issues.some(issue=>issue.code==='water-type-mismatch'));
+  const unknown=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'koi',quantity:1},{id:'goldfish',quantity:2}]})});
+  assert.equal(unknown.status,200);
+  const unknownResult=await unknown.json();
+  assert.equal(unknownResult.status,'insufficient_information');
+  assert.equal(unknownResult.pairAssessment,'unknown');
+  assert.ok(unknownResult.notes.some(note=>note.includes('不代表物种彼此兼容')));
+  const betta=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'betta',quantity:2}]})});
+  assert.equal((await betta.json()).status,'caution');
+  const invalid=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'not-real',quantity:1}]})});
+  assert.equal(invalid.status,400);
+});
