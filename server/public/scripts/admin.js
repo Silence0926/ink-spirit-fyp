@@ -180,6 +180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   productFilter?.addEventListener('change', renderProductRows);
 
   const form = document.getElementById('product-form');
+  const speciesSelect = document.getElementById('product-species');
+  let speciesCatalogue = [];
+  try {
+    speciesCatalogue = await request('/api/species');
+    speciesCatalogue.forEach(species => { const option=document.createElement('option');option.value=species.id;option.textContent=species.commonName+' · '+species.scientificName;speciesSelect.append(option); });
+  } catch (error) { showMessage('Species list unavailable: '+error.message,true); }
   const editProduct = product => {
     form.hidden = false;
     const values = {
@@ -200,6 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       field.value = value;
     });
+    speciesSelect.value = product?.speciesId || '';
     document.getElementById('product-image-file').value = '';
     document.getElementById('product-gallery').value = Array.isArray(product?.images) ? product.images.join('\n') : '';
     const specs = product?.specifications || {};
@@ -268,6 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const payload = {
       name: document.getElementById('product-name').value.trim(),
       category: document.getElementById('product-category').value.trim(),
+      speciesId: speciesSelect.value || null,
       description: document.getElementById('product-description').value.trim(),
       price: Number(document.getElementById('product-price').value),
       stock: Number(document.getElementById('product-stock').value),
