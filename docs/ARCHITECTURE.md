@@ -138,3 +138,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - `GET /api/admin/analytics?range=7d|30d` is restricted to Admin and Manager roles. It returns aggregate verified-payment totals, period gross, order status counts, active catalogue and low-stock counts, daily gross, category counts and best-selling lines. It does not expose customer identifiers or order-level PII.
 - Gross payment metrics include only orders with `paymentVerified === true`, set after provider verification. Pending and unverified orders are excluded. The project does not currently integrate refunds, so gross verified payments are not net revenue.
 - Dashboard data is calculated from JSON files at request time. This is suitable for the current single-instance prototype, not a high-volume analytics warehouse. The underlying JSON persistence is not transactional across multiple server processes.
+
+
+## Shared species catalogue
+
+- `server/species-catalogue.json` is the canonical eight-species reference dataset. The public `GET /api/species` endpoint serves the shared records used by the ecology atlas, species guide, product detail page, and Admin product editor.
+- Product records may carry an optional `speciesId`; the server validates it against the canonical catalogue. Generic aquarium equipment, food, and plants may leave the field empty.
+- Species records distinguish native-range summaries, habitat descriptions, domestication/origin notes, care notes, conservation/legal cautions, broad map reference coordinates, and further-reading source URLs. Map coordinates are regional educational markers, not precise occurrence or collection records. The dataset is introductory and should be reviewed against current taxonomic, conservation, and local regulatory references before operational use.
+- Existing legacy product IDs retain a temporary front-end association fallback. New and edited products should use the explicit species reference.
