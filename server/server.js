@@ -371,7 +371,7 @@ app.post('/api/creatures/interact', requireAuth, (req, res) => {
   care.creatures[creatureId].bond += 1;
   saveCreatureCare(req.user.id, care);
   recordCreatureEvent(req.user.id, { type:'interaction', creatureId, title:'相伴互动', detail:'与伙伴相伴片刻，获得 ' + reward + ' 点灵息，亲密度增加 1。' });
-  res.json({ reward, progress:publicCreatureProgress(progress), care:publicCreatureCare(care) });
+  res.json({ reward, progress:publicCreatureProgress(progress), care:publicCreatureCare(care, req.user.id) });
 });
 
 
@@ -408,7 +408,20 @@ function saveCreatureCare(userId, care) {
   all[userId] = care;
   writeJson(FILES.creatureCare, all);
 }
-function publicCreatureCare(care) {
+function getCreatureEvolution(level, bond) {
+  if (level >= 10 && bond >= 50) {
+    return { id:'transcendent', stage:3, name:'灵韵化境', description:'灵息充盈，灵契相通。', nextLevel:null, nextBond:null };
+  }
+  if (level >= 5 && bond >= 20) {
+    return { id:'awakened', stage:2, name:'灵脉初醒', description:'灵脉苏醒，形态显现。', nextLevel:10, nextBond:50 };
+  }
+  return {
+    id:'young', stage:1, name:'初生灵形', description:'灵性尚在积蓄，等待下一次蜕变。',
+    nextLevel:5, nextBond:20
+  };
+}
+function publicCreatureCare(care, userId) {
+  const progression = userId ? getCreatureProgress(userId) : null;
   return {
     creatures:Object.fromEntries(CREATURE_IDS.map(creatureId => {
       const item = care.creatures[creatureId];
@@ -417,6 +430,7 @@ function publicCreatureCare(care) {
         bond:item.bond,
         mood:item.satiety >= 70 ? '安然' : item.satiety >= 35 ? '平静' : '需要照料',
         bondStage:item.bond >= 100 ? '心契' : item.bond >= 50 ? '亲近' : item.bond >= 20 ? '熟悉' : '初识',
+        evolution:getCreatureEvolution(progression?.creatures?.[creatureId]?.level || 1, item.bond),
         dailyFeeds:{ count:item.daily.count, limit:DAILY_FEED_LIMIT, date:item.daily.date },
         lastFedAt:item.lastFedAt
       }];
@@ -430,7 +444,7 @@ app.get('/api/creatures/journal', requireAuth, (req, res) => {
 });
 
 app.get('/api/creatures/care', requireAuth, (req, res) => {
-  res.json(publicCreatureCare(getCreatureCare(req.user.id)));
+  res.json(publicCreatureCare(getCreatureCare(req.user.id), req.user.id));
 });
 app.post('/api/creatures/care/feed', requireAuth, (req, res) => {
   const creatureId = req.body.creatureId;
@@ -452,7 +466,7 @@ app.post('/api/creatures/care/feed', requireAuth, (req, res) => {
   creature.lastFedAt = new Date().toISOString();
   saveCreatureCare(req.user.id, care);
   recordCreatureEvent(req.user.id, { type:'feeding', creatureId, title:'灵食照料', detail:'奉上' + food.name + '，饱足恢复 ' + food.satiety + ' 点，亲密度增加 5。' });
-  res.json({ fed:true, food:food.name, satietyRestored:food.satiety, care:publicCreatureCare(care) });
+  res.json({ fed:true, food:food.name, satietyRestored:food.satiety, care:publicCreatureCare(care, req.user.id) });
 });
 
 const HABITAT_IDS = ['lotus-pond', 'cloud-mountain', 'bamboo-forest', 'quiet-marsh'];
