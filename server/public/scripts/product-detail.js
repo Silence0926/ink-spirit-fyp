@@ -62,6 +62,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const careTitle=document.createElement('h2');careTitle.textContent=matched?'物种与照护札记':'使用与养护札记';
     const careText=document.createElement('p');careText.textContent=matched?matched.care:(careForCategory[product.category]||'请在购买前确认商品规格、适用环境及维护要求；如有疑问，请先向专业人员或供应方核实。');
     care.append(careTitle,careText);
+    const specs=product.specifications||{};
+    const specEntries=[];
+    const waterLabels={freshwater:'淡水',marine:'海水',brackish:'汽水',any:'通用'};
+    const difficultyLabels={beginner:'入门',intermediate:'中等',advanced:'进阶'};
+    if(specs.waterType)specEntries.push(['适宜水域',waterLabels[specs.waterType]||specs.waterType]);
+    if(specs.difficulty)specEntries.push(['饲养难度',difficultyLabels[specs.difficulty]||specs.difficulty]);
+    if(specs.minTankLitres)specEntries.push(['建议最小水体',specs.minTankLitres+' L']);
+    if(specs.temperatureMinC!==null&&specs.temperatureMinC!==undefined&&specs.temperatureMaxC!==null&&specs.temperatureMaxC!==undefined)specEntries.push(['温度范围',specs.temperatureMinC+'–'+specs.temperatureMaxC+' °C']);
+    if(specs.adultSizeCm)specEntries.push(['成年体长参考',specs.adultSizeCm+' cm']);
+    if(specEntries.length||specs.careNotes){
+      const specBox=document.createElement('div');specBox.className='detail-specifications';
+      if(specEntries.length){const list=document.createElement('dl');specEntries.forEach(([label,value])=>{const group=document.createElement('div');const term=document.createElement('dt');term.textContent=label;const desc=document.createElement('dd');desc.textContent=value;group.append(term,desc);list.append(group);});specBox.append(list);}
+      if(specs.careNotes){const notes=document.createElement('p');notes.textContent=specs.careNotes;specBox.append(notes);}
+      care.append(specBox);
+    }
     if(matched){const links=document.createElement('div');links.className='detail-links';const atlas=document.createElement('a');atlas.href='map.html?species='+encodeURIComponent(matched.map);atlas.textContent='在生态地图查看 '+matched.name+' ↗';const guide=document.createElement('a');guide.href='fish-list.html';guide.textContent='阅读生灵图谱 ↗';links.append(atlas,guide);care.append(links);}
     root.append(visual,copy,care);
     const relatedProducts=products.filter(item=>item.id!==product.id&&item.active!==false&&item.category===product.category).slice(0,4);
