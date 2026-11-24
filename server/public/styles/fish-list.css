@@ -33,3 +33,5 @@
 .species-shop-link{display:inline-block;margin:9px 0 0 12px;color:#9b5749;font-size:11px;text-decoration:none;text-underline-offset:4px}.species-shop-link:hover{text-decoration:underline}
 
 .species-kind-label{display:inline-block;margin:0 0 8px;padding:4px 7px;border:1px solid #d9d3c3;color:#8e574b;font-size:9px;letter-spacing:.5px}.species-simulator-link{display:inline-block;margin:9px 0 0 12px;color:#526a58;font-size:11px;text-decoration:none;text-underline-offset:4px}.species-simulator-link:hover{text-decoration:underline}
+
+.species-sources{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:13px;padding-top:10px;border-top:1px dashed #dedacc}.species-sources strong{width:100%;color:#9b5749;font-size:8px;letter-spacing:1px}.species-sources a{color:#687a65;font-size:9px;text-decoration:underline;text-underline-offset:3px}
