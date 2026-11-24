@@ -758,3 +758,22 @@ test('product gallery images are validated, returned in cart lines and reject un
   const cart=await add.json();
   assert.deepEqual(cart.lines[0].images,product.images);
 });
+
+test('aquatic product specifications validate ranges and appear in the public catalogue', async t => {
+  const { base } = await startServer(t, [{id:'spec-admin',username:'spec-admin',password:'spec-admin-pass',role:'admin'}], []);
+  const login=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'spec-admin',password:'spec-admin-pass'})});
+  assert.equal(login.status,200);
+  const cookie=login.headers.get('set-cookie').split(';')[0];
+  const headers={cookie,'content-type':'application/json'};
+  const baseProduct={name:'Marine Angel',category:'Marine Fish',description:'A test marine fish.',price:35,stock:3,image:'/images/products/clownfish-card.svg'};
+  const invalid=await fetch(base+'/api/admin/products',{method:'POST',headers,body:JSON.stringify({...baseProduct,specifications:{waterType:'marine',difficulty:'advanced',temperatureMinC:28,temperatureMaxC:22}})});
+  assert.equal(invalid.status,400,'temperature minimum cannot exceed maximum');
+  const created=await fetch(base+'/api/admin/products',{method:'POST',headers,body:JSON.stringify({...baseProduct,specifications:{waterType:'marine',difficulty:'intermediate',minTankLitres:120,temperatureMinC:24.5,temperatureMaxC:27,adultSizeCm:12.5,careNotes:'Use a mature marine system.'}})});
+  assert.equal(created.status,201);
+  const product=(await created.json()).product;
+  assert.equal(product.specifications.waterType,'marine');
+  assert.equal(product.specifications.minTankLitres,120);
+  const publicList=await fetch(base+'/api/products');
+  const listed=(await publicList.json()).find(item=>item.id===product.id);
+  assert.equal(listed.specifications.difficulty,'intermediate');
+});
