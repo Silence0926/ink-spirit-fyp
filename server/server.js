@@ -371,9 +371,13 @@ function getCreatureCare(userId) {
     const daily = saved.daily?.date === today && Number.isInteger(saved.daily.count)
       ? { date:today, count:Math.max(0, saved.daily.count) }
       : { date:today, count:0 };
-    const satiety = Number.isInteger(saved.satiety) ? Math.min(100, Math.max(0, saved.satiety)) : 60;
+    const storedSatiety = Number.isInteger(saved.satiety) ? Math.min(100, Math.max(0, saved.satiety)) : 60;
+    const lastFedAt = saved.lastFedAt || null;
+    const elapsed = lastFedAt ? Math.max(0, Date.now() - Date.parse(lastFedAt)) : 0;
+    const decay = Number.isFinite(elapsed) ? Math.floor(elapsed / (6 * 60 * 60 * 1000)) * 10 : 0;
+    const satiety = Math.max(0, storedSatiety - decay);
     const bond = Number.isInteger(saved.bond) ? Math.max(0, saved.bond) : 0;
-    creatures[creatureId] = { satiety, bond, daily, lastFedAt:saved.lastFedAt || null };
+    creatures[creatureId] = { satiety, bond, daily, lastFedAt };
   }
   return { creatures };
 }
