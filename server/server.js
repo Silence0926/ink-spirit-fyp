@@ -383,6 +383,13 @@ const CARE_FOODS = {
   'cloud-fruit': { name:'云果', satiety:20 }
 };
 const DAILY_FEED_LIMIT = 3;
+const DAILY_ABILITY_LIMIT = 5;
+const CREATURE_ABILITIES = {
+  koi:{ id:'ripple-leap', name:'锦鲤跃波', seal:'跃', description:'跃出水面，唤起层层水纹。', effect:'ripples' },
+  dragon:{ id:'cloudborne-presence', name:'云龙现世', seal:'云', description:'云气舒展，龙影穿过山岚。', effect:'cloud' },
+  snake:{ id:'veil-of-ink', name:'幽影潜行', seal:'影', description:'墨影隐现，于竹影间悄然穿行。', effect:'veil' },
+  turtle:{ id:'tortoise-ward', name:'玄甲守心', seal:'甲', description:'玄甲凝光，水泽泛起守护涟漪。', effect:'ward' }
+};
 function getCreatureCare(userId) {
   const all = readJson(FILES.creatureCare, {});
   const record = all[userId] || {};
@@ -399,7 +406,10 @@ function getCreatureCare(userId) {
     const decay = Number.isFinite(elapsed) ? Math.floor(elapsed / (6 * 60 * 60 * 1000)) * 10 : 0;
     const satiety = Math.max(0, storedSatiety - decay);
     const bond = Number.isInteger(saved.bond) ? Math.max(0, saved.bond) : 0;
-    creatures[creatureId] = { satiety, bond, daily, lastFedAt };
+    const abilityDaily = saved.abilityDaily?.date === today && Number.isInteger(saved.abilityDaily.count)
+      ? { date:today, count:Math.max(0, saved.abilityDaily.count) }
+      : { date:today, count:0 };
+    creatures[creatureId] = { satiety, bond, daily, abilityDaily, lastFedAt };
   }
   return { creatures };
 }
@@ -431,12 +441,42 @@ function publicCreatureCare(care, userId) {
         mood:item.satiety >= 70 ? '安然' : item.satiety >= 35 ? '平静' : '需要照料',
         bondStage:item.bond >= 100 ? '心契' : item.bond >= 50 ? '亲近' : item.bond >= 20 ? '熟悉' : '初识',
         evolution:getCreatureEvolution(progression?.creatures?.[creatureId]?.level || 1, item.bond),
+        ability:{
+          ...CREATURE_ABILITIES[creatureId],
+          unlocked:item.bond >= 50 && (progression?.creatures?.[creatureId]?.level || 1) >= 5,
+          unlockBond:50,
+          unlockLevel:5,
+          dailyUses:{ count:item.abilityDaily.count, limit:DAILY_ABILITY_LIMIT, date:item.abilityDaily.date }
+        },
         dailyFeeds:{ count:item.daily.count, limit:DAILY_FEED_LIMIT, date:item.daily.date },
         lastFedAt:item.lastFedAt
       }];
     }))
   };
 }
+app.post('/api/creatures/ability', requireAuth, (req, res) => {
+  const creatureId = req.body.creatureId;
+  if (!CREATURE_IDS.includes(creatureId)) return res.status(400).json({ error:'Unknown creature.' });
+  const ability = CREATURE_ABILITIES[creatureId];
+  if (req.body.abilityId !== ability.id) return res.status(400).json({ error:'Ability does not match this companion.' });
+  const care = getCreatureCare(req.user.id);
+  const creature = care.creatures[creatureId];
+  const level = getCreatureProgress(req.user.id).creatures[creatureId].level;
+  if (creature.bond < 50 || level < 5) {
+    return res.status(403).json({ error:'此灵技尚未觉醒：需要等级 LV. 5 与亲密度 50。' });
+  }
+  if (creature.abilityDaily.count >= DAILY_ABILITY_LIMIT) {
+    return res.status(429).json({ error:'今日灵技施展次数已达上限，请明天再来。' });
+  }
+  creature.abilityDaily.count += 1;
+  saveCreatureCare(req.user.id, care);
+  recordCreatureEvent(req.user.id, {
+    type:'ability', creatureId, title:ability.name,
+    detail:ability.description + ' 今日施展 ' + creature.abilityDaily.count + ' / ' + DAILY_ABILITY_LIMIT + ' 次。'
+  });
+  res.json({ activated:true, ability, care:publicCreatureCare(care, req.user.id) });
+});
+
 app.get('/api/creatures/journal', requireAuth, (req, res) => {
   const all = readJson(FILES.creatureJournal, {});
   const events = Array.isArray(all[req.user.id]) ? all[req.user.id] : [];
