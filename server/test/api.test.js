@@ -711,7 +711,8 @@ test('cart mutations enforce stock and quantity limits without persisting invali
   });
   assert.equal(tooMany.status, 409);
   assert.match((await tooMany.json()).error, /Insufficient stock/);
-  let carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
+  const cartFile = path.join(dataDir, 'carts.json');
+  let carts = fs.existsSync(cartFile) ? JSON.parse(fs.readFileSync(cartFile, 'utf8')) : {};
   const user = (await registration.json()).user;
   assert.deepEqual(carts[user.id] || [], [], 'rejected add must not persist a cart line');
 
@@ -725,7 +726,7 @@ test('cart mutations enforce stock and quantity limits without persisting invali
     method:'POST', headers, body:JSON.stringify({ productId:'limited-fish', quantity:1 })
   });
   assert.equal(increment.status, 409);
-  carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
+  carts = JSON.parse(fs.readFileSync(cartFile, 'utf8'));
   assert.equal(carts[user.id][0].quantity, 2, 'rejected increment must preserve previous cart quantity');
 
   const update = await fetch(base + '/api/cart/items/limited-fish', {
