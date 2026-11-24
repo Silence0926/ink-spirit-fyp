@@ -187,11 +187,11 @@ function seedProducts() {
   if (missing.length) writeJson(FILES.products, [...current, ...missing]);
 }
 function validateProduct(input, partial = false) {
+  const result = {};
   if (input.speciesId !== undefined) {
     if (input.speciesId !== null && input.speciesId !== '' && (typeof input.speciesId !== 'string' || !SPECIES_BY_ID.has(input.speciesId))) throw new Error('Unknown species reference.');
     result.speciesId = input.speciesId || null;
   }
-  const result = {};
   const fields = ['name', 'category', 'description', 'image'];
   for (const field of fields) {
     if (partial && input[field] === undefined) continue;
