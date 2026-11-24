@@ -99,7 +99,7 @@ Map markers represent broad regional reference points, not precise collection lo
 
 ## Original soundtrack
 
-- The homepage now plays the repository-owned original track `server/public/audio/ink-spirit-original.wav` (48 seconds, mono PCM WAV at 22.05 kHz).
+- The homepage now plays the repository-owned original track in MP3 format (`server/public/audio/ink-spirit-original.mp3`, 128 kbps, 22.05 kHz) with the WAV master (`server/public/audio/ink-spirit-original.wav`) as a browser fallback. The composition is 48 seconds long.
 - The composition is procedurally synthesized for this project: guzheng-like plucked tones, airy bamboo-flute-like melody and a softly filtered, tide-like ambient bed. The water texture is synthesized ambience, not a field recording.
 - Playback is user-initiated, loops continuously, and includes a volume control. No third-party song or external streaming service is required.
 - The earlier Web Audio real-time sketch has been replaced on the homepage by the standalone audio asset. Other pages are unchanged.
