@@ -700,6 +700,70 @@ app.delete('/api/admin/products/:id', requireRole('admin'), (req, res) => {
   writeJson(FILES.products, products);
   res.json({ message:'Product archived.' });
 });
+app.get('/api/admin/analytics', requireRole('admin', 'manager'), (req, res) => {
+  const range = req.query.range === '30d' ? 30 : 7;
+  const now = Date.now();
+  const windowStart = now - range * 24 * 60 * 60 * 1000;
+  const orders = readJson(FILES.orders, []);
+  const products = readJson(FILES.products, []);
+  const paidOrders = orders.filter(order => order.paymentVerified === true || ['paid','processing','shipped','completed'].includes(order.status));
+  const verifiedInRange = paidOrders.filter(order => {
+    const timestamp = Date.parse(order.paidAt || order.updatedAt || order.createdAt);
+    return Number.isFinite(timestamp) && timestamp >= windowStart && timestamp <= now;
+  });
+  const grossVerifiedPayments = paidOrders.reduce((sum, order) => sum + Math.round(Number(order.total || 0) * 100), 0) / 100;
+  const periodGross = verifiedInRange.reduce((sum, order) => sum + Math.round(Number(order.total || 0) * 100), 0) / 100;
+  const daily = Array.from({length:range}, (_, index) => {
+    const date = new Date(windowStart + index * 24 * 60 * 60 * 1000);
+    return { date:date.toISOString().slice(0,10), gross:0, paidOrders:0 };
+  });
+  const dailyIndex = new Map(daily.map((item,index)=>[item.date,index]));
+  verifiedInRange.forEach(order => {
+    const date = new Date(Date.parse(order.paidAt || order.updatedAt || order.createdAt)).toISOString().slice(0,10);
+    const index = dailyIndex.get(date);
+    if (index === undefined) return;
+    daily[index].gross += Math.round(Number(order.total || 0) * 100) / 100;
+    daily[index].paidOrders += 1;
+  });
+  const statusCounts = {};
+  orders.forEach(order => { statusCounts[order.status || 'unknown'] = (statusCounts[order.status || 'unknown'] || 0) + 1; });
+  const lowStock = products.filter(product => product.active !== false && Number(product.stock) <= (Number.isInteger(product.stockThreshold) ? product.stockThreshold : 5));
+  const outOfStock = products.filter(product => product.active !== false && Number(product.stock) <= 0);
+  const categoryCounts = {};
+  products.filter(product=>product.active!==false).forEach(product => {
+    const category = product.category || 'Uncategorised';
+    if (!categoryCounts[category]) categoryCounts[category] = { category, products:0, stockUnits:0 };
+    categoryCounts[category].products += 1;
+    categoryCounts[category].stockUnits += Number.isFinite(Number(product.stock)) ? Number(product.stock) : 0;
+  });
+  const bestSellers = new Map();
+  verifiedInRange.forEach(order => (order.items || []).forEach(item => {
+    const entry = bestSellers.get(item.productId) || { productId:item.productId, name:item.name, units:0, gross:0 };
+    entry.units += Number(item.quantity) || 0;
+    entry.gross += Math.round(Number(item.lineTotal ?? (Number(item.unitPrice || 0) * Number(item.quantity || 0))) * 100) / 100;
+    bestSellers.set(item.productId, entry);
+  }));
+  res.json({
+    rangeDays:range,
+    generatedAt:new Date(now).toISOString(),
+    revenueDefinition:'Gross verified payments; excludes pending/unverified orders. Refunds are not integrated, so this is not net revenue.',
+    summary:{
+      grossVerifiedPayments,
+      periodGross,
+      verifiedOrders:verifiedInRange.length,
+      allOrders:orders.length,
+      pendingPayment:orders.filter(order=>order.status==='pending_payment').length,
+      activeProducts:products.filter(product=>product.active!==false).length,
+      lowStock:lowStock.length,
+      outOfStock:outOfStock.length
+    },
+    daily,
+    statusCounts,
+    categories:Object.values(categoryCounts).sort((a,b)=>b.products-a.products),
+    bestSellers:[...bestSellers.values()].sort((a,b)=>b.units-a.units).slice(0,8),
+    lowStockProducts:lowStock.sort((a,b)=>Number(a.stock)-Number(b.stock)).slice(0,12).map(product=>({id:product.id,name:product.name,category:product.category,stock:product.stock,threshold:Number.isInteger(product.stockThreshold)?product.stockThreshold:5}))
+  });
+});
 app.get('/api/admin/orders', requireRole('admin', 'manager'), (_req, res) => {
   const orders = readJson(FILES.orders, []);
   res.json(orders.sort((a,b) => b.createdAt.localeCompare(a.createdAt)));
