@@ -141,3 +141,59 @@ test('admin and manager API permissions are enforced server-side', async t => {
     method:'DELETE', headers:adminHeaders
   })).status, 200);
 });
+
+test('authenticated creature progression persists server-side and validates rewards', async t => {
+  const { base, dataDir } = await startServer(t);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST',
+    headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'creature-user', password:'creature-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+
+  const initial = await fetch(base + '/api/creatures/progress', { headers });
+  assert.equal(initial.status, 200);
+  const initialData = await initial.json();
+  assert.equal(initialData.selectedCreature, 'koi');
+  assert.equal(initialData.creatures.koi.level, 1);
+  assert.equal(initialData.dailyInteractions.count, 0);
+
+  const unauthorized = await fetch(base + '/api/creatures/progress');
+  assert.equal(unauthorized.status, 401);
+
+  const invalid = await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'phoenix', reward:999999 })
+  });
+  assert.equal(invalid.status, 400);
+
+  const select = await fetch(base + '/api/creatures/selected', {
+    method:'PATCH', headers, body:JSON.stringify({ creatureId:'dragon' })
+  });
+  assert.equal(select.status, 200);
+  assert.equal((await select.json()).selectedCreature, 'dragon');
+
+  let latest;
+  for (let index = 0; index < 10; index += 1) {
+    const interaction = await fetch(base + '/api/creatures/interact', {
+      method:'POST', headers, body:JSON.stringify({ creatureId:'dragon', reward:999999 })
+    });
+    assert.equal(interaction.status, 200);
+    latest = await interaction.json();
+    assert.equal(latest.reward, 10, 'server controls the interaction reward');
+  }
+  assert.equal(latest.progress.creatures.dragon.level, 2);
+  assert.equal(latest.progress.creatures.dragon.experience, 0);
+  assert.equal(latest.progress.creatures.dragon.visits, 10);
+  assert.equal(latest.progress.dailyInteractions.count, 10);
+
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-progress.json'), 'utf8'));
+  const user = (await registration.json()).user;
+  assert.equal(stored[user.id].creatures.dragon.totalExperience, 100);
+
+  const limit = await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'unknown' })
+  });
+  assert.equal(limit.status, 400);
+});
