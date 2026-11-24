@@ -736,3 +736,25 @@ test('cart mutations enforce stock and quantity limits without persisting invali
   carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
   assert.equal(carts[user.id][0].quantity, 2, 'rejected quantity update must roll back');
 });
+
+test('product gallery images are validated, returned in cart lines and reject unsafe URLs', async t => {
+  const { base } = await startServer(t, [
+    { id:'gallery-admin', username:'gallery-admin', password:'gallery-admin-pass', role:'admin' },
+    { id:'gallery-user', username:'gallery-user', password:'gallery-user-pass', role:'user' }
+  ], []);
+  const login=async(username,password)=>{const response=await fetch(base+'/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username,password})});assert.equal(response.status,200);return response.headers.get('set-cookie').split(';')[0];};
+  const adminCookie=await login('gallery-admin','gallery-admin-pass');
+  const adminHeaders={cookie:adminCookie,'content-type':'application/json'};
+  const invalid=await fetch(base+'/api/admin/products',{method:'POST',headers:adminHeaders,body:JSON.stringify({name:'Gallery Fish',category:'Ornamental Fish',description:'Test',price:12,stock:4,image:'/images/products/koi-card.svg',images:['//evil.example/a.png']})});
+  assert.equal(invalid.status,400);
+  const created=await fetch(base+'/api/admin/products',{method:'POST',headers:adminHeaders,body:JSON.stringify({name:'Gallery Fish',category:'Ornamental Fish',description:'Test',price:12,stock:4,image:'/images/products/koi-card.svg',images:['/images/products/betta-card.svg','https://example.com/second.webp']})});
+  assert.equal(created.status,201);
+  const product=(await created.json()).product;
+  assert.deepEqual(product.images,['/images/products/betta-card.svg','https://example.com/second.webp']);
+  const userCookie=await login('gallery-user','gallery-user-pass');
+  const userHeaders={cookie:userCookie,'content-type':'application/json'};
+  const add=await fetch(base+'/api/cart/items',{method:'POST',headers:userHeaders,body:JSON.stringify({productId:product.id,quantity:1})});
+  assert.equal(add.status,200);
+  const cart=await add.json();
+  assert.deepEqual(cart.lines[0].images,product.images);
+});
