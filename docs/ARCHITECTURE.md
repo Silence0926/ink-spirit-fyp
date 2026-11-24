@@ -79,3 +79,11 @@ Map markers represent broad regional reference points, not precise collection lo
 
 - Each companion has authored temperament, idle-behavior copy and a distinct interaction response: koi is lively and friendly, dragon is dignified and protective, snake is alert and quiet, and turtle is steady and gentle.
 - The homepage renders the selected companion's temperament and behavior description and plays a creature-specific Web Animations API motion on interaction. This is a 2D presentation layer; it does not yet simulate autonomous AI behavior, pathfinding, or real-time 3D animation.
+
+
+## Creature evolution
+
+- Evolution is calculated by the server from both creature level and bond; clients cannot submit an evolution stage.
+- Stage 1 (初生灵形) is the starting form. Stage 2 (灵脉初醒) requires level 5 and bond 20. Stage 3 (灵韵化境) requires level 10 and bond 50.
+- The care API returns the calculated evolution for each creature. The homepage renders the stage, next-stage requirements and a restrained 2D ink-aura treatment. Guest mode calculates the same thresholds from browser-local progress.
+- These are presentation-stage unlocks, not separate 3D models. Unique stage-specific creature meshes, rigging, skeletal animation and special ability systems remain future work.
