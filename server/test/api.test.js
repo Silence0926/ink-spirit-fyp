@@ -872,6 +872,8 @@ test('aquarium compatibility assessment rejects mixed water types and avoids fal
   assert.equal(unknownResult.status,'insufficient_information');
   assert.equal(unknownResult.pairAssessment,'unknown');
   assert.ok(unknownResult.notes.some(note=>note.includes('不代表物种彼此兼容')));
+  const single=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'koi',quantity:1}]})});
+  assert.equal((await single.json()).status,'single_species');
   const betta=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'betta',quantity:2}]})});
   assert.equal((await betta.json()).status,'caution');
   const invalid=await fetch(base+'/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:[{id:'not-real',quantity:1}]})});
