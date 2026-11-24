@@ -171,6 +171,7 @@
       ? '已达到当前原型的最高形态。'
       : '下一阶段：等级 LV. ' + evolution.nextLevel + ' · 亲密度 ' + evolution.nextBond;
     $('creature-art').dataset.evolution = evolution.id;
+    $('painting').dataset.evolution = evolution.id;
   }
   function renderCare() {
     const care = careProgress[selected] || defaultCare()[selected];
