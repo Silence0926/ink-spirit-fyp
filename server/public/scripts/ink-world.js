@@ -29,7 +29,7 @@
   let selected = 'koi';
   let authenticated = false;
   let dailyInteractions = { count:0, limit:50 };
-  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, mood:'平静', dailyFeeds:{ count:0, limit:3 } }]));
+  const defaultCare = () => Object.fromEntries(Object.keys(creatures).map(id => [id, { satiety:60, bond:0, mood:'平静', dailyFeeds:{ count:0, limit:3 }, lastFedAt:null }]));
   let careProgress = defaultCare();
   const $ = id => document.getElementById(id);
   const threshold = level => level * 100;
@@ -100,9 +100,7 @@
     const full = care.satiety >= 100;
     feedButton.disabled = exhausted || full;
     feedButton.textContent = exhausted ? '今日照料已达上限' : full ? '伙伴已经吃饱' : '喂给伙伴';
-    $('care-note').textContent = authenticated
-      ? '今日喂养 · ' + care.dailyFeeds.count + ' / ' + care.dailyFeeds.limit + ' 次。照料记录已同步至账号。'
-      : '访客模式 · 今日喂养 ' + care.dailyFeeds.count + ' / ' + care.dailyFeeds.limit + ' 次，记录保存在当前浏览器。';
+
   }
   function applyCare(data) {
     if (!data || !data.creatures) return;
@@ -211,6 +209,7 @@
         if (care.dailyFeeds.count >= 3) throw new Error('今日的喂养次数已达上限。');
         if (care.satiety >= 100) throw new Error('伙伴现在已经吃饱了。');
         care.satiety = Math.min(100, care.satiety + 20);
+        care.lastFedAt = new Date().toISOString();
         care.bond += 5;
         care.mood = care.satiety >= 70 ? '安然' : care.satiety >= 35 ? '平静' : '需要照料';
         care.dailyFeeds.count += 1;
@@ -238,7 +237,18 @@
       try {
         const savedCare = JSON.parse(localStorage.getItem('inkSpirit.care.v1') || 'null');
         if (savedCare && typeof savedCare === 'object') {
-          for (const id of Object.keys(creatures)) if (savedCare[id]) careProgress[id] = savedCare[id];
+          for (const id of Object.keys(creatures)) {
+            if (!savedCare[id]) continue;
+            const item = savedCare[id];
+            if (item.lastFedAt && Number.isFinite(Date.parse(item.lastFedAt))) {
+              const elapsed = Math.max(0, Date.now() - Date.parse(item.lastFedAt));
+              const intervals = Math.floor(elapsed / (6 * 60 * 60 * 1000));
+              item.satiety = Math.max(0, item.satiety - intervals * 10);
+              if (intervals) item.lastFedAt = new Date(Date.parse(item.lastFedAt) + intervals * 6 * 60 * 60 * 1000).toISOString();
+            }
+            item.mood = item.satiety >= 70 ? '安然' : item.satiety >= 35 ? '平静' : '需要照料';
+            careProgress[id] = item;
+          }
         }
       } catch {}
       try {
