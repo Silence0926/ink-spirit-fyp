@@ -188,7 +188,7 @@ function validateProduct(input, partial = false) {
   const fields = ['name', 'category', 'description', 'image'];
   for (const field of fields) {
     if (partial && input[field] === undefined) continue;
-    if (typeof input[field] !== 'string' || !input[field].trim() || input[field].length > (field === 'description' ? 1200 : 160)) {
+    if (typeof input[field] !== 'string' || !input[field].trim() || input[field].length > (field === 'description' ? 1200 : (field === 'image' ? 500 : 160))) {
       throw new Error('Invalid product field: ' + field);
     }
     if (field === 'image') {
