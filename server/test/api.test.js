@@ -208,3 +208,48 @@ test('authenticated creature progression persists server-side and validates rewa
   });
   assert.equal(invalidAfterLimit.status, 400);
 });
+
+
+test('habitat discoveries are authenticated, persistent, one-time and reward the selected creature', async t => {
+  const { base, dataDir } = await startServer(t);
+  const anonymous = await fetch(base + '/api/exploration/progress');
+  assert.equal(anonymous.status, 401);
+
+  const registration = await fetch(base + '/api/register', {
+    method:'POST',
+    headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'explorer-user', password:'explorer-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+
+  const invalid = await fetch(base + '/api/exploration/discover', {
+    method:'POST', headers, body:JSON.stringify({ habitatId:'unknown-realm' })
+  });
+  assert.equal(invalid.status, 400);
+
+  const first = await fetch(base + '/api/exploration/discover', {
+    method:'POST', headers, body:JSON.stringify({ habitatId:'lotus-pond', reward:999999 })
+  });
+  assert.equal(first.status, 201);
+  const firstData = await first.json();
+  assert.equal(firstData.reward, 25, 'server fixes the discovery reward');
+  assert.equal(firstData.rewardedCreature, 'koi');
+  assert.equal(firstData.creatureProgress.creatures.koi.experience, 25);
+  assert.deepEqual(firstData.exploration.discovered, ['lotus-pond']);
+
+  const repeated = await fetch(base + '/api/exploration/discover', {
+    method:'POST', headers, body:JSON.stringify({ habitatId:'lotus-pond' })
+  });
+  assert.equal(repeated.status, 200);
+  const repeatedData = await repeated.json();
+  assert.equal(repeatedData.alreadyDiscovered, true);
+  assert.equal(repeatedData.reward, 0);
+
+  const persisted = JSON.parse(fs.readFileSync(path.join(dataDir, 'exploration-progress.json'), 'utf8'));
+  const user = (await registration.json()).user;
+  assert.deepEqual(persisted[user.id].discovered, ['lotus-pond']);
+  const progress = await fetch(base + '/api/exploration/progress', { headers });
+  assert.deepEqual((await progress.json()).discovered, ['lotus-pond']);
+});
