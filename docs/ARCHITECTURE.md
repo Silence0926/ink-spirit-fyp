@@ -73,3 +73,9 @@ Map markers represent broad regional reference points, not precise collection lo
 - Each feeding restores 20 satiety (capped at 100) and adds 5 bond points. Each creature has a server-enforced daily limit of three feedings; a full creature cannot be fed.
 - Satiety decreases by 10 points per six elapsed hours after feeding; mood is derived from satiety: 70–100 calm/comfortable, 35–69 peaceful, 0–34 needs care. Guest care state is browser-local.
 - Daily counters use UTC dates. The current prototype does not simulate passive hunger decay or real-time biological needs.
+
+
+## Creature personality presentation
+
+- Each companion has authored temperament, idle-behavior copy and a distinct interaction response: koi is lively and friendly, dragon is dignified and protective, snake is alert and quiet, and turtle is steady and gentle.
+- The homepage renders the selected companion's temperament and behavior description and plays a creature-specific Web Animations API motion on interaction. This is a 2D presentation layer; it does not yet simulate autonomous AI behavior, pathfinding, or real-time 3D animation.
