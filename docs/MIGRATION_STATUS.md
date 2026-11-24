@@ -38,3 +38,5 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 | Admin business dashboard | Implemented prototype | Role-protected aggregate dashboard for verified gross payments, 7/30-day trend, order status, best-selling lines, category counts and low-stock alerts. Metrics exclude pending/unverified payments; refunds are not integrated, so gross payments are not net revenue. |
 
 | Shared species catalogue and product linkage | Implemented prototype | Eight species served by `GET /api/species`; species guide and Leaflet atlas consume the same dataset; products support validated optional `speciesId`; Admin editor can assign the link. Legacy product-ID fallback remains for older catalogue records. |
+
+| Aquarium encyclopedia | Implemented prototype | 12 structured knowledge articles across five categories; searchable/category-filterable API and reader page; external references and veterinary-safety caveats included. |
