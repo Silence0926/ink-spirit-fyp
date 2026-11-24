@@ -901,6 +901,19 @@ test('virtual aquariums are private, persistent and support safe simulation acti
   assert.equal(created.status,201);
   const aquarium = (await created.json()).aquarium;
   assert.equal(aquarium.fishCount,0);
+  const decorList=await fetch(base+'/api/aquarium-decorations');
+  assert.equal(decorList.status,200);
+  assert.ok((await decorList.json()).some(item=>item.id==='anubias'));
+  const wrongDecor=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'decorate',itemId:'coral-arch',operation:'add'})});
+  assert.equal(wrongDecor.status,409);
+  const addDecor=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'decorate',itemId:'anubias',operation:'add'})});
+  assert.equal(addDecor.status,200);
+  assert.equal((await addDecor.json()).aquarium.decorationCount,1);
+  const duplicateDecor=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'decorate',itemId:'anubias',operation:'add'})});
+  assert.equal(duplicateDecor.status,409);
+  const removeDecor=await fetch(base+'/api/aquariums/'+aquarium.id+'/actions',{method:'POST',headers,body:JSON.stringify({action:'decorate',itemId:'anubias',operation:'remove'})});
+  assert.equal(removeDecor.status,200);
+  assert.equal((await removeDecor.json()).aquarium.decorationCount,0);
   assert.equal((await fetch(base + '/api/aquariums/'+aquarium.id,{headers:{cookie:otherCookie}})).status,404);
   const invalidWater = await fetch(base + '/api/aquariums/'+aquarium.id+'/actions', {
     method:'POST',headers,body:JSON.stringify({action:'add_fish',speciesId:'clown',quantity:1})
