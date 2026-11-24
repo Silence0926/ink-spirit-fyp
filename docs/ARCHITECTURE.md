@@ -177,3 +177,10 @@ Map markers represent broad regional reference points, not precise collection lo
 - Growth stages are derived by server-side thresholds: fry below 7 points, juvenile from 7 to 19, and adult at 20 or more. Feeding advances each cohort's simulation growth by one point per feeding action.
 - Guppy simulation line labels currently include standard grey, mosaic, tuxedo and cobra. These are selectable game appearance labels, not validated genetic strains.
 - The breeding action creates a separate fry cohort, increments generation, and carries forward the parent cohort's line label. This is lineage bookkeeping for gameplay, not a genetic inheritance model.
+
+
+## Virtual aquarium aquascaping
+
+- Each virtual aquarium stores up to eight selected decorative elements. The server validates item IDs, add/remove operations and freshwater/marine compatibility.
+- The initial catalogue contains freshwater plant/hardscape themes and marine seagrass/reef-themed decorative elements. Coral arch is explicitly a decorative object, not a live coral organism.
+- An aquascape score is derived from the number of placed elements for collection presentation only. It does not represent water quality, ecological balance, animal welfare or real aquarium suitability.
