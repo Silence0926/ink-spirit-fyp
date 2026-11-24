@@ -660,7 +660,7 @@ app.post('/api/aquarium/compatibility', (req, res) => {
   if (bettaCount > 1) issues.push({ severity:'caution', code:'betta-social-risk', message:'暹罗斗鱼具有明显个体与性别相关的攻击风险；仅凭物种名称和数量无法判断能否同缸，请先核实性别、品系、缸体结构与专业饲养条件。', species:['betta'] });
   const hasUnknownPairRules = selected.length > 1 && !issues.some(issue=>issue.severity==='incompatible');
   res.json({
-    status:issues.some(issue=>issue.severity==='incompatible')?'incompatible':issues.some(issue=>issue.severity==='caution')?'caution':'insufficient_information',
+    status:issues.some(issue=>issue.severity==='incompatible')?'incompatible':issues.some(issue=>issue.severity==='caution')?'caution':selected.length===1?'single_species':'insufficient_information',
     selected:selected.map(item=>({id:item.id,commonName:item.commonName,scientificName:item.scientificName,waterType:item.waterType,quantity:item.quantity,care:item.care})),
     issues,
     notes:[
@@ -668,7 +668,7 @@ app.post('/api/aquarium/compatibility', (req, res) => {
       '当前物种资料尚未覆盖所有成年体型、温度、行为、食性和空间需求；未知条件不会被视为安全。',
       '新增物种、数量或环境后，应重新评估，并在实际混养前咨询可靠的专业资料或鱼类兽医。'
     ],
-    pairAssessment:hasUnknownPairRules?'unknown':'not_applicable'
+    pairAssessment:hasUnknownPairRules?'unknown':selected.length===1?'single_species':'not_applicable'
   });
 });
 app.get('/api/species', (_req, res) => res.json(SPECIES_CATALOGUE));
