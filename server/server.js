@@ -730,10 +730,15 @@ app.post('/api/cart/items', requireAuth, (req, res) => {
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) return res.status(400).json({ error:'Quantity must be between 1 and 99.' });
   const items = getCart(req.user.id);
   const existing = items.find(item => item.productId === productId);
-  if (existing) existing.quantity = Math.min(99, existing.quantity + quantity);
+  const nextQuantity = (existing ? existing.quantity : 0) + quantity;
+  if (nextQuantity > 99) return res.status(400).json({ error:'A maximum of 99 units per product can be added to the cart.' });
+  if (nextQuantity > product.stock) return res.status(409).json({ error:'Insufficient stock for ' + product.name + '. Available quantity: ' + product.stock + '.' });
+  if (existing) existing.quantity = nextQuantity;
   else items.push({ productId, quantity });
+  let summary;
+  try { summary = cartSummary(items); } catch (error) { return res.status(409).json({ error:error.message }); }
   saveCart(req.user.id, items);
-  res.json(cartSummary(items));
+  res.json(summary);
 });
 app.patch('/api/cart/items/:productId', requireAuth, (req, res) => {
   const quantity = Number(req.body.quantity);
@@ -741,8 +746,13 @@ app.patch('/api/cart/items/:productId', requireAuth, (req, res) => {
   const items = getCart(req.user.id);
   const item = items.find(entry => entry.productId === req.params.productId);
   if (!item) return res.status(404).json({ error:'Cart item not found.' });
-  item.quantity = quantity; saveCart(req.user.id, items);
-  try { res.json(cartSummary(items)); } catch (error) { res.status(409).json({ error:error.message }); }
+  const previousQuantity = item.quantity;
+  item.quantity = quantity;
+  let summary;
+  try { summary = cartSummary(items); }
+  catch (error) { item.quantity = previousQuantity; return res.status(409).json({ error:error.message }); }
+  saveCart(req.user.id, items);
+  res.json(summary);
 });
 app.delete('/api/cart/items/:productId', requireAuth, (req, res) => {
   const items = getCart(req.user.id).filter(item => item.productId !== req.params.productId);
