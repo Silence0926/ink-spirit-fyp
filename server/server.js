@@ -193,7 +193,7 @@ function validateProduct(input, partial = false) {
     }
     if (field === 'image') {
       const image = input[field].trim();
-      const isLocalImage = /^\/(?:images|uploads)\/[a-zA-Z0-9_./-]+\.(?:svg|png|jpe?g|webp)$/i.test(image) && !image.includes('..');
+      const isLocalImage = image.startsWith('/') && !image.startsWith('//') && !image.includes('..') && !image.includes('\\') && /^\/(?:images|uploads)\/[a-zA-Z0-9_./-]+\.(?:svg|png|jpe?g|webp)$/i.test(image);
       let isHttpsImage = false;
       try { const parsed = new URL(image); isHttpsImage = parsed.protocol === 'https:' && Boolean(parsed.hostname); } catch {}
       if (!isLocalImage && !isHttpsImage) throw new Error('Image must be a site image path or HTTPS URL.');
@@ -889,7 +889,7 @@ app.post('/api/admin/media/products', requireRole('admin', 'manager'), express.r
 });
 app.use(express.static(PUBLIC_DIR, { extensions:['html'], dotfiles:'deny', index:'index.html' }));
 app.use((req, res) => req.path.startsWith('/api/') ? res.status(404).json({ error:'API route not found.' }) : res.status(404).send('Not found.'));
-app.use((error, _req, res, _next) => { console.error(error); res.status(500).json({ error:'Internal server error.' }); });
+app.use((error, _req, res, _next) => { console.error(error); const status = error.type === 'entity.too.large' ? 413 : 500; res.status(status).json({ error:status === 413 ? 'Image upload exceeds the 5 MB limit.' : 'Internal server error.' }); });
 
 if (require.main === module) app.listen(PORT, () => console.log('Ink Spirit / Sea Garden running at http://localhost:' + PORT));
 module.exports = app;
