@@ -693,3 +693,45 @@ test('product image uploads require staff, enforce image signatures and serve st
   assert.equal(asset.headers.get('content-type'),'image/png');
   assert.deepEqual(Buffer.from(await asset.arrayBuffer()),png);
 });
+
+test('cart mutations enforce stock and quantity limits without persisting invalid quantities', async t => {
+  const { base, dataDir } = await startServer(t, [], [
+    { id:'limited-fish', name:'Limited Koi', category:'Ornamental Fish', description:'Only two available.', price:20, currency:'MYR', stock:2, image:'/images/products/koi-card.svg', active:true }
+  ]);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'cart-stock-user', password:'cart-stock-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+
+  const tooMany = await fetch(base + '/api/cart/items', {
+    method:'POST', headers, body:JSON.stringify({ productId:'limited-fish', quantity:3 })
+  });
+  assert.equal(tooMany.status, 409);
+  assert.match((await tooMany.json()).error, /Insufficient stock/);
+  let carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
+  const user = (await registration.json()).user;
+  assert.deepEqual(carts[user.id] || [], [], 'rejected add must not persist a cart line');
+
+  const added = await fetch(base + '/api/cart/items', {
+    method:'POST', headers, body:JSON.stringify({ productId:'limited-fish', quantity:2 })
+  });
+  assert.equal(added.status, 200);
+  assert.equal((await added.json()).lines[0].quantity, 2);
+
+  const increment = await fetch(base + '/api/cart/items', {
+    method:'POST', headers, body:JSON.stringify({ productId:'limited-fish', quantity:1 })
+  });
+  assert.equal(increment.status, 409);
+  carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
+  assert.equal(carts[user.id][0].quantity, 2, 'rejected increment must preserve previous cart quantity');
+
+  const update = await fetch(base + '/api/cart/items/limited-fish', {
+    method:'PATCH', headers, body:JSON.stringify({ quantity:3 })
+  });
+  assert.equal(update.status, 409);
+  carts = JSON.parse(fs.readFileSync(path.join(dataDir, 'carts.json'), 'utf8'));
+  assert.equal(carts[user.id][0].quantity, 2, 'rejected quantity update must roll back');
+});
