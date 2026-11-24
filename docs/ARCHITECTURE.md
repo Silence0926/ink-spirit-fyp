@@ -116,3 +116,10 @@ Map markers represent broad regional reference points, not precise collection lo
 - The server rejects adjustments that would make stock negative or exceed 1,000,000 units. Each product has a configurable low-stock threshold (default 5); Admin Studio highlights active products at or below that threshold and offers a low-stock filter.
 - The latest 10,000 manual movements are retained in `inventory-movements.json`; the per-product history endpoint returns the latest 50. Existing checkout/payment stock allocation and order cancellation restoration remain separate from manual movements.
 - This audit file and product file are still JSON documents. Updates are not transactional across processes, so the feature is suitable for the current single-instance prototype only; production requires database transactions and a unified inventory ledger that also records order allocations, cancellations, returns and supplier receipts.
+
+
+## Product media handling
+
+- Admin and Manager roles can upload product images through `POST /api/admin/media/products`. The endpoint accepts raw JPEG, PNG or WebP bodies up to 5 MB, verifies the declared MIME type against file signatures, generates a UUID filename, and stores the asset under `server/public/uploads/products/` for static delivery.
+- Product image fields accept site-local `/images/...` or `/uploads/...` paths with supported image extensions, or HTTPS URLs. Protocol-relative paths, traversal segments and non-HTTPS external URLs are rejected.
+- Uploads are not automatically resized or optimized. Replacing an image does not yet garbage-collect the previous asset; production should add image processing, malware scanning, storage quotas, orphan cleanup and object storage/CDN integration.
