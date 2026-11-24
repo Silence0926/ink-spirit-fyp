@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const values=dimensions.map(id=>Number($(id).value));
   const valid=values.every((v,i)=>Number.isFinite(v)&&v>0&&v<=2000);
   volume=valid?values.reduce((a,b)=>a*b,1)/1000:null;
-  $('volume-litres').innerHTML=volume===null?'— <small>L</small>':fmt(volume)+' <small>L</small>';
+  const volumeNode=$('volume-litres');volumeNode.replaceChildren();volumeNode.append(document.createTextNode(volume===null?'— ':fmt(volume)+' '));const unit=document.createElement('small');unit.textContent='L';volumeNode.append(unit);
   $('volume-note').textContent=volume===null?'请输入有效的内部长度、宽度和实际水深。':'几何毛体积；实际水量通常更低，请以注水量或可靠测量为准。';
   renderEquipment();
  }
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
    const response=await fetch('/api/aquarium/compatibility',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({species:entries})});
    const data=await response.json();if(!response.ok)throw new Error(data.error||'评估失败。');
    result.replaceChildren();const status=document.createElement('strong');status.className='assessment-status '+data.status;
-   status.textContent=data.status==='incompatible'?'发现水体类型冲突':data.status==='caution'?'需要特别谨慎':'资料不足，不能确认兼容';
+   status.textContent=data.status==='incompatible'?'发现水体类型冲突':data.status==='caution'?'需要特别谨慎':data.status==='single_species'?'单一物种基础检查完成':'资料不足，不能确认兼容';
    result.append(status);
    data.issues.forEach(issue=>{const p=document.createElement('p');p.textContent=(issue.severity==='incompatible'?'冲突：':'注意：')+issue.message;result.append(p);});
    data.notes.forEach(note=>{const p=document.createElement('p');p.className='assessment-note';p.textContent=note;result.append(p);});
