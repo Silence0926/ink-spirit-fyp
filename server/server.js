@@ -601,6 +601,40 @@ app.get('/api/admin/orders', requireRole('admin', 'manager'), (_req, res) => {
   const orders = readJson(FILES.orders, []);
   res.json(orders.sort((a,b) => b.createdAt.localeCompare(a.createdAt)));
 });
+app.patch('/api/admin/orders/:id/status', requireRole('admin', 'manager'), (req, res) => {
+  const transitions = {
+    paid:['processing', 'cancelled'],
+    processing:['shipped', 'cancelled'],
+    shipped:['completed'],
+    completed:[],
+    cancelled:[]
+  };
+  const nextStatus = req.body.status;
+  const orders = readJson(FILES.orders, []);
+  const order = orders.find(item => item.id === req.params.id);
+  if (!order) return res.status(404).json({ error:'Order not found.' });
+  if (!Array.isArray(transitions[order.status]) || !transitions[order.status].includes(nextStatus)) {
+    return res.status(409).json({ error:'This order cannot move from ' + order.status + ' to ' + String(nextStatus) + '.' });
+  }
+  if (['processing', 'shipped', 'completed'].includes(nextStatus) && order.inventoryDeducted !== true) {
+    return res.status(409).json({ error:'Inventory has not been safely allocated to this order.' });
+  }
+  if (nextStatus === 'cancelled' && order.inventoryDeducted === true && order.inventoryRestored !== true) {
+    const products = readJson(FILES.products, []);
+    for (const line of order.items || []) {
+      const product = products.find(item => item.id === line.productId);
+      if (product) product.stock = Math.min(1000000, product.stock + line.quantity);
+    }
+    writeJson(FILES.products, products);
+    order.inventoryRestored = true;
+  }
+  order.status = nextStatus;
+  order.statusUpdatedAt = new Date().toISOString();
+  order.statusUpdatedBy = req.user.id;
+  order.updatedAt = order.statusUpdatedAt;
+  writeJson(FILES.orders, orders);
+  res.json({ order });
+});
 app.get('/api/admin/users', requireRole('admin'), (_req, res) => {
   res.json(readJson(FILES.users, []).map(safeUser));
 });
@@ -702,20 +736,33 @@ app.post('/api/payments/billplz/callback', async (req, res) => {
     const verifiedBill = await billplzRequest(base + encodeURIComponent(billId));
     const verifiedPaid = verifiedBill.paid === true || verifiedBill.paid === 'true';
     if (verifiedPaid && Number(verifiedBill.paid_amount || verifiedBill.amount) === Math.round(order.total * 100)) {
-      if (order.status !== 'paid') {
-        order.status = 'paid'; order.paidAt = new Date().toISOString(); order.updatedAt = order.paidAt;
-        writeJson(FILES.orders, orders);
+      if (order.paymentVerified !== true) {
         const products = readJson(FILES.products, []);
-        for (const line of order.items) {
+        const canAllocate = (order.items || []).every(line => {
           const product = products.find(item => item.id === line.productId);
-          if (product) product.stock = Math.max(0, product.stock - line.quantity);
+          return product && Number.isInteger(product.stock) && product.stock >= line.quantity;
+        });
+        order.paymentVerified = true;
+        order.paidAt = new Date().toISOString();
+        order.updatedAt = order.paidAt;
+        if (canAllocate) {
+          for (const line of order.items) {
+            const product = products.find(item => item.id === line.productId);
+            product.stock -= line.quantity;
+          }
+          order.inventoryDeducted = true;
+          order.status = 'paid';
+          writeJson(FILES.products, products);
+          const carts = readJson(FILES.carts, {});
+          carts[order.userId] = [];
+          writeJson(FILES.carts, carts);
+        } else {
+          order.inventoryDeducted = false;
+          order.status = 'paid_inventory_review';
         }
-        writeJson(FILES.products, products);
-        const carts = readJson(FILES.carts, {});
-        carts[order.userId] = [];
-        writeJson(FILES.carts, carts);
+        writeJson(FILES.orders, orders);
       }
-    } else if (order.status !== 'paid') {
+    } else if (order.paymentVerified !== true) {
       order.status = 'payment_failed'; order.updatedAt = new Date().toISOString(); writeJson(FILES.orders, orders);
     }
     res.status(200).send('OK');
