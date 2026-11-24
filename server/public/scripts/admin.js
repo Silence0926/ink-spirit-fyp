@@ -197,14 +197,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       orders.forEach(order => {
         const row = document.createElement('article');
-        row.className = 'admin-row';
+        row.className = 'admin-row admin-order-row';
         const info = document.createElement('div');
         const title = document.createElement('strong');
         title.textContent = order.id + ' · RM ' + Number(order.total).toFixed(2);
         const detail = document.createElement('p');
-        detail.textContent = order.status + ' · ' + new Date(order.createdAt).toLocaleString();
+        const itemCount = (order.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+        detail.textContent = order.status + ' · ' + itemCount + ' item(s) · ' + new Date(order.createdAt).toLocaleString();
         info.append(title, detail);
-        row.append(info);
+        const actions = document.createElement('div');
+        actions.className = 'admin-row-actions';
+        const next = {
+          paid:['processing', 'cancelled'],
+          processing:['shipped', 'cancelled'],
+          shipped:['completed']
+        }[order.status] || [];
+        if (next.length) {
+          const select = document.createElement('select');
+          select.setAttribute('aria-label', 'Next status for ' + order.id);
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = 'Update status…';
+          select.append(placeholder);
+          next.forEach(status => {
+            const option = document.createElement('option');
+            option.value = status;
+            option.textContent = status.replace('_', ' ');
+            select.append(option);
+          });
+          select.addEventListener('change', async () => {
+            if (!select.value) return;
+            select.disabled = true;
+            try {
+              await send('/api/admin/orders/' + encodeURIComponent(order.id) + '/status', 'PATCH', { status:select.value });
+              showMessage('Order ' + order.id + ' updated to ' + select.value + '.');
+              await loadOrders();
+            } catch (error) {
+              showMessage(error.message, true);
+              select.disabled = false;
+              select.value = '';
+            }
+          });
+          actions.append(select);
+        } else {
+          const state = document.createElement('span');
+          state.className = 'admin-order-terminal';
+          state.textContent = order.status === 'paid_inventory_review' ? 'Inventory review required' : 'No further actions';
+          actions.append(state);
+        }
+        row.append(info, actions);
         target.append(row);
       });
     } catch (error) {
