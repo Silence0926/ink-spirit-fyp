@@ -71,6 +71,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           discovered.push(habitatId);
           discovered = ids.filter(id => discovered.includes(id));
           localStorage.setItem(guestKey, JSON.stringify(discovered));
+          try {
+            const journal = JSON.parse(localStorage.getItem('inkSpirit.journal.v1') || '[]');
+            const names = { 'lotus-pond':'烟雨荷塘', 'cloud-mountain':'云海山巅', 'bamboo-forest':'幽篁竹林', 'quiet-marsh':'静水泽地' };
+            journal.unshift({ type:'exploration', title:'初访' + names[habitatId], detail:'发现新的灵境，留下了一段访境记忆。', createdAt:new Date().toISOString() });
+            localStorage.setItem('inkSpirit.journal.v1', JSON.stringify(journal.slice(0, 30)));
+          } catch {}
           status.textContent = '已记录这次访境。登录后可将探索与伙伴成长同步至账号。';
         }
         render();
