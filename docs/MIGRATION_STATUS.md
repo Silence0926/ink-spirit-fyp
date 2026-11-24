@@ -56,3 +56,10 @@ See [Deployment and Payments](DEPLOYMENT_AND_PAYMENTS.md) before configuring pro
 - Fish are represented as separate cohorts with server-derived fry, juvenile and adult stages and growth progress.
 - Guppy cohorts can be assigned one of four visual line labels: standard grey, mosaic, tuxedo and cobra.
 - Simulated offspring retain the parent cohort's label and increment the generation counter. The labels do not represent scientifically modelled genetics.
+
+
+## Virtual aquarium aquascaping V3.0
+
+- Added a user-owned aquascape editor with a fixed decoration catalogue for freshwater and marine tanks.
+- Users can place and remove up to eight compatible decorative elements per tank. Duplicate placement and incompatible water-type elements are rejected server-side.
+- The display score is a cosmetic collection metric only; no ecological or husbandry claims are attached.
