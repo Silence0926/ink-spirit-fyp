@@ -319,3 +319,42 @@ test('creature care is authenticated, validates food, persists bonds and prevent
   assert.equal(persisted[user.id].creatures.koi.bond, 15);
   assert.equal(persisted[user.id].creatures.koi.daily.count, 3);
 });
+
+
+test('creature journal records interactions, feeding and first-time habitat discoveries', async t => {
+  const { base, dataDir } = await startServer(t);
+  const anonymous = await fetch(base + '/api/creatures/journal');
+  assert.equal(anonymous.status, 401);
+  const registration = await fetch(base + '/api/register', {
+    method:'POST',
+    headers:{ 'content-type':'application/json' },
+    body:JSON.stringify({ username:'journal-user', password:'journal-pass-123' })
+  });
+  assert.equal(registration.status, 201);
+  const cookie = registration.headers.get('set-cookie').split(';')[0];
+  const headers = { cookie, 'content-type':'application/json' };
+
+  const interact = await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi' })
+  });
+  assert.equal(interact.status, 200);
+  const feed = await fetch(base + '/api/creatures/care/feed', {
+    method:'POST', headers, body:JSON.stringify({ creatureId:'koi', foodId:'moon-dew' })
+  });
+  assert.equal(feed.status, 200);
+  const explore = await fetch(base + '/api/exploration/discover', {
+    method:'POST', headers, body:JSON.stringify({ habitatId:'lotus-pond' })
+  });
+  assert.equal(explore.status, 201);
+
+  const response = await fetch(base + '/api/creatures/journal', { headers });
+  assert.equal(response.status, 200);
+  const events = (await response.json()).events;
+  assert.deepEqual(events.map(event => event.type), ['exploration', 'feeding', 'interaction']);
+  assert.equal(events[0].title, '初访烟雨荷塘');
+  assert.ok(events.every(event => event.createdAt && event.creatureId === 'koi'));
+
+  const user = (await registration.json()).user;
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'creature-journal.json'), 'utf8'));
+  assert.equal(stored[user.id].length, 3);
+});
