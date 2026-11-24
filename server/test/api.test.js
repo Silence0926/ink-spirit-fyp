@@ -432,6 +432,10 @@ test('companion signature abilities are unique, bond-gated, rate-limited and ser
     method:'POST', headers, body:JSON.stringify({creatureId:'koi',abilityId:'cloudborne-presence'})
   });
   assert.equal(wrongAbility.status, 400);
+  const seedState = await fetch(base + '/api/creatures/interact', {
+    method:'POST', headers, body:JSON.stringify({creatureId:'koi'})
+  });
+  assert.equal(seedState.status,200);
   const progressPath = path.join(dataDir,'creature-progress.json');
   const carePath = path.join(dataDir,'creature-care.json');
   const progress = JSON.parse(fs.readFileSync(progressPath,'utf8'));
