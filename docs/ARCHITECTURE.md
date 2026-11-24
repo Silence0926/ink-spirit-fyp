@@ -161,3 +161,11 @@ Map markers represent broad regional reference points, not precise collection lo
 - `POST /api/aquarium/compatibility` accepts 1–8 catalogue species and quantities (1–30), validates IDs against the canonical species catalogue, and flags mixed freshwater/marine system selections. It warns on multiple Betta splendens without claiming that all other pairs are safe.
 - Same water type is not treated as proof of compatibility. Pair-level behavior, adult-size, temperature, diet, and space rules remain unknown unless supported by reviewed structured data. Unknown assessment is explicitly returned as `insufficient_information`.
 - The browser aquarium planner calculates geometric gross volume from user-entered internal dimensions. It does not convert gross volume into a stocking recommendation. Product recommendations only use explicit structured product specifications; missing specifications are not inferred.
+
+
+## Virtual aquarium breeding simulation
+
+- Authenticated users can trigger a first-stage breeding simulation for guppies in their own virtual aquariums.
+- The simulation requires at least two guppies in an adult growth cohort, satiety of at least 50, water-quality and cleanliness scores of at least 60, and enforces a 24-hour per-tank cooldown.
+- Each successful cycle adds up to three fry as a separate cohort with its own growth progress. The existing 30-individual game capacity remains enforced.
+- This is deliberately an abstract game mechanic: it does not model sex, pairing, genetics, gestation, water chemistry or real breeding timelines. It must not be presented as husbandry advice.
