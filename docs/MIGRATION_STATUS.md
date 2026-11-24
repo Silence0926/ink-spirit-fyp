@@ -11,6 +11,7 @@
 | Mini-game hub | Expanded | Snake, 2048, Sudoku and Tetris are linked as playable front-end prototypes. |
 | Ecological Atlas | Expanded | Bilingual Leaflet atlas with eight species, freshwater/marine filters, native-range notes, habitat descriptions and responsible-release guidance. Regional markers are illustrative, not exact occurrence records. |
 | Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |\n| Creature progression | Implemented prototype | Authenticated per-user creature XP, levels, visits, selected companion, server-calculated rewards and a 50-interaction daily cap; JSON persistence. |
+| Habitat exploration | Implemented prototype | Four realms, authenticated discovery records, one-time server-calculated 25 XP reward to selected companion, guest-local fallback; JSON persistence. |
 | Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
 | Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. |
 | Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
