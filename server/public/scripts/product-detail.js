@@ -5,13 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!root) return;
   const productId = new URLSearchParams(location.search).get('id');
   const categoryNames = {'Ornamental Fish':'淡水观赏鱼','Marine Fish':'海水鱼','Aquarium':'鱼缸与造景','Equipment':'设备与检测','Food':'鱼粮与营养','Aquatic Plants':'水草'};
-  const species = {
-    'koi-001':{name:'锦鲤',latin:'Cyprinus carpio',water:'淡水池塘',care:'锦鲤是鲤鱼的观赏选育品系。饲养应以池塘或大型水体为基础，提供强过滤、充足溶氧和稳定水质。购买前确认鱼只健康、来源可信，并预先完成隔离检疫。',map:'koi'},
-    'betta-001':{name:'暹罗斗鱼',latin:'Betta splendens',water:'东南亚浅水与缓流水域',care:'斗鱼原生于东南亚浅水环境。提供加盖、温度稳定、低水流且有遮蔽物的成熟水族箱；迷宫器官并不意味着可以长期生活在脏水或无维护容器中。',map:'betta'},
-    'goldfish-001':{name:'金鱼',latin:'Carassius auratus',water:'东亚淡水池塘与缓流水域',care:'金鱼由东亚鲫属鱼类长期人工选育而来，排泄负荷较高。请准备足够水量、成熟过滤和规律水质检测，避免将其长期饲养于狭小圆缸。',map:'goldfish'},
-    'guppy-001':{name:'孔雀鱼',latin:'Poecilia reticulata',water:'南美洲北部淡水溪流',care:'孔雀鱼为胎生鱼类，繁殖速度较快。建议预先规划性别比例、幼鱼安置和种群数量，并维持稳定水质；防止弃养或放生造成非原生扩散。',map:'guppy'},
-    'clownfish-001':{name:'公子小丑鱼',latin:'Amphiprion ocellaris',water:'印度洋—西太平洋珊瑚礁',care:'小丑鱼需要成熟海水系统、稳定盐度和完善过滤。此商品描述标注为人工繁殖来源，但实际采购时仍应向供应方核验来源记录和健康状态。',map:'clown'}
-  };
+  const legacySpeciesIds = {'koi-001':'koi','betta-001':'betta','goldfish-001':'goldfish','guppy-001':'guppy','clownfish-001':'clown'};
   const careForCategory = {
     'Aquarium':'鱼缸容量应结合成年鱼体型、活动空间和过滤能力决定。新缸需要完成氮循环后再逐步放养；不要以标称容量替代实际可用水量。',
     'Equipment':'设备规格应与鱼缸实际水量、鱼类负荷和维护能力匹配。安装后检查流量、噪声、漏水与电气安全，并按制造商要求维护。',
@@ -24,6 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const response = await fetch('/api/products',{credentials:'same-origin'});
     if (!response.ok) throw new Error('暂时无法读取商品资料。');
     const products = await response.json();
+    const speciesResponse = await fetch('/api/species',{credentials:'same-origin'});
+    if (!speciesResponse.ok) throw new Error('暂时无法读取物种图谱。');
+    const speciesCatalogue = await speciesResponse.json();
     const product = Array.isArray(products) ? products.find(item=>item.id===productId && item.active!==false) : null;
     if (!product) { showError('这件藏品不存在、已下架或暂不可查看。'); return; }
     breadcrumb.textContent=product.name;
@@ -57,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     buy.append(quantity,add,feedback);
     copy.append(kicker,title,category,price,stock,description,buy);
-    const matched=species[product.id];
+    const matched=speciesCatalogue.find(item=>item.id===(product.speciesId||legacySpeciesIds[product.id]));
     const care=document.createElement('section');care.className='detail-care';
     const careTitle=document.createElement('h2');careTitle.textContent=matched?'物种与照护札记':'使用与养护札记';
     const careText=document.createElement('p');careText.textContent=matched?matched.care:(careForCategory[product.category]||'请在购买前确认商品规格、适用环境及维护要求；如有疑问，请先向专业人员或供应方核实。');
@@ -77,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if(specs.careNotes){const notes=document.createElement('p');notes.textContent=specs.careNotes;specBox.append(notes);}
       care.append(specBox);
     }
-    if(matched){const links=document.createElement('div');links.className='detail-links';const atlas=document.createElement('a');atlas.href='map.html?species='+encodeURIComponent(matched.map);atlas.textContent='在生态地图查看 '+matched.name+' ↗';const guide=document.createElement('a');guide.href='fish-list.html';guide.textContent='阅读生灵图谱 ↗';links.append(atlas,guide);care.append(links);}
+    if(matched){const links=document.createElement('div');links.className='detail-links';const atlas=document.createElement('a');atlas.href='map.html?species='+encodeURIComponent(matched.id);atlas.textContent='在生态地图查看 '+matched.name+' ↗';const guide=document.createElement('a');guide.href='fish-list.html';guide.textContent='阅读生灵图谱 ↗';links.append(atlas,guide);care.append(links);}
     root.append(visual,copy,care);
     const relatedProducts=products.filter(item=>item.id!==product.id&&item.active!==false&&item.category===product.category).slice(0,4);
     if(relatedProducts.length){
