@@ -2,7 +2,7 @@
 
 | Area | Status | Notes |
 |---|---|---|
-| Ink Spirit homepage | Implemented prototype | Ink-wash scene, four creature selector and local progression. |
+| Ink Spirit homepage | Expanded prototype | Ink-wash scene, four creature selector, guest-local progression and authenticated server-synced creature growth. |
 | Aquatic visual assets | Expanded | Original SVG artwork for koi, betta, goldfish, guppy, clownfish, Asian arowana reference, freshwater and reef habitat scenes, plus aquarium equipment. |
 | Product catalogue seed | Improved | New starter products are appended by ID without overwriting existing product records. |
 | Original soundtrack | Procedural soundtrack implemented | Web Audio composition: plucked-string, flute-like tones and filtered water ambience. It is generated in-browser; no standalone MP3 is bundled yet. |
@@ -10,7 +10,7 @@
 | 2048 | Rebuilt | Keyboard, WASD, swipe and touch direction controls, score, best score and win/continue state. |\n| Sudoku | Rebuilt prototype | Generated unique-solution puzzles, three difficulty settings, notes mode, keyboard/numpad input, mistake feedback, timer and completion detection. |\n| Tetris | Rebuilt prototype | Seven tetrominoes, rotation with wall kicks, collision/locking, line clears, level-based speed, pause, hard drop, touch controls and local best score. |
 | Mini-game hub | Expanded | Snake, 2048, Sudoku and Tetris are linked as playable front-end prototypes. |
 | Ecological Atlas | Expanded | Bilingual Leaflet atlas with eight species, freshwater/marine filters, native-range notes, habitat descriptions and responsible-release guidance. Regional markers are illustrative, not exact occurrence records. |
-| Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |
+| Server sessions | Implemented prototype | HttpOnly cookie, hashed session token store, scrypt password hashes. |\n| Creature progression | Implemented prototype | Authenticated per-user creature XP, levels, visits, selected companion, server-calculated rewards and a 50-interaction daily cap; JSON persistence. |
 | Admin/manager permissions | Implemented prototype | Server-side role checks; role-aware Admin Studio navigation; bootstrap via environment variables. |
 | Product CRUD | Implemented prototype | Admin/manager create/update; admin archive. |
 | Server cart/orders | Implemented prototype | JSON file persistence; persistent single-instance disk required. |
