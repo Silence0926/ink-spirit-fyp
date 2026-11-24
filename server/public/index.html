@@ -87,6 +87,17 @@
         <div class="progress-bottom"><span id="xp-text">0 / 100 灵息</span><button id="interact-button" class="small-button" type="button">与它互动 +10</button></div>
         <div class="progress-meta"><span id="creature-visits">相伴次数 · 0</span><span id="daily-interactions">访客模式</span></div><p class="progress-note" id="progress-note" aria-live="polite">每次互动都会积累灵息。登录后可同步成长记录。</p>
       </div>
+      <div class="care-panel" aria-labelledby="care-title">
+        <div class="care-heading"><div><p class="eyebrow">DAILY CARE · 日常照料</p><h3 id="care-title">一餐一念，情谊渐深</h3></div><span class="care-bond" id="care-bond">亲密度 · 0</span></div>
+        <div class="care-status"><span id="care-mood">心境 · 平静</span><span id="care-satiety-text">饱足 · 60 / 100</span></div>
+        <div class="care-track"><span id="care-satiety-bar"></span></div>
+        <div class="care-actions">
+          <label for="care-food">选择灵食</label>
+          <select id="care-food"><option value="moon-dew">月露 · 清润</option><option value="lotus-seed">莲心 · 温和</option><option value="cloud-fruit">云果 · 甘甜</option></select>
+          <button id="feed-button" class="small-button" type="button">喂给伙伴</button>
+        </div>
+        <p class="care-note" id="care-note" aria-live="polite">每日每只灵兽最多照料三次。照料不消耗灵息。</p>
+      </div>
     </section>
   </main>
   <footer><span class="footer-seal">墨</span><span>墨灵 · INK SPIRIT</span><span>一卷山水，万物有灵。</span></footer>
